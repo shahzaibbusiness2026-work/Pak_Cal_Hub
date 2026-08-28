@@ -1,8 +1,20 @@
 {
   "crons": [
     {
-      "path": "/api/cron/update-data",
-      "schedule": "0 1 * * *"
+      "path": "/api/cron/update-fuel",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/update-gold",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/update-currency",
+      "schedule": "0 10 * * 1-5"
+    },
+    {
+      "path": "/api/cron/update-electricity",
+      "schedule": "0 0 1 * *"
     }
   ]
 }

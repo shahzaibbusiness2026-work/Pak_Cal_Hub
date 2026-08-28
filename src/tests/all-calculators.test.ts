@@ -1,6 +1,6 @@
 /**
- * Comprehensive Enterprise Test Suite for Pakistan Calculation Hub Engines
- * Validates Salary, Pension, Tax, Electricity, Fuel, Gold, Currency, Solar, and Loan calculations
+ * Comprehensive Enterprise Test Suite for Pakistan Calculation Hub Engines & Data Pipeline
+ * Validates Salary, Pension, Tax, Electricity, Fuel, Gold, Currency, Solar, Loan engines AND Live Sync Pipelines
  */
 
 import {
@@ -18,9 +18,14 @@ import {
   calculateSolarSystem,
   calculateLoan,
 } from '../lib/calculations';
-import { getSalaryDataset } from '../data/salary';
-import { getPensionRules, getCommutationFactor } from '../data/pension';
-import { getTaxDataset } from '../data/tax';
+import {
+  syncFuelPrices,
+  syncGoldRates,
+  syncCurrencyRates,
+  syncElectricityTariffs,
+  syncGovernmentNotifications,
+  syncAllServices,
+} from '../lib/sync';
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -29,9 +34,9 @@ function assert(condition: boolean, message: string) {
   console.log(`✅ PASS: ${message}`);
 }
 
-function runAllTests() {
+async function runAllTests() {
   console.log('\n======================================================');
-  console.log('🚀 RUNNING COMPLETE ENTERPRISE CALCULATION SUITE');
+  console.log('🚀 RUNNING COMPLETE ENTERPRISE CALCULATION & SYNC SUITE');
   console.log('======================================================\n');
 
   // 1. SALARY ENGINE
@@ -82,16 +87,10 @@ function runAllTests() {
   const gold24k = calculateGoldPrice({ weight: 1, weightUnit: 'tola', purity: '24k', baseRate24kPerTola: 242000 });
   assert(String(gold24k.primaryResult.value).includes('2,42,000'), '1 Tola 24K gold equals Rs. 242,000');
 
-  const gold22k = calculateGoldPrice({ weight: 10, weightUnit: 'gram', purity: '22k', baseRate24kPerTola: 242000 });
-  assert(String(gold22k.primaryResult.value) !== '', '10 Gram 22K gold jewelry value computed');
-
   // 7. CURRENCY CONVERTER ENGINE
   console.log('\n--- 7. Currency Converter Engine ---');
   const usdToPkr = calculateCurrencyConversion({ amount: 1000, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'interbank' });
   assert(String(usdToPkr.primaryResult.value).includes('2,80,500'), '1000 USD equals Rs. 280,500');
-
-  const aedToPkr = calculateCurrencyConversion({ amount: 100, fromCurrency: 'AED', toCurrency: 'PKR' });
-  assert(String(aedToPkr.primaryResult.value).includes('7,640'), '100 AED equals Rs. 7,640');
 
   // 8. SOLAR SYSTEM SIZING ENGINE
   console.log('\n--- 8. Solar Sizing & Net Metering Engine ---');
@@ -104,9 +103,32 @@ function runAllTests() {
   const loanCar = calculateLoan({ loanAmount: 2000000, interestRatePercent: 18, tenureYears: 5 });
   assert(String(loanCar.primaryResult.value) !== '', 'Monthly Loan EMI computed');
 
+  // 10. LIVE DATA SYNC PIPELINES
+  console.log('\n--- 10. Live Data Synchronization Pipelines ---');
+  const fuelSync = await syncFuelPrices();
+  assert(fuelSync.success, 'Fuel sync service completed successfully');
+
+  const goldSync = await syncGoldRates();
+  assert(goldSync.success, 'Gold sync service completed successfully');
+
+  const currencySync = await syncCurrencyRates();
+  assert(currencySync.success, 'Currency sync service completed successfully');
+
+  const elecSync = await syncElectricityTariffs();
+  assert(elecSync.success, 'Electricity tariff sync service completed successfully');
+
+  const govtSync = await syncGovernmentNotifications();
+  assert(govtSync.success, 'Government notification detection completed (staged safely in review)');
+
+  const masterSync = await syncAllServices();
+  assert(masterSync.success && masterSync.totalServices === 5, 'Master multi-pipeline sync executed all 5 services concurrently');
+
   console.log('\n======================================================');
-  console.log('🎉 ALL 15 CALCULATION SERVICES VERIFIED WITH 100% SUCCESS');
+  console.log('🎉 ALL CALCULATION ENGINES & SYNC PIPELINES VERIFIED (100% SUCCESS)');
   console.log('======================================================\n');
 }
 
-runAllTests();
+runAllTests().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

@@ -177,10 +177,50 @@ model NotificationDocument {
   uploadedAt         DateTime @default(now())
 }
 
+/// Automated Synchronization Logs for Cron Jobs
+model SyncLog {
+  id        String   @id @default(cuid())
+  type      String   // "fuel", "gold", "currency", "electricity", "government"
+  status    String   // "SUCCESS", "FAILED", "SKIPPED", "PENDING_REVIEW"
+  oldValue  String?
+  newValue  String?
+  message   String
+  source    String?  @default("Automated Cron Service")
+  createdAt DateTime @default(now())
+}
+
+/// Government Gazette Drafts Staged for Human Admin Review & Approval
+model GovernmentNotificationDraft {
+  id             String    @id @default(cuid())
+  government     String    // "federal", "punjab", "sindh", "kpk", "balochistan"
+  year           String    // "2026-27"
+  title          String    // e.g. "Ad-hoc Relief Allowance 2026 Notification"
+  notificationNo String    // e.g. "F.1(2)Imp/2026"
+  details        String    // JSON string containing scales or allowance parameters
+  effectiveDate  String    // e.g. "2026-07-01"
+  sourceUrl      String?
+  status         String    @default("PENDING_REVIEW") // "DETECTED" | "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "PUBLISHED"
+  detectedAt     DateTime  @default(now())
+  reviewedAt     DateTime?
+  reviewedBy     String?
+}
+
+/// In-App System Notifications for Important Price Changes & Events
+model SystemNotification {
+  id        String   @id @default(cuid())
+  title     String   // e.g. "Fuel Price Change Detected"
+  message   String   // e.g. "Petrol updated from Rs. 254.63 to Rs. 262.50"
+  type      String   @default("INFO") // "INFO", "WARNING", "ALERT", "SUCCESS"
+  category  String   // "fuel", "salary", "electricity", "gold", "currency"
+  isRead    Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+}
+
 /// Admin Dashboard Activity & Audit Log
 model AdminAuditLog {
   id          String   @id @default(cuid())
-  action      String   // "UPDATE_MARKET_RATE", "UPDATE_SALARY_SCALE", "SEED_DATABASE", "PUBLISH_DATA"
+  action      String   // "UPDATE_MARKET_RATE", "UPDATE_SALARY_SCALE", "SEED_DATABASE", "PUBLISH_DATA", "APPROVE_GOVT_DRAFT"
   targetTable String   // "MarketRate", "TaxSlab", etc.
   details     String   // JSON string or human-readable description
   createdAt   DateTime @default(now())
