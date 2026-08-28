@@ -1,0 +1,138 @@
+// Prisma Schema for Pakistan Calculation Hub (Supabase PostgreSQL)
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// Dynamic Market & Commodity Rates (Petrol, Diesel, Gold, USD/PKR, Steel, Cement)
+model MarketRate {
+  id        String   @id @default(cuid())
+  key       String   @unique // e.g. "petrol", "diesel", "gold_24k_tola", "usd_pkr"
+  category  String   // "fuel", "gold", "currency", "construction"
+  label     String   // e.g. "Petrol (Super)", "High Speed Diesel"
+  value     Float    // e.g. 254.63
+  unit      String   // e.g. "PKR / Litre", "PKR / Tola"
+  updatedAt DateTime @updatedAt
+  updatedBy String?  @default("Admin")
+  notes     String?
+}
+
+/// Pakistan Civil Service BPS Scale Master Record per Government & Budget Year
+model GovernmentSalaryScale {
+  id                 String         @id @default(cuid())
+  government         String         // "federal", "punjab", "sindh", "kpk", "balochistan"
+  governmentName     String         // e.g. "Federal Government of Pakistan"
+  year               String         // "2026-27", "2025-26", "2024-25"
+  scaleTitle         String         // e.g. "Revised Basic Pay Scales 2026 (RBPS-2026)"
+  effectiveDate      String         // e.g. "2026-07-01"
+  notificationNumber String         // e.g. "Finance Division OM No. F.1(2)IMP/2026"
+  minimumWage        Float          @default(37000)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  scales             BpsScale[]
+  adhocReliefs       AdhocRelief[]
+
+  @@unique([government, year])
+}
+
+/// BPS 1 to 22 Grade Pay and Allowance Matrix
+model BpsScale {
+  id                  String                @id @default(cuid())
+  salaryScaleId       String
+  salaryScale         GovernmentSalaryScale @relation(fields: [salaryScaleId], references: [id], onDelete: Cascade)
+  bps                 Int                   // 1 to 22
+  minPay              Float
+  increment           Float
+  maxPay              Float
+  stages              Int                   @default(30)
+  frozenHraBigCity    Float
+  frozenHraOtherCity  Float
+  conveyanceAllowance Float
+  medicalAllowance    Float
+
+  @@unique([salaryScaleId, bps])
+}
+
+/// Ad-hoc Relief Allowances (e.g. 7% ARA-2026, 25% ARA-2024, Special Allowances)
+model AdhocRelief {
+  id            String                @id @default(cuid())
+  salaryScaleId String
+  salaryScale   GovernmentSalaryScale @relation(fields: [salaryScaleId], references: [id], onDelete: Cascade)
+  code          String                // e.g. "ara2026", "dra"
+  name          String                // e.g. "Ad-hoc Relief Allowance 2026 (7%)"
+  rate          Float                 // e.g. 0.07 for 7%
+  appliesTo     String                @default("runningBasic") // "runningBasic", "initial2017", "initial2022"
+  minBps        Int?                  @default(1)
+  maxBps        Int?                  @default(22)
+}
+
+/// Civil Service Pension & Retirement Rules
+model PensionRule {
+  id                             String   @id @default(cuid())
+  government                     String   @unique // "federal", "punjab", "sindh", "kpk", "balochistan"
+  governmentName                 String
+  minimumPension                 Float    @default(25000)
+  familyPensionRate              Float    @default(0.75) // 75%
+  familyPensionLifetimeWidow     Boolean  @default(true)
+  familyPensionLifetimeDaughter  Boolean  @default(true)
+  commutationMaxPercent          Float    @default(35)
+  voluntaryRetirementMinYears    Int      @default(25)
+  superannuationAge              Int      @default(60)
+  post2024Enabled                Boolean  @default(true)
+  post2024EmpRate                Float    @default(0.10) // 10%
+  post2024GovRate                Float    @default(0.12) // 12%
+  notes                          String[]
+  updatedAt                      DateTime @updatedAt
+}
+
+/// Official Revised Commutation Purchase Factor Table (Appendix I: Age 45 to 65)
+model CommutationFactor {
+  id     String @id @default(cuid())
+  age    Int    @unique // 45 to 65
+  factor Float  // e.g. 14.31, 8.48
+}
+
+/// Federal Board of Revenue (FBR) Income Tax Slabs
+model TaxSlab {
+  id           String   @id @default(cuid())
+  taxYear      String   // "2026-27", "2025-26", "2024-25"
+  taxpayerType String   // "salaried", "non-salaried"
+  slabNumber   Int      // 1, 2, 3...
+  minIncome    Float    // e.g. 600000
+  maxIncome    Float    // e.g. 1200000
+  fixedTax     Float    // e.g. 0 or 6000
+  rate         Float    // e.g. 0.01 for 1%
+  rateLabel    String   // e.g. "1% on amount exceeding Rs. 600,000"
+  updatedAt    DateTime @updatedAt
+
+  @@unique([taxYear, taxpayerType, slabNumber])
+}
+
+/// Electricity & Solar Tariff Schedule (Protected & Unprotected Slabs)
+model ElectricityTariff {
+  id            String   @id @default(cuid())
+  consumerType  String   // "protected", "unprotected"
+  slabMin       Int      // e.g. 1, 101, 201, 301
+  slabMax       Int      // e.g. 100, 200, 300, 700, 99999
+  baseRate      Float    // e.g. 16.48, 22.95, 34.26, 42.12
+  effectiveYear String   @default("2026-27")
+  updatedAt     DateTime @updatedAt
+
+  @@unique([consumerType, slabMin, slabMax, effectiveYear])
+}
+
+/// Admin Dashboard Activity & Audit Log
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  action      String   // "UPDATE_MARKET_RATE", "UPDATE_SALARY_SCALE", "SEED_DATABASE"
+  targetTable String   // "MarketRate", "TaxSlab", etc.
+  details     String   // JSON string or human-readable description
+  createdAt   DateTime @default(now())
+  adminUser   String?  @default("Admin")
+}
