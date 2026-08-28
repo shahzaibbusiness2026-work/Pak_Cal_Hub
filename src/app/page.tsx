@@ -19,6 +19,12 @@ import {
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
+  Banknote,
+  HeartHandshake,
+  ClipboardList,
+  Award,
+  TrendingDown,
+  BadgeCheck,
 } from 'lucide-react';
 import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories';
 import CalculatorCard from '../components/ui/CalculatorCard';
@@ -80,6 +86,7 @@ export default function HomePage() {
           <div className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Popular:</span>
             {[
+              { label: '🏛️ Govt Suite', href: '#govt-suite' },
               { label: 'BPS Salary 2026', href: '/salary/bps-salary-calculator' },
               { label: 'FBR Income Tax', href: '/tax/income-tax-calculator' },
               { label: 'Electricity Bill', href: '/electricity/electricity-bill-calculator' },
@@ -87,7 +94,6 @@ export default function HomePage() {
               { label: 'Marla to Sq Ft', href: '/property/property-area-converter' },
               { label: 'MDCAT Aggregate', href: '/education/university-merit-calculator' },
               { label: 'Zakat & Nisab', href: '/islamic/zakat-calculator' },
-              { label: 'Freelancer IT Tax', href: '/tax/freelancer-tax-calculator' },
             ].map((tag) => (
               <Link
                 key={tag.label}
@@ -98,6 +104,254 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+           GOVERNMENT EMPLOYEE SUITE — Premium Featured Section
+          ═══════════════════════════════════════════════════════ */}
+      <section id="govt-suite" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-20">
+
+        {/* Section Header — Official Banner */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900 via-emerald-800 to-slate-900 p-6 sm:p-8 shadow-xl">
+          {/* Decorative background circles */}
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-emerald-600/20 blur-3xl" />
+          <div className="pointer-events-none absolute right-32 bottom-0 h-32 w-32 rounded-full bg-emerald-400/10 blur-2xl" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-4">
+              {/* Badge icon */}
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-600/30 ring-1 ring-emerald-400/30">
+                <BadgeCheck className="h-6 w-6 text-emerald-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+                    🏛️ Pakistan Government Employees
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-300">
+                    RBPS-2026 Verified
+                  </span>
+                </div>
+                <h2 className="mt-1.5 text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                  Government Employee Suite
+                </h2>
+                <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-lg">
+                  All salary, pension, tax &amp; service-related calculators for Pakistan civil servants — modeled on Finance Division OM F.1(2)IMP/2026 &amp; Pension-cum-Gratuity Rules.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/salary"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition-all active:scale-95"
+            >
+              View All Tools
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Tool Cards Grid */}
+        <div className="mt-5 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+
+          {/* Card 1: BPS Salary */}
+          <Link href="/salary/bps-salary-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/15 group-hover:bg-emerald-800 group-hover:text-white transition-colors dark:bg-emerald-950/60 dark:text-emerald-400">
+                <Banknote className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                Most Used
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              BPS Salary Calculator
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              RBPS-2026 gross &amp; net salary with GP Fund, conveyance, HRA &amp; ARA-2026 (7%).
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 2: Pension */}
+          <Link href="/salary/pension-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-600/15 group-hover:bg-blue-700 group-hover:text-white transition-colors dark:bg-blue-950/60 dark:text-blue-400">
+                <Award className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                Commutation Table
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              Pension Calculator
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Pre &amp; post-July 2024 schemes. Lump sum commutation using official Finance Div table.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 3: Family Pension */}
+          <Link href="/salary/family-pension-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700 ring-1 ring-rose-600/15 group-hover:bg-rose-700 group-hover:text-white transition-colors dark:bg-rose-950/60 dark:text-rose-400">
+                <HeartHandshake className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                Punjab 2026
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              Family Pension
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Spouse/dependent pension entitlement. Punjab lifetime &amp; federal 10-year rules.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 4: GP Fund */}
+          <Link href="/salary/gp-fund-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-700 ring-1 ring-violet-600/15 group-hover:bg-violet-700 group-hover:text-white transition-colors dark:bg-violet-950/60 dark:text-violet-400">
+                <TrendingUp className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">
+                12.05% Rate
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              GP Fund Calculator
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              General Provident Fund balance growth at 12.05% compound. Maturity projection.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 5: Leave Encashment */}
+          <Link href="/salary/leave-encashment-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 ring-1 ring-amber-600/15 group-hover:bg-amber-700 group-hover:text-white transition-colors dark:bg-amber-950/60 dark:text-amber-400">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                Max 365 Days
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              Leave Encashment
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Earned / privilege leave cash-out on retirement or LPR. Per-day basic formula.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 6: Promotion Pay Fixation */}
+          <Link href="/salary/promotion-pay-fixation"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-teal-600/15 group-hover:bg-teal-700 group-hover:text-white transition-colors dark:bg-teal-950/60 dark:text-teal-400">
+                <ClipboardList className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
+                FR-22 Rule
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              Promotion Pay Fixation
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              New grade pay fixation on promotion per FR-22 — one stage benefit &amp; re-fixation.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 7: Salary Income Tax */}
+          <Link href="/tax/income-tax-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-700 ring-1 ring-red-600/15 group-hover:bg-red-700 group-hover:text-white transition-colors dark:bg-red-950/60 dark:text-red-400">
+                <Receipt className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-950/60 dark:text-red-300">
+                FY 2026-27
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              Salary Income Tax
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              FBR salaried tax slabs Tax Year 2027. Monthly TDS, effective &amp; marginal rates.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 8: Arrears Tax / Income Averaging */}
+          <Link href="/salary/increment-arrears-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-emerald-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-700 ring-1 ring-orange-600/15 group-hover:bg-orange-700 group-hover:text-white transition-colors dark:bg-orange-950/60 dark:text-orange-400">
+                <TrendingDown className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-700 dark:bg-orange-950/60 dark:text-orange-300">
+                Tax Relief
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+              Increment &amp; Arrears
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Annual increment calculation &amp; backdated salary arrears with tax averaging relief.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-800 dark:text-emerald-400">
+              Calculate Now <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+        </div>
+
+        {/* Bottom CTA Row */}
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/50">
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">8 tools</span> tailored for Pakistan civil servants — federal &amp; provincial, BPS 1–22.
+          </p>
+          <Link
+            href="/salary"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-800 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 active:scale-95 transition-all shrink-0"
+          >
+            <BadgeCheck className="h-3.5 w-3.5" />
+            Full Government Suite →
+          </Link>
         </div>
       </section>
 
