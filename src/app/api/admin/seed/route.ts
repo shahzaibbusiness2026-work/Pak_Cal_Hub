@@ -4,7 +4,7 @@ import { DEFAULT_MARKET_RATES } from '../../../../lib/db/dataProvider';
 import { COMMUTATION_TABLE, getPensionRules } from '../../../../data/pension';
 import { getTaxDataset } from '../../../../data/tax';
 import { getSalaryDataset, SUPPORTED_GOVERNMENTS, SUPPORTED_BUDGET_YEARS } from '../../../../data/salary';
-import { PROTECTED_SLABS, UNPROTECTED_SLABS } from '../../../../lib/data/electricity-data';
+import { PROTECTED_SLABS, UNPROTECTED_SLABS } from '../../../../lib/calculations/electricityEngine';
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
     for (const rate of DEFAULT_MARKET_RATES) {
       await prisma.marketRate.upsert({
         where: { key: rate.key },
-        update: { value: rate.value, label: rate.label, unit: rate.unit, category: rate.category, notes: rate.notes },
-        create: { key: rate.key, value: rate.value, label: rate.label, unit: rate.unit, category: rate.category, notes: rate.notes },
+        update: { value: rate.value, label: rate.label, unit: rate.unit, category: rate.category, status: 'PUBLISHED', source: rate.source, notes: rate.notes },
+        create: { key: rate.key, value: rate.value, label: rate.label, unit: rate.unit, category: rate.category, status: 'PUBLISHED', source: rate.source, notes: rate.notes },
       });
     }
 
@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
           post2024Enabled: rules.post2024Scheme.enabled,
           post2024EmpRate: rules.post2024Scheme.employeeContributionRate,
           post2024GovRate: rules.post2024Scheme.governmentContributionRate,
+          status: 'PUBLISHED',
           notes: rules.notes,
         },
         create: {
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest) {
           post2024Enabled: rules.post2024Scheme.enabled,
           post2024EmpRate: rules.post2024Scheme.employeeContributionRate,
           post2024GovRate: rules.post2024Scheme.governmentContributionRate,
+          status: 'PUBLISHED',
           notes: rules.notes,
         },
       });
@@ -88,16 +90,16 @@ export async function POST(req: NextRequest) {
         const slab = dataset.salariedSlabs[idx];
         await prisma.taxSlab.upsert({
           where: { taxYear_taxpayerType_slabNumber: { taxYear: ty, taxpayerType: 'salaried', slabNumber: idx + 1 } },
-          update: { minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel },
-          create: { taxYear: ty, taxpayerType: 'salaried', slabNumber: idx + 1, minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel },
+          update: { minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel, status: 'PUBLISHED' },
+          create: { taxYear: ty, taxpayerType: 'salaried', slabNumber: idx + 1, minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel, status: 'PUBLISHED' },
         });
       }
       for (let idx = 0; idx < dataset.nonSalariedSlabs.length; idx++) {
         const slab = dataset.nonSalariedSlabs[idx];
         await prisma.taxSlab.upsert({
           where: { taxYear_taxpayerType_slabNumber: { taxYear: ty, taxpayerType: 'non-salaried', slabNumber: idx + 1 } },
-          update: { minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel },
-          create: { taxYear: ty, taxpayerType: 'non-salaried', slabNumber: idx + 1, minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel },
+          update: { minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel, status: 'PUBLISHED' },
+          create: { taxYear: ty, taxpayerType: 'non-salaried', slabNumber: idx + 1, minIncome: slab.min, maxIncome: slab.max > 999999999 ? 999999999 : slab.max, fixedTax: slab.fixedTax, rate: slab.rate, rateLabel: slab.rateLabel, status: 'PUBLISHED' },
         });
       }
     }
@@ -108,8 +110,8 @@ export async function POST(req: NextRequest) {
         const salDataset = getSalaryDataset(gov.value, year.value);
         const parentScale = await prisma.governmentSalaryScale.upsert({
           where: { government_year: { government: salDataset.government, year: salDataset.year } },
-          update: { governmentName: salDataset.governmentName, scaleTitle: salDataset.scaleTitle, effectiveDate: salDataset.effectiveDate, notificationNumber: salDataset.notificationNumber, minimumWage: salDataset.minimumWage },
-          create: { government: salDataset.government, governmentName: salDataset.governmentName, year: salDataset.year, scaleTitle: salDataset.scaleTitle, effectiveDate: salDataset.effectiveDate, notificationNumber: salDataset.notificationNumber, minimumWage: salDataset.minimumWage },
+          update: { governmentName: salDataset.governmentName, scaleTitle: salDataset.scaleTitle, effectiveDate: salDataset.effectiveDate, notificationNumber: salDataset.notificationNumber, minimumWage: salDataset.minimumWage, status: 'PUBLISHED' },
+          create: { government: salDataset.government, governmentName: salDataset.governmentName, year: salDataset.year, scaleTitle: salDataset.scaleTitle, effectiveDate: salDataset.effectiveDate, notificationNumber: salDataset.notificationNumber, minimumWage: salDataset.minimumWage, status: 'PUBLISHED' },
         });
 
         for (let bps = 1; bps <= 22; bps++) {
@@ -128,17 +130,49 @@ export async function POST(req: NextRequest) {
     // 6. Seed Electricity Tariffs
     for (const slab of PROTECTED_SLABS) {
       await prisma.electricityTariff.upsert({
-        where: { consumerType_slabMin_slabMax_effectiveYear: { consumerType: 'protected', slabMin: slab.min, slabMax: slab.max > 9999 ? 9999 : slab.max, effectiveYear: '2026-27' } },
-        update: { baseRate: slab.rate },
-        create: { consumerType: 'protected', slabMin: slab.min, slabMax: slab.max > 9999 ? 9999 : slab.max, baseRate: slab.rate, effectiveYear: '2026-27' },
+        where: {
+          provider_consumerType_slabMin_slabMax_effectiveYear: {
+            provider: 'NEPRA_NATIONAL',
+            consumerType: 'protected',
+            slabMin: slab.min,
+            slabMax: slab.max > 9999 ? 9999 : slab.max,
+            effectiveYear: '2026-27',
+          },
+        },
+        update: { baseRate: slab.rate, status: 'PUBLISHED' },
+        create: {
+          provider: 'NEPRA_NATIONAL',
+          consumerType: 'protected',
+          slabMin: slab.min,
+          slabMax: slab.max > 9999 ? 9999 : slab.max,
+          baseRate: slab.rate,
+          effectiveYear: '2026-27',
+          status: 'PUBLISHED',
+        },
       });
     }
 
     for (const slab of UNPROTECTED_SLABS) {
       await prisma.electricityTariff.upsert({
-        where: { consumerType_slabMin_slabMax_effectiveYear: { consumerType: 'unprotected', slabMin: slab.min, slabMax: slab.max > 99999 ? 99999 : slab.max, effectiveYear: '2026-27' } },
-        update: { baseRate: slab.rate },
-        create: { consumerType: 'unprotected', slabMin: slab.min, slabMax: slab.max > 99999 ? 99999 : slab.max, baseRate: slab.rate, effectiveYear: '2026-27' },
+        where: {
+          provider_consumerType_slabMin_slabMax_effectiveYear: {
+            provider: 'NEPRA_NATIONAL',
+            consumerType: 'unprotected',
+            slabMin: slab.min,
+            slabMax: slab.max > 99999 ? 99999 : slab.max,
+            effectiveYear: '2026-27',
+          },
+        },
+        update: { baseRate: slab.rate, status: 'PUBLISHED' },
+        create: {
+          provider: 'NEPRA_NATIONAL',
+          consumerType: 'unprotected',
+          slabMin: slab.min,
+          slabMax: slab.max > 99999 ? 99999 : slab.max,
+          baseRate: slab.rate,
+          effectiveYear: '2026-27',
+          status: 'PUBLISHED',
+        },
       });
     }
 

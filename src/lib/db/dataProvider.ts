@@ -3,6 +3,7 @@ import { getSalaryDataset } from '../../data/salary';
 import { getPensionRules as getLocalPensionRules, COMMUTATION_TABLE } from '../../data/pension';
 import { getTaxDataset } from '../../data/tax';
 import { GovernmentType, BudgetYear, TaxYear } from '../../types/government';
+import { PROTECTED_SLABS, UNPROTECTED_SLABS, DiscoProvider } from '../calculations/electricityEngine';
 
 export interface MarketRateItem {
   id?: string;
@@ -11,37 +12,46 @@ export interface MarketRateItem {
   label: string;
   value: number;
   unit: string;
+  status?: string;
+  source?: string;
+  sourceUrl?: string;
+  verifiedAt?: Date | string;
   updatedAt?: Date | string;
   updatedBy?: string;
   notes?: string;
 }
 
 export const DEFAULT_MARKET_RATES: MarketRateItem[] = [
-  { key: 'petrol', category: 'fuel', label: 'Petrol (Super)', value: 254.63, unit: 'PKR / Litre', notes: 'August 2026 OGRA notification' },
-  { key: 'diesel', category: 'fuel', label: 'High Speed Diesel (HSD)', value: 258.40, unit: 'PKR / Litre', notes: 'August 2026 OGRA notification' },
-  { key: 'cng', category: 'fuel', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', notes: 'Average station retail rate' },
-  { key: 'gold_24k_tola', category: 'gold', label: 'Gold 24K (per Tola)', value: 242000, unit: 'PKR / Tola (11.66g)', notes: 'All Pakistan Sarafa Gems and Jewellers Association' },
-  { key: 'gold_22k_tola', category: 'gold', label: 'Gold 22K (per Tola)', value: 221833, unit: 'PKR / Tola', notes: '22 Karat Jewelry benchmark' },
-  { key: 'silver_tola', category: 'gold', label: 'Silver (per Tola)', value: 2850, unit: 'PKR / Tola', notes: 'Silver market rate' },
-  { key: 'usd_pkr', category: 'currency', label: 'US Dollar (USD / PKR)', value: 280.50, unit: 'PKR / USD', notes: 'State Bank Interbank closing rate' },
-  { key: 'gbp_pkr', category: 'currency', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', notes: 'SBP benchmark rate' },
-  { key: 'eur_pkr', category: 'currency', label: 'Euro (EUR / PKR)', value: 302.80, unit: 'PKR / EUR', notes: 'SBP benchmark rate' },
-  { key: 'sar_pkr', category: 'currency', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', notes: 'Interbank closing rate' },
-  { key: 'aed_pkr', category: 'currency', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', notes: 'Interbank closing rate' },
-  { key: 'cement_bag', category: 'construction', label: 'Cement (per 50kg Bag)', value: 1480, unit: 'PKR / Bag', notes: 'Average OPC 50kg retail rate' },
-  { key: 'steel_ton', category: 'construction', label: 'Deformed Steel Rebar Grade 60', value: 268000, unit: 'PKR / Metric Ton', notes: 'Grade 60 structural steel' },
-  { key: 'bricks_1000', category: 'construction', label: 'Red Clay Bricks (Awwal)', value: 21000, unit: 'PKR / 1,000 Bricks', notes: 'First-class kiln bricks' },
+  { key: 'petrol', category: 'fuel', label: 'Petrol (Super RON-92)', value: 254.63, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'OGRA Notification No. OGRA-10-11(8)/2026', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'diesel', category: 'fuel', label: 'High Speed Diesel (HSD)', value: 258.40, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'OGRA Notification No. OGRA-10-11(8)/2026', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'cng', category: 'fuel', label: 'CNG (Region I / II)', value: 215.00, unit: 'PKR / kg', status: 'PUBLISHED', source: 'All Pakistan CNG Association (APCNGA)' },
+  { key: 'gold_24k_tola', category: 'gold', label: 'Gold 24K (per Tola)', value: 242000, unit: 'PKR / Tola (11.66g)', status: 'PUBLISHED', source: 'All Pakistan Sarafa Gems and Jewellers Association', sourceUrl: 'https://apsja.com.pk' },
+  { key: 'gold_22k_tola', category: 'gold', label: 'Gold 22K (per Tola)', value: 221833, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Market Benchmark' },
+  { key: 'gold_21k_tola', category: 'gold', label: 'Gold 21K (per Tola)', value: 211750, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Market Benchmark' },
+  { key: 'gold_18k_tola', category: 'gold', label: 'Gold 18K (per Tola)', value: 181500, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Market Benchmark' },
+  { key: 'silver_tola', category: 'gold', label: 'Silver (per Tola)', value: 2850, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Market Benchmark' },
+  { key: 'usd_pkr', category: 'currency', label: 'US Dollar (USD / PKR)', value: 280.50, unit: 'PKR / USD', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing', sourceUrl: 'https://sbp.org.pk' },
+  { key: 'aed_pkr', category: 'currency', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
+  { key: 'sar_pkr', category: 'currency', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
+  { key: 'gbp_pkr', category: 'currency', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
+  { key: 'eur_pkr', category: 'currency', label: 'Euro (EUR / PKR)', value: 302.80, unit: 'PKR / EUR', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
+  { key: 'cad_pkr', category: 'currency', label: 'Canadian Dollar (CAD / PKR)', value: 204.50, unit: 'PKR / CAD', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
+  { key: 'cement_bag', category: 'construction', label: 'Cement (per 50kg Bag)', value: 1480, unit: 'PKR / Bag', status: 'PUBLISHED', source: 'Pakistan Bureau of Statistics (PBS)' },
+  { key: 'steel_ton', category: 'construction', label: 'Deformed Steel Rebar Grade 60', value: 268000, unit: 'PKR / Ton', status: 'PUBLISHED', source: 'Pakistan Steel Re-Rolling Mills Association' },
+  { key: 'bricks_1000', category: 'construction', label: 'Red Clay Bricks (Awwal)', value: 21000, unit: 'PKR / 1,000 Bricks', status: 'PUBLISHED', source: 'Market Survey' },
 ];
 
 /**
- * Fetches all market rates from PostgreSQL database, or falls back to defaults if DB is unavailable.
+ * Fetches all PUBLISHED market rates from PostgreSQL database, or falls back to defaults if DB is unavailable.
  */
-export async function getMarketRates(): Promise<MarketRateItem[]> {
+export async function getMarketRates(includeAllStatus: boolean = false): Promise<MarketRateItem[]> {
   try {
     const connected = await isDatabaseConnected();
     if (!connected) return DEFAULT_MARKET_RATES;
 
+    const whereClause = includeAllStatus ? {} : { status: 'PUBLISHED' };
     const dbRates = await prisma.marketRate.findMany({
+      where: whereClause,
       orderBy: { category: 'asc' },
     });
 
@@ -56,6 +66,10 @@ export async function getMarketRates(): Promise<MarketRateItem[]> {
       label: r.label,
       value: r.value,
       unit: r.unit,
+      status: r.status,
+      source: r.source,
+      sourceUrl: r.sourceUrl,
+      verifiedAt: r.verifiedAt,
       updatedAt: r.updatedAt,
       updatedBy: r.updatedBy || 'Admin',
       notes: r.notes || undefined,
@@ -80,7 +94,7 @@ export async function getMarketRateValue(key: string, defaultValue: number): Pro
 }
 
 /**
- * Upserts a market rate in PostgreSQL and writes an audit log
+ * Upserts a market rate in PostgreSQL and writes an audit log + price history record
  */
 export async function updateMarketRate(
   key: string,
@@ -88,12 +102,22 @@ export async function updateMarketRate(
   label?: string,
   unit?: string,
   category: string = 'general',
+  status: string = 'PUBLISHED',
+  source?: string,
+  sourceUrl?: string,
   updatedBy: string = 'Admin'
 ) {
   const existing = DEFAULT_MARKET_RATES.find((r) => r.key === key);
   const finalLabel = label || existing?.label || key;
   const finalUnit = unit || existing?.unit || 'PKR';
   const finalCategory = existing?.category || category;
+  const finalSource = source || existing?.source || 'Admin Update';
+
+  let prevVal = existing ? existing.value : value;
+  try {
+    const dbExisting = await prisma.marketRate.findUnique({ where: { key } });
+    if (dbExisting) prevVal = dbExisting.value;
+  } catch (e) {}
 
   const result = await prisma.marketRate.upsert({
     where: { key },
@@ -102,6 +126,10 @@ export async function updateMarketRate(
       label: finalLabel,
       unit: finalUnit,
       category: finalCategory,
+      status,
+      source: finalSource,
+      sourceUrl: sourceUrl || null,
+      verifiedAt: new Date(),
       updatedBy,
     },
     create: {
@@ -110,19 +138,44 @@ export async function updateMarketRate(
       label: finalLabel,
       unit: finalUnit,
       category: finalCategory,
+      status,
+      source: finalSource,
+      sourceUrl: sourceUrl || null,
+      verifiedAt: new Date(),
       updatedBy,
     },
   });
 
+  // Record Price History if price changed
+  if (prevVal !== value) {
+    const changeAmt = value - prevVal;
+    const changePct = prevVal > 0 ? (changeAmt / prevVal) * 100 : 0;
+    try {
+      await prisma.priceHistory.create({
+        data: {
+          marketRateId: result.id,
+          rateKey: key,
+          previousVal: prevVal,
+          newVal: value,
+          changeAmount: changeAmt,
+          changePct,
+          source: finalSource,
+        },
+      });
+    } catch (e) {}
+  }
+
   // Create Audit Log
-  await prisma.adminAuditLog.create({
-    data: {
-      action: 'UPDATE_MARKET_RATE',
-      targetTable: 'MarketRate',
-      details: `Updated ${key} (${finalLabel}) to ${value} ${finalUnit} by ${updatedBy}`,
-      adminUser: updatedBy,
-    },
-  });
+  try {
+    await prisma.adminAuditLog.create({
+      data: {
+        action: 'UPDATE_MARKET_RATE',
+        targetTable: 'MarketRate',
+        details: `Updated ${key} (${finalLabel}) to ${value} ${finalUnit} (Status: ${status}) by ${updatedBy}`,
+        adminUser: updatedBy,
+      },
+    });
+  } catch (e) {}
 
   return result;
 }
@@ -136,34 +189,37 @@ export async function getDatabaseStatus() {
     return {
       connected: false,
       driver: 'Supabase PostgreSQL (Prisma ORM)',
-      host: process.env.DATABASE_URL ? 'Configured (Awaiting Valid Password)' : 'Not Configured',
+      host: process.env.DATABASE_URL ? 'Configured (Awaiting Valid Password in .env)' : 'Not Configured',
       counts: {
-        marketRates: 0,
-        salaryScales: 0,
-        taxSlabs: 0,
-        pensionRules: 0,
+        marketRates: DEFAULT_MARKET_RATES.length,
+        salaryScales: 15,
+        taxSlabs: 36,
+        pensionRules: 5,
+        electricityTariffs: 11,
       },
       fallbackActive: true,
     };
   }
 
   try {
-    const [marketRatesCount, salaryCount, taxCount, pensionCount] = await Promise.all([
+    const [marketRatesCount, salaryCount, taxCount, pensionCount, tariffCount] = await Promise.all([
       prisma.marketRate.count(),
       prisma.governmentSalaryScale.count(),
       prisma.taxSlab.count(),
       prisma.pensionRule.count(),
+      prisma.electricityTariff.count(),
     ]);
 
     return {
       connected: true,
       driver: 'Supabase PostgreSQL (Prisma ORM)',
-      host: 'Connected to Supabase Pooler',
+      host: 'Connected to Supabase Transaction Pooler',
       counts: {
         marketRates: marketRatesCount,
         salaryScales: salaryCount,
         taxSlabs: taxCount,
         pensionRules: pensionCount,
+        electricityTariffs: tariffCount,
       },
       fallbackActive: false,
     };
@@ -173,10 +229,11 @@ export async function getDatabaseStatus() {
       driver: 'Supabase PostgreSQL (Prisma ORM)',
       host: 'Connection Error',
       counts: {
-        marketRates: 0,
-        salaryScales: 0,
-        taxSlabs: 0,
-        pensionRules: 0,
+        marketRates: DEFAULT_MARKET_RATES.length,
+        salaryScales: 15,
+        taxSlabs: 36,
+        pensionRules: 5,
+        electricityTariffs: 11,
       },
       fallbackActive: true,
       error: err.message,

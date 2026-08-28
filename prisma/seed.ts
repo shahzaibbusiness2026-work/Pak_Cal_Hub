@@ -3,7 +3,7 @@ import { DEFAULT_MARKET_RATES } from '../src/lib/db/dataProvider';
 import { COMMUTATION_TABLE, getPensionRules } from '../src/data/pension';
 import { getTaxDataset } from '../src/data/tax';
 import { getSalaryDataset, SUPPORTED_GOVERNMENTS, SUPPORTED_BUDGET_YEARS } from '../src/data/salary';
-import { PROTECTED_SLABS, UNPROTECTED_SLABS } from '../src/lib/data/electricity-data';
+import { PROTECTED_SLABS, UNPROTECTED_SLABS } from '../src/lib/calculations/electricityEngine';
 
 const prisma = new PrismaClient();
 
@@ -20,6 +20,9 @@ async function main() {
         label: rate.label,
         unit: rate.unit,
         category: rate.category,
+        status: 'PUBLISHED',
+        source: rate.source,
+        sourceUrl: rate.sourceUrl,
         notes: rate.notes,
       },
       create: {
@@ -28,6 +31,9 @@ async function main() {
         label: rate.label,
         unit: rate.unit,
         category: rate.category,
+        status: 'PUBLISHED',
+        source: rate.source,
+        sourceUrl: rate.sourceUrl,
         notes: rate.notes,
       },
     });
@@ -62,6 +68,7 @@ async function main() {
         post2024Enabled: rules.post2024Scheme.enabled,
         post2024EmpRate: rules.post2024Scheme.employeeContributionRate,
         post2024GovRate: rules.post2024Scheme.governmentContributionRate,
+        status: 'PUBLISHED',
         notes: rules.notes,
       },
       create: {
@@ -77,6 +84,7 @@ async function main() {
         post2024Enabled: rules.post2024Scheme.enabled,
         post2024EmpRate: rules.post2024Scheme.employeeContributionRate,
         post2024GovRate: rules.post2024Scheme.governmentContributionRate,
+        status: 'PUBLISHED',
         notes: rules.notes,
       },
     });
@@ -105,6 +113,7 @@ async function main() {
           fixedTax: slab.fixedTax,
           rate: slab.rate,
           rateLabel: slab.rateLabel,
+          status: 'PUBLISHED',
         },
         create: {
           taxYear: ty,
@@ -115,6 +124,7 @@ async function main() {
           fixedTax: slab.fixedTax,
           rate: slab.rate,
           rateLabel: slab.rateLabel,
+          status: 'PUBLISHED',
         },
       });
     }
@@ -136,6 +146,7 @@ async function main() {
           fixedTax: slab.fixedTax,
           rate: slab.rate,
           rateLabel: slab.rateLabel,
+          status: 'PUBLISHED',
         },
         create: {
           taxYear: ty,
@@ -146,6 +157,7 @@ async function main() {
           fixedTax: slab.fixedTax,
           rate: slab.rate,
           rateLabel: slab.rateLabel,
+          status: 'PUBLISHED',
         },
       });
     }
@@ -170,6 +182,7 @@ async function main() {
           effectiveDate: salDataset.effectiveDate,
           notificationNumber: salDataset.notificationNumber,
           minimumWage: salDataset.minimumWage,
+          status: 'PUBLISHED',
         },
         create: {
           government: salDataset.government,
@@ -179,6 +192,7 @@ async function main() {
           effectiveDate: salDataset.effectiveDate,
           notificationNumber: salDataset.notificationNumber,
           minimumWage: salDataset.minimumWage,
+          status: 'PUBLISHED',
         },
       });
 
@@ -241,20 +255,23 @@ async function main() {
   for (const slab of PROTECTED_SLABS) {
     await prisma.electricityTariff.upsert({
       where: {
-        consumerType_slabMin_slabMax_effectiveYear: {
+        provider_consumerType_slabMin_slabMax_effectiveYear: {
+          provider: 'NEPRA_NATIONAL',
           consumerType: 'protected',
           slabMin: slab.min,
           slabMax: slab.max > 9999 ? 9999 : slab.max,
           effectiveYear: '2026-27',
         },
       },
-      update: { baseRate: slab.rate },
+      update: { baseRate: slab.rate, status: 'PUBLISHED' },
       create: {
+        provider: 'NEPRA_NATIONAL',
         consumerType: 'protected',
         slabMin: slab.min,
         slabMax: slab.max > 9999 ? 9999 : slab.max,
         baseRate: slab.rate,
         effectiveYear: '2026-27',
+        status: 'PUBLISHED',
       },
     });
   }
@@ -262,20 +279,23 @@ async function main() {
   for (const slab of UNPROTECTED_SLABS) {
     await prisma.electricityTariff.upsert({
       where: {
-        consumerType_slabMin_slabMax_effectiveYear: {
+        provider_consumerType_slabMin_slabMax_effectiveYear: {
+          provider: 'NEPRA_NATIONAL',
           consumerType: 'unprotected',
           slabMin: slab.min,
           slabMax: slab.max > 99999 ? 99999 : slab.max,
           effectiveYear: '2026-27',
         },
       },
-      update: { baseRate: slab.rate },
+      update: { baseRate: slab.rate, status: 'PUBLISHED' },
       create: {
+        provider: 'NEPRA_NATIONAL',
         consumerType: 'unprotected',
         slabMin: slab.min,
         slabMax: slab.max > 99999 ? 99999 : slab.max,
         baseRate: slab.rate,
         effectiveYear: '2026-27',
+        status: 'PUBLISHED',
       },
     });
   }

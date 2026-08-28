@@ -66,6 +66,7 @@ export interface BreakdownRow {
   percentage?: number;
   isTotal?: boolean;
   isDeduction?: boolean;
+  type?: 'earning' | 'deduction' | 'total';
 }
 
 export interface CalculatorOutput {

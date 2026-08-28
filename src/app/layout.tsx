@@ -30,6 +30,8 @@ export const metadata: Metadata = {
   authors: [{ name: 'Pakistan Calculator Hub' }],
 };
 
+import Analytics from '../components/ui/Analytics';
+
 export default function RootLayout({
   children,
 }: {
@@ -38,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className="min-h-screen flex flex-col justify-between">
+        <Analytics />
         <ThemeRegistry>
           <Navbar />
           <main className="flex-1">{children}</main>
