@@ -9,7 +9,9 @@ import { CalculatorOutput } from '../../types/calculator';
 export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutput {
   const bps = safeNumber(inputs.bps, 17);
   const stage = safeNumber(inputs.stage, 0); // increment stage
-  const isBigCity = inputs.cityType === 'big'; // Big city vs other station
+  const cityType = inputs.cityType || 'big'; // 'big', 'other', 'none'
+  const isBigCity = cityType === 'big';
+  const isNoHra = cityType === 'none' || inputs.noHra === true;
   const qualificationPay = safeNumber(inputs.qualificationPay, 0);
   const specialAllowance = safeNumber(inputs.specialAllowance, 0);
   const includeAdhoc = inputs.includeAdhoc !== false;
@@ -19,10 +21,18 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
   const basicPay = scale.minPay + effectiveStage * scale.increment;
 
   // House Rent Allowance (HRA) is FROZEN at 30-06-2026 admissibility levels as per Finance Division rules
-  const customHra = safeNumber(inputs.customHra, 0);
-  const houseRentAllowance = customHra > 0
-    ? customHra
-    : (isBigCity ? scale.frozenHraBigCity : scale.frozenHraOtherCity);
+  // If government accommodation is provided, HRA is 0
+  const customHra = safeNumber(inputs.customHra, -1);
+  let houseRentAllowance = 0;
+  if (customHra >= 0) {
+    houseRentAllowance = customHra;
+  } else if (isNoHra) {
+    houseRentAllowance = 0;
+  } else if (isBigCity) {
+    houseRentAllowance = scale.frozenHraBigCity;
+  } else {
+    houseRentAllowance = scale.frozenHraOtherCity;
+  }
 
   // Conveyance Allowance — Flat rupee table (OM No. 3(1)R-5/2010-P-001, 21 July 2026)
   const conveyanceAllowance = scale.conveyanceAllowance;
@@ -54,9 +64,61 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
   const benevolentFundDeduction = Math.min(basicPay * 0.02, 2500);
   // Group Insurance: BPS 1–15 → Rs. 350/mo, BPS 16–22 → Rs. 700/mo
   const groupInsurance = bps <= 15 ? 350 : 700;
-  const totalDeductions = gpFundDeduction + benevolentFundDeduction + groupInsurance;
+  // 5% House Rent Deduction (HRD) if official accommodation is allotted
+  const houseRentDeduction = isNoHra ? basicPay * 0.05 : 0;
+  const totalDeductions = gpFundDeduction + benevolentFundDeduction + groupInsurance + houseRentDeduction;
 
   const netSalary = grossSalary - totalDeductions;
+
+  const hralabel = isNoHra
+    ? 'Official Govt Accommodation (0 HRA)'
+    : isBigCity
+    ? 'Big City HRA'
+    : 'Non-Big City HRA';
+
+  const breakdownRows: any[] = [
+    { label: `Basic Pay (RBPS-2026 Grade ${bps} Stage ${effectiveStage})`, amount: formatPKR(basicPay), percentage: (basicPay / grossSalary) * 100 },
+  ];
+
+  if (isNoHra) {
+    breakdownRows.push({ label: 'House Rent Allowance (Govt Accommodation Allotted)', amount: 'Rs. 0 (Not Admissible)' });
+  } else {
+    breakdownRows.push({
+      label: `Frozen House Rent Allowance (${isBigCity ? 'Big City Schedule' : 'Other Station / Non-Big City'})`,
+      amount: formatPKR(houseRentAllowance),
+      percentage: (houseRentAllowance / grossSalary) * 100,
+    });
+  }
+
+  breakdownRows.push(
+    { label: 'Medical Allowance (Revised)', amount: formatPKR(medicalAllowance), percentage: (medicalAllowance / grossSalary) * 100 },
+    { label: 'Conveyance Allowance (OM July 2026)', amount: formatPKR(conveyanceAllowance), percentage: (conveyanceAllowance / grossSalary) * 100 },
+    { label: 'Ad-hoc Relief Allowance 2026 (7%)', amount: formatPKR(adhoc2026), percentage: (adhoc2026 / grossSalary) * 100 },
+    { label: `GP Fund Deduction (${(gpFundPct * 100).toFixed(0)}% — ${bps <= 15 ? 'BPS 1–15' : 'BPS 16–22 Officer'})`, amount: formatPKR(gpFundDeduction), isDeduction: true },
+    { label: 'Benevolent Fund (2%, Max Rs. 2,500)', amount: formatPKR(benevolentFundDeduction), isDeduction: true },
+    { label: `Group Insurance (${bps <= 15 ? 'Rs. 350 — BPS 1–15' : 'Rs. 700 — BPS 16–22'})`, amount: formatPKR(groupInsurance), isDeduction: true }
+  );
+
+  if (houseRentDeduction > 0) {
+    breakdownRows.push({
+      label: 'Govt Accommodation 5% Maintenance Deduction (HRD)',
+      amount: formatPKR(houseRentDeduction),
+      isDeduction: true,
+    });
+  }
+
+  breakdownRows.push({ label: 'Net Monthly Take-Home Pay', amount: formatPKR(netSalary), isTotal: true });
+
+  const chartData: any[] = [
+    { name: 'Basic Pay', value: Math.round(basicPay), color: '#16a34a' },
+  ];
+  if (houseRentAllowance > 0) {
+    chartData.push({ name: 'House Rent (Frozen)', value: Math.round(houseRentAllowance), color: '#3b82f6' });
+  }
+  chartData.push(
+    { name: 'ARA-2026 (7%)', value: Math.round(adhoc2026), color: '#eab308' },
+    { name: 'Other Allowances', value: Math.round(medicalAllowance + conveyanceAllowance + qualificationPay + specialAllowance), color: '#8b5cf6' }
+  );
 
   return {
     primaryResult: {
@@ -65,7 +127,7 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
       value: formatPKR(netSalary),
       type: 'currency',
       highlight: true,
-      subtext: `RBPS-2026 BPS-${bps} (Stage ${effectiveStage}) | GP Fund: ${(gpFundPct * 100).toFixed(0)}%`,
+      subtext: `RBPS-2026 BPS-${bps} (Stage ${effectiveStage}) | ${hralabel}`,
       color: 'success',
     },
     secondaryResults: [
@@ -74,29 +136,18 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
       { id: 'totalAllowances', label: 'Total Allowances', value: formatPKR(totalAllowances), type: 'currency' },
       { id: 'totalDeductions', label: 'Monthly Deductions', value: formatPKR(totalDeductions), type: 'currency', color: 'warning' },
     ],
-    breakdown: [
-      { label: `Basic Pay (RBPS-2026 Grade ${bps} Stage ${effectiveStage})`, amount: formatPKR(basicPay), percentage: (basicPay / grossSalary) * 100 },
-      { label: `Frozen House Rent Allowance (${isBigCity ? 'Big City Schedule' : 'Other Station'})`, amount: formatPKR(houseRentAllowance), percentage: (houseRentAllowance / grossSalary) * 100 },
-      { label: 'Medical Allowance (Revised)', amount: formatPKR(medicalAllowance), percentage: (medicalAllowance / grossSalary) * 100 },
-      { label: 'Conveyance Allowance (OM July 2026)', amount: formatPKR(conveyanceAllowance), percentage: (conveyanceAllowance / grossSalary) * 100 },
-      { label: 'Ad-hoc Relief Allowance 2026 (7%)', amount: formatPKR(adhoc2026), percentage: (adhoc2026 / grossSalary) * 100 },
-      { label: `GP Fund Deduction (${(gpFundPct * 100).toFixed(0)}% — ${bps <= 15 ? 'BPS 1–15' : 'BPS 16–22 Officer'})`, amount: formatPKR(gpFundDeduction), isDeduction: true },
-      { label: 'Benevolent Fund (2%, Max Rs. 2,500)', amount: formatPKR(benevolentFundDeduction), isDeduction: true },
-      { label: `Group Insurance (${bps <= 15 ? 'Rs. 350 — BPS 1–15' : 'Rs. 700 — BPS 16–22'})`, amount: formatPKR(groupInsurance), isDeduction: true },
-      { label: 'Net Monthly Take-Home Pay', amount: formatPKR(netSalary), isTotal: true },
-    ],
+    breakdown: breakdownRows,
     chartType: 'pie',
-    chartData: [
-      { name: 'Basic Pay', value: Math.round(basicPay), color: '#16a34a' },
-      { name: 'House Rent (Frozen)', value: Math.round(houseRentAllowance), color: '#3b82f6' },
-      { name: 'ARA-2026 (7%)', value: Math.round(adhoc2026), color: '#eab308' },
-      { name: 'Other Allowances', value: Math.round(medicalAllowance + conveyanceAllowance + qualificationPay + specialAllowance), color: '#8b5cf6' },
-    ],
+    chartData,
     notes: [
       'Modeled strictly on Revised Basic Pay Scales 2026 (Finance Division OM No. F.1(2)IMP/2026, 21 July 2026).',
       'ARA-2022 (15%) and ARA-2025 (10%) are merged into basic pay. New 7% ARA-2026 applies on top of RBPS-2026 basic.',
       'GP Fund: BPS 1–15 deduct 5% of basic; BPS 16–22 Gazetted Officers deduct 8% of basic (Finance Division Schedule II).',
-      'House Rent Allowance is frozen at 30-06-2026 admissibility levels per Finance Division Circular.',
+      isNoHra
+        ? 'Government accommodation allotted: House Rent Allowance (HRA) is 0 and 5% House Rent Deduction (HRD) is deducted per Estate Office rules.'
+        : isBigCity
+        ? 'Big City HRA applied (Islamabad, Rawalpindi, Lahore, Karachi, Peshawar, Quetta, Faisalabad, Multan, Hyderabad).'
+        : 'Non-Big City / Other Station HRA applied per frozen admissibility schedule.',
     ],
   };
 }

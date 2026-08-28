@@ -67,7 +67,18 @@ export const CATEGORIES_DATA: CategoryDefinition[] = [
         inputs: [
           { id: 'bps', label: 'Basic Pay Scale (BPS)', type: 'select', defaultValue: 17, options: Array.from({ length: 22 }, (_, i) => ({ label: `BPS-${i + 1}`, value: i + 1 })) },
           { id: 'stage', label: 'Annual Increment Stage (Years in Scale)', type: 'number', defaultValue: 2, min: 0, max: 30 },
-          { id: 'cityType', label: 'Posting Station (Frozen HRA Schedule)', type: 'select', defaultValue: 'big', options: [{ label: 'Specified Big Cities (Islamabad, Rawalpindi, Lahore, Karachi, Peshawar, Quetta, Multan, Faisalabad, Hyderabad)', value: 'big' }, { label: 'Other Cities / Rural Areas (Standard Frozen Rate)', value: 'other' }] },
+          {
+            id: 'cityType',
+            label: 'Posting Station & House Rent (HRA)',
+            type: 'select',
+            defaultValue: 'big',
+            options: [
+              { label: 'Specified Big Cities (Islamabad, Rawalpindi, Lahore, Karachi, Peshawar, Quetta, Multan, Faisalabad, Hyderabad — Big City HRA)', value: 'big' },
+              { label: 'Other Cities / Rural Areas (Non-Big City Station — Standard HRA)', value: 'other' },
+              { label: 'Official Govt Accommodation Provided / Quarter (No Big City & 0 HRA + 5% Maintenance Deduction)', value: 'none' },
+            ],
+            helpText: 'Select "Official Govt Accommodation" if government quarter/house is allotted (HRA is Rs. 0).',
+          },
           { id: 'qualificationPay', label: 'Qualification / Special Pay (PKR)', type: 'currency', defaultValue: 0 },
           { id: 'includeAdhoc', label: 'Include 7% Ad-hoc Relief Allowance 2026 (ARA 2022 & 2025 merged into basic)', type: 'toggle', defaultValue: true },
         ],
