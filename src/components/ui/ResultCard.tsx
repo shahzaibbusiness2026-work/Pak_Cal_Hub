@@ -27,14 +27,14 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
           </span>
         </div>
 
-        <div className="mt-2 flex items-baseline gap-2">
-          <span className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white drop-shadow-xs">
+        <div className="mt-2 flex flex-wrap items-baseline gap-2">
+          <span className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white drop-shadow-xs break-words max-w-full">
             {primary.value}
           </span>
         </div>
 
         {primary.subtext && (
-          <p className="mt-1.5 text-xs font-medium text-emerald-200/90">
+          <p className="mt-1.5 text-xs font-medium text-emerald-200/90 break-words">
             {primary.subtext}
           </p>
         )}
@@ -42,16 +42,16 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
 
       {/* Secondary Key Metric Cards */}
       {secondaries && secondaries.length > 0 && (
-        <div className="mt-6 grid grid-cols-2 gap-3 border-t border-emerald-800/40 pt-5 sm:grid-cols-3">
+        <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3 border-t border-emerald-800/40 pt-4 sm:pt-5 sm:grid-cols-3">
           {secondaries.map((item) => (
             <div
               key={item.id}
-              className="rounded-xl bg-white/5 p-3 backdrop-blur-xs ring-1 ring-white/10"
+              className="rounded-xl bg-white/5 p-2.5 sm:p-3 backdrop-blur-xs ring-1 ring-white/10 flex flex-col justify-between"
             >
-              <div className="text-[11px] font-medium text-emerald-200/80 truncate">
+              <div className="text-[10px] sm:text-[11px] font-medium text-emerald-200/80 line-clamp-2 leading-tight">
                 {item.label}
               </div>
-              <div className="mt-1 text-sm sm:text-base font-bold text-white truncate">
+              <div className="mt-1 text-xs sm:text-base font-bold text-white break-words">
                 {item.value}
               </div>
             </div>

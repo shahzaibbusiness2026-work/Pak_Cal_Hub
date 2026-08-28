@@ -105,20 +105,20 @@ export default function NumberInput({
           max={max}
           step={step}
           placeholder={placeholder || (isCurrency ? '0' : '')}
-          className={`block w-full rounded-xl border border-slate-300 bg-white py-2.5 text-sm font-semibold text-slate-900 shadow-xs transition-all focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white ${
-            isCurrency ? 'pl-11 pr-20' : unit ? 'pl-3.5 pr-20' : 'px-3.5 pr-20'
+          className={`block w-full rounded-xl border border-slate-300 bg-white py-2.5 text-base sm:text-sm font-semibold text-slate-900 shadow-xs transition-all focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white ${
+            isCurrency ? 'pl-11 pr-22' : unit ? 'pl-3.5 pr-22' : 'px-3.5 pr-22'
           }`}
         />
 
         {/* Stepper +/- quick action buttons inside input */}
         <div className="absolute right-1.5 flex items-center gap-1">
           {unit && !isCurrency && (
-            <span className="text-xs font-semibold text-slate-400 mr-1">{unit}</span>
+            <span className="text-xs font-semibold text-slate-400 mr-1 hidden sm:inline">{unit}</span>
           )}
           <button
             type="button"
             onClick={() => handleStep(-(step || (isCurrency ? 1000 : 1)))}
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+            className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
             title="Decrease"
           >
             <Minus className="h-3.5 w-3.5" />
@@ -126,7 +126,7 @@ export default function NumberInput({
           <button
             type="button"
             onClick={() => handleStep(step || (isCurrency ? 1000 : 1))}
-            className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+            className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
             title="Increase"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -136,21 +136,21 @@ export default function NumberInput({
 
       {/* Quick Add Preset Chips for Currency */}
       {isCurrency && numValue > 0 && (
-        <div className="flex items-center gap-1.5 pt-0.5">
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
           <span className="text-[10px] text-slate-400 font-medium">Add:</span>
           {numValue < 1000000 && (
             <>
               <button
                 type="button"
                 onClick={() => handleStep(10000)}
-                className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400"
+                className="rounded-md bg-slate-100 px-2 py-1 text-[11px] sm:text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400 active:scale-95 transition-all touch-manipulation"
               >
                 +10k
               </button>
               <button
                 type="button"
                 onClick={() => handleStep(50000)}
-                className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400"
+                className="rounded-md bg-slate-100 px-2 py-1 text-[11px] sm:text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400 active:scale-95 transition-all touch-manipulation"
               >
                 +50k
               </button>
@@ -159,7 +159,7 @@ export default function NumberInput({
           <button
             type="button"
             onClick={() => handleStep(100000)}
-            className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400"
+            className="rounded-md bg-slate-100 px-2 py-1 text-[11px] sm:text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400 active:scale-95 transition-all touch-manipulation"
           >
             +1 Lakh
           </button>
@@ -167,7 +167,7 @@ export default function NumberInput({
             <button
               type="button"
               onClick={() => handleStep(1000000)}
-              className="rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400"
+              className="rounded-md bg-slate-100 px-2 py-1 text-[11px] sm:text-[10px] font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-800 dark:bg-slate-800 dark:text-slate-400 active:scale-95 transition-all touch-manipulation"
             >
               +10 Lakh
             </button>

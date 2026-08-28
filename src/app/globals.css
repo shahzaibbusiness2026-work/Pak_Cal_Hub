@@ -8,9 +8,46 @@
     --foreground: 222.2 84% 4.9%;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-slate-50 text-slate-900 antialiased selection:bg-emerald-200 selection:text-emerald-900 dark:bg-slate-950 dark:text-slate-50;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    min-height: 100dvh;
+  }
+}
+
+/* Custom Slim Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+
+/* Prevent zooming on iOS Safari inputs without reducing desktop readability */
+@media screen and (max-width: 640px) {
+  input[type="number"],
+  input[type="text"],
+  select {
+    font-size: 16px !important;
   }
 }
 

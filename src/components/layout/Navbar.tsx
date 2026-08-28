@@ -312,7 +312,7 @@ export default function Navbar() {
 
         {/* Mobile menu accordion drawer */}
         {mobileMenuOpen && (
-          <div className="border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden max-h-[80vh] overflow-y-auto">
+          <div className="border-b border-slate-200 bg-white px-3 sm:px-4 py-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden max-h-[80vh] overflow-y-auto overscroll-contain custom-scrollbar shadow-2xl pb-8">
             <nav className="flex flex-col gap-2">
               <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Most Popular Categories & Tools
