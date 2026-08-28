@@ -1,0 +1,295 @@
+import { BPS_SCALES_2026, ADHOC_ALLOWANCES, GP_FUND_RATES } from '../data/bps-data';
+import { formatPKR, formatPercent, safeNumber } from '../utils/formatters';
+import { CalculatorOutput } from '../../types/calculator';
+
+/**
+ * Calculates BPS / Pakistan Government Salary with Allowances and Adhoc Reliefs under RBPS-2026
+ * Effective 1 July 2026 (Finance Division OM No. F.1(2)IMP/2026)
+ */
+export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutput {
+  const bps = safeNumber(inputs.bps, 17);
+  const stage = safeNumber(inputs.stage, 0); // increment stage
+  const isBigCity = inputs.cityType === 'big'; // Big city vs other station
+  const qualificationPay = safeNumber(inputs.qualificationPay, 0);
+  const specialAllowance = safeNumber(inputs.specialAllowance, 0);
+  const includeAdhoc = inputs.includeAdhoc !== false;
+
+  const scale = BPS_SCALES_2026[bps] || BPS_SCALES_2026[17];
+  const effectiveStage = Math.min(stage, scale.stages);
+  const basicPay = scale.minPay + effectiveStage * scale.increment;
+
+  // House Rent Allowance (HRA) is FROZEN at 30-06-2026 admissibility levels as per Finance Division rules
+  const customHra = safeNumber(inputs.customHra, 0);
+  const houseRentAllowance = customHra > 0
+    ? customHra
+    : (isBigCity ? scale.frozenHraBigCity : scale.frozenHraOtherCity);
+
+  // Conveyance Allowance — Flat rupee table (OM No. 3(1)R-5/2010-P-001, 21 July 2026)
+  const conveyanceAllowance = scale.conveyanceAllowance;
+
+  // Medical Allowance — Fixed monthly table (Rs 3,500 for BPS 1-15, Rs 4,000 for BPS 16-22)
+  const medicalAllowance = scale.medicalAllowance;
+
+  // Ad-hoc Relief Allowance 2026 (7% on new RBPS-2026 basic pay; ARA-2022 & ARA-2025 merged into basic)
+  let adhoc2026 = 0;
+  if (includeAdhoc) {
+    adhoc2026 = basicPay * ADHOC_ALLOWANCES.adhoc2026;
+  }
+
+  const totalAllowances =
+    houseRentAllowance +
+    medicalAllowance +
+    conveyanceAllowance +
+    adhoc2026 +
+    qualificationPay +
+    specialAllowance;
+
+  const grossSalary = basicPay + totalAllowances;
+
+  // Standard Mandatory Deductions
+  const gpFundPct = bps <= 16 ? 0.05 : 0.08;
+  const gpFundDeduction = basicPay * gpFundPct;
+  const benevolentFundDeduction = Math.min(basicPay * 0.02, 2500);
+  const groupInsurance = bps <= 16 ? 350 : 700;
+  const totalDeductions = gpFundDeduction + benevolentFundDeduction + groupInsurance;
+
+  const netSalary = grossSalary - totalDeductions;
+
+  return {
+    primaryResult: {
+      id: 'netSalary',
+      label: 'Monthly Net Take-Home Salary',
+      value: formatPKR(netSalary),
+      type: 'currency',
+      highlight: true,
+      subtext: `RBPS-2026 BPS-${bps} (Stage ${effectiveStage})`,
+      color: 'success',
+    },
+    secondaryResults: [
+      { id: 'grossSalary', label: 'Gross Monthly Salary', value: formatPKR(grossSalary), type: 'currency' },
+      { id: 'basicPay', label: 'Running Basic Pay (2026)', value: formatPKR(basicPay), type: 'currency' },
+      { id: 'totalAllowances', label: 'Total Allowances', value: formatPKR(totalAllowances), type: 'currency' },
+      { id: 'totalDeductions', label: 'Monthly Deductions', value: formatPKR(totalDeductions), type: 'currency', color: 'warning' },
+    ],
+    breakdown: [
+      { label: `Basic Pay (RBPS-2026 Grade ${bps} Stage ${effectiveStage})`, amount: formatPKR(basicPay), percentage: (basicPay / grossSalary) * 100 },
+      { label: `Frozen House Rent Allowance (${isBigCity ? 'Big City Schedule' : 'Other Station'})`, amount: formatPKR(houseRentAllowance), percentage: (houseRentAllowance / grossSalary) * 100 },
+      { label: 'Medical Allowance (Revised)', amount: formatPKR(medicalAllowance), percentage: (medicalAllowance / grossSalary) * 100 },
+      { label: 'Conveyance Allowance (OM July 2026)', amount: formatPKR(conveyanceAllowance), percentage: (conveyanceAllowance / grossSalary) * 100 },
+      { label: 'Ad-hoc Relief Allowance 2026 (7%)', amount: formatPKR(adhoc2026), percentage: (adhoc2026 / grossSalary) * 100 },
+      { label: 'GP Fund Monthly Contribution', amount: formatPKR(gpFundDeduction), isDeduction: true },
+      { label: 'Benevolent Fund', amount: formatPKR(benevolentFundDeduction), isDeduction: true },
+      { label: 'Group Insurance', amount: formatPKR(groupInsurance), isDeduction: true },
+      { label: 'Net Monthly Pay', amount: formatPKR(netSalary), isTotal: true },
+    ],
+    chartType: 'pie',
+    chartData: [
+      { name: 'Basic Pay', value: Math.round(basicPay), color: '#16a34a' },
+      { name: 'House Rent (Frozen)', value: Math.round(houseRentAllowance), color: '#3b82f6' },
+      { name: 'ARA-2026 (7%)', value: Math.round(adhoc2026), color: '#eab308' },
+      { name: 'Other Allowances', value: Math.round(medicalAllowance + conveyanceAllowance + qualificationPay + specialAllowance), color: '#8b5cf6' },
+    ],
+    notes: [
+      'Modeled strictly on Revised Basic Pay Scales 2026 (Finance Division OM No. F.1(2)IMP/2026, 21 July 2026).',
+      'ARA-2022 (15%) and ARA-2025 (10%) are merged into basic pay. A new 7% ARA-2026 is applied on top.',
+      'House Rent Allowance (HRA) is frozen at the 30-06-2026 admissibility level per official Finance Division policy.',
+    ],
+  };
+}
+
+/**
+ * Civil Service Pension and Commutation Calculator
+ * Handles Pre-July 2024 Defined Benefit Pension vs Post-July 2024 FGDC Defined Contribution Scheme
+ */
+export function calculatePension(inputs: Record<string, any>): CalculatorOutput {
+  const hireScheme = inputs.hireScheme || 'pre-2024'; // 'pre-2024' or 'post-2024'
+  const basicPay = safeNumber(inputs.lastBasicPay || inputs.basicPay, 95000);
+  const serviceYears = Math.min(safeNumber(inputs.serviceYears, 30), 35);
+  const ageAtRetirement = safeNumber(inputs.ageAtRetirement, 60);
+
+  // 1. Post-July 2024 Hires: Federal Government Defined Contribution (FGDC) Pension Fund Scheme Rules 2024
+  if (hireScheme === 'post-2024') {
+    const employeeContribPct = 10; // 10% from employee salary
+    const govtContribPct = 12;     // 12% from government
+    const totalMonthlyContribPct = employeeContribPct + govtContribPct; // 22% total
+
+    const monthlyEmployeeContrib = (basicPay * employeeContribPct) / 100;
+    const monthlyGovtContrib = (basicPay * govtContribPct) / 100;
+    const totalMonthlyInvestment = monthlyEmployeeContrib + monthlyGovtContrib;
+
+    // Projected compound growth at nominal 12% annual return over serviceYears
+    const annualReturnRate = 0.12;
+    const monthlyRate = annualReturnRate / 12;
+    const totalMonths = serviceYears * 12;
+
+    const accumulatedCorpus = totalMonthlyInvestment > 0
+      ? totalMonthlyInvestment * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate)
+      : 0;
+
+    // Estimated monthly annuity payout upon retirement (assuming ~8% safe withdrawal / annuity yield)
+    const estimatedMonthlyAnnuity = (accumulatedCorpus * 0.08) / 12;
+
+    return {
+      primaryResult: {
+        id: 'corpus',
+        label: 'Projected Retirement Pension Corpus (FGDC)',
+        value: formatPKR(accumulatedCorpus),
+        type: 'currency',
+        highlight: true,
+        color: 'success',
+        subtext: `Est. Monthly Annuity: ${formatPKR(estimatedMonthlyAnnuity)} / month`,
+      },
+      secondaryResults: [
+        { id: 'monthlyContrib', label: 'Total Monthly Contribution (22%)', value: formatPKR(totalMonthlyInvestment), type: 'currency' },
+        { id: 'govtShare', label: 'Government Share (12%)', value: formatPKR(monthlyGovtContrib), type: 'currency' },
+        { id: 'employeeShare', label: 'Employee Share (10%)', value: formatPKR(monthlyEmployeeContrib), type: 'currency' },
+        { id: 'scheme', label: 'Pension Regime', value: 'FGDC Defined Contribution (Post-2024)', type: 'badge' },
+      ],
+      breakdown: [
+        { label: 'Pensionable Basic Pay', amount: formatPKR(basicPay) },
+        { label: 'Employee Monthly Contribution (10%)', amount: formatPKR(monthlyEmployeeContrib) },
+        { label: 'Federal Government Matching Contribution (12%)', amount: formatPKR(monthlyGovtContrib) },
+        { label: 'Total Monthly Inflow into Pension Fund (22%)', amount: formatPKR(totalMonthlyInvestment) },
+        { label: `Qualifying Service Duration (${serviceYears} Years)`, amount: `${serviceYears} Years (${totalMonths} Months)` },
+        { label: `Estimated Accumulated Retirement Fund (@ 12% p.a.)`, amount: formatPKR(accumulatedCorpus), isTotal: true },
+      ],
+      notes: [
+        'Under FGDC Pension Scheme Rules 2024, employees appointed on or after 1 July 2024 contribute 10% with a 12% government match into a licensed Pension Fund Manager (VPS model).',
+        'Retirement payout is determined by accumulated fund value and market performance rather than the classic 70% formula.',
+      ],
+    };
+  }
+
+  // 2. Pre-July 2024 Hires: Classic Defined Benefit Pension Formula
+  const totalServiceYears = Math.min(serviceYears, 30); // Max 30 years counted for classic 70% rate
+  const commutationPercent = safeNumber(inputs.commutationPercent, 35); // Max 35% commutated
+
+  // Gross Pension = (Average Emoluments * Service Years * 7) / 300 (or 70% of Basic Pay for 30 years)
+  const grossPension = (basicPay * totalServiceYears * 7) / 300;
+
+  // Commutation (Gratuity lump sum)
+  const commutatedPart = (grossPension * commutationPercent) / 100;
+  const netMonthlyPension = grossPension - commutatedPart;
+
+  // Pakistan Age-based Commutation Purchase Factors table (Age 60 is approx 12.3719)
+  const commutationFactor = Math.max(10, 20 - (ageAtRetirement - 45) * 0.5);
+  const lumpSumCommutation = commutatedPart * 12 * commutationFactor;
+
+  // Medical Allowance addition in pension (25% of gross pension)
+  const pensionerMedical = grossPension * 0.25;
+  // 7% Federal Pension Increase 2026-27
+  const annualIncrease2026 = netMonthlyPension * 0.07;
+  const takeHomeMonthlyPension = Math.max(10000, netMonthlyPension + pensionerMedical + annualIncrease2026);
+
+  return {
+    primaryResult: {
+      id: 'netMonthlyPension',
+      label: 'Monthly Net Pension (Pre-2024 Scheme)',
+      value: formatPKR(takeHomeMonthlyPension),
+      type: 'currency',
+      highlight: true,
+      color: 'success',
+      subtext: `Qualifying Service: ${totalServiceYears} Years`,
+    },
+    secondaryResults: [
+      { id: 'lumpSum', label: 'Commutation Lump Sum (35% Gratuity)', value: formatPKR(lumpSumCommutation), type: 'currency' },
+      { id: 'grossPension', label: 'Gross Pension (Before Commutation)', value: formatPKR(grossPension), type: 'currency' },
+      { id: 'medicalAllowance', label: 'Pensioner Medical Allowance (25%)', value: formatPKR(pensionerMedical), type: 'currency' },
+      { id: 'minPension', label: 'Minimum Floor', value: 'Rs. 10,000/mo', type: 'badge' },
+    ],
+    breakdown: [
+      { label: 'Last Drawn Basic Pay (or Average Emoluments)', amount: formatPKR(basicPay) },
+      { label: `Qualifying Service (${totalServiceYears} Years, Max 30)`, amount: `${totalServiceYears} Years` },
+      { label: 'Gross Calculated Pension (70% Max)', amount: formatPKR(grossPension) },
+      { label: `Commutation Deducted (${commutationPercent}%)`, amount: formatPKR(commutatedPart), isDeduction: true },
+      { label: 'Pensioner Medical Allowance (25%)', amount: formatPKR(pensionerMedical) },
+      { label: '2026-27 Federal Pension Increase (7%)', amount: formatPKR(annualIncrease2026) },
+      { label: 'Net Monthly Take-Home Pension (Min Rs 10,000)', amount: formatPKR(takeHomeMonthlyPension), isTotal: true },
+    ],
+    notes: [
+      'Applicable to civil employees appointed before 1 July 2024 under classic Defined Benefit Pension rules.',
+      'Includes 7% federal pension increase for 2026-27 and statutory minimum pension floor of Rs. 10,000/month.',
+    ],
+  };
+}
+
+/**
+ * Annual Increment & Arrears Calculator
+ */
+export function calculateIncrementArrears(inputs: Record<string, any>): CalculatorOutput {
+  const currentBasic = safeNumber(inputs.currentBasic, 54140);
+  const annualIncrement = safeNumber(inputs.annualIncrement, 4100);
+  const arrearsMonths = safeNumber(inputs.arrearsMonths, 6);
+
+  const newBasicPay = currentBasic + annualIncrement;
+  const monthlyDifference = annualIncrement;
+  const totalArrears = monthlyDifference * arrearsMonths;
+
+  return {
+    primaryResult: {
+      id: 'totalArrears',
+      label: 'Total Arrears Payable',
+      value: formatPKR(totalArrears),
+      type: 'currency',
+      highlight: true,
+      color: 'success',
+    },
+    secondaryResults: [
+      { id: 'newBasic', label: 'New Basic Pay (After Increment)', value: formatPKR(newBasicPay), type: 'currency' },
+      { id: 'monthlyDiff', label: 'Monthly Difference', value: formatPKR(monthlyDifference), type: 'currency' },
+    ],
+    breakdown: [
+      { label: 'Previous Basic Pay', amount: formatPKR(currentBasic) },
+      { label: 'Annual Increment Amount (1st December)', amount: formatPKR(annualIncrement) },
+      { label: 'Updated Basic Pay', amount: formatPKR(newBasicPay) },
+      { label: `Arrears Period (${arrearsMonths} Months)`, amount: formatPKR(totalArrears), isTotal: true },
+    ],
+  };
+}
+
+/**
+ * GP Fund (General Provident Fund) Interest Calculator
+ */
+export function calculateGpFund(inputs: Record<string, any>): CalculatorOutput {
+  const openingBalance = safeNumber(inputs.openingBalance, 600000);
+  const monthlySubscription = safeNumber(inputs.monthlySubscription, 9000);
+  const interestRate = safeNumber(inputs.interestRate, GP_FUND_RATES.fy2025_26); // Default 12.05% benchmark
+  const years = safeNumber(inputs.years, 5);
+
+  let currentBalance = openingBalance;
+  let totalDeposited = openingBalance;
+
+  for (let y = 1; y <= years; y++) {
+    const annualDeposit = monthlySubscription * 12;
+    totalDeposited += annualDeposit;
+    // Interest calculated on opening balance + average monthly balance
+    const interest = (currentBalance + annualDeposit / 2) * (interestRate / 100);
+    currentBalance += annualDeposit + interest;
+  }
+
+  const totalProfit = currentBalance - totalDeposited;
+
+  return {
+    primaryResult: {
+      id: 'finalBalance',
+      label: 'Estimated GP Fund Balance',
+      value: formatPKR(currentBalance),
+      type: 'currency',
+      highlight: true,
+      color: 'success',
+    },
+    secondaryResults: [
+      { id: 'totalDeposits', label: 'Total Subscriptions Deposited', value: formatPKR(totalDeposited), type: 'currency' },
+      { id: 'totalProfit', label: 'Total Accumulated Profit / Mark-up', value: formatPKR(totalProfit), type: 'currency' },
+    ],
+    chartType: 'pie',
+    chartData: [
+      { name: 'Your Contributions', value: Math.round(totalDeposited), color: '#3b82f6' },
+      { name: 'Accumulated Profit', value: Math.round(totalProfit), color: '#10b981' },
+    ],
+    notes: [
+      `Calculated using latest official GP Fund mark-up benchmark rate of ${interestRate}%.`,
+      'Employees can also opt for Non-Interest (mark-up free) GP Fund account as per service rules.',
+    ],
+  };
+}
