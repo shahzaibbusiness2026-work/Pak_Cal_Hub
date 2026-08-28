@@ -36,10 +36,8 @@ export async function GET(req: NextRequest) {
         rate.label,
         rate.unit,
         rate.category,
-        'PUBLISHED',
-        rate.source || 'Automated SBP / OGRA Daily Sync',
-        rate.sourceUrl,
-        'Vercel Cron Service'
+        'Vercel Cron Service',
+        rate.source || 'Automated SBP / OGRA Daily Sync'
       );
       syncResults.push({ key: rate.key, value: rate.value, status: 'synced' });
     }

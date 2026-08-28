@@ -22,6 +22,9 @@ import {
   X,
   Clock,
   Radio,
+  KeyRound,
+  ArrowRight,
+  ShieldAlert,
 } from 'lucide-react';
 import { formatPKR } from '../../lib/utils/formatters';
 
@@ -41,6 +44,8 @@ interface DatabaseStatus {
   connected: boolean;
   driver: string;
   host: string;
+  reason?: string;
+  hasPlaceholder?: boolean;
   counts: {
     marketRates: number;
     salaryScales: number;
@@ -93,6 +98,11 @@ export default function AdminDashboardPage() {
   const [seedStatus, setSeedStatus] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'rates' | 'automation' | 'salary' | 'tax' | 'status'>('rates');
 
+  // Supabase quick connect password state
+  const [dbPasswordInput, setDbPasswordInput] = useState('');
+  const [connectingDb, setConnectingDb] = useState(false);
+  const [connectMessage, setConnectMessage] = useState<{ text: string; isError: boolean } | null>(null);
+
   // Automation state
   const [syncLogs, setSyncLogs] = useState<SyncLog[]>([]);
   const [govtDrafts, setGovtDrafts] = useState<GovtDraft[]>([]);
@@ -141,6 +151,37 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleConnectSupabase = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dbPasswordInput.trim()) {
+      setConnectMessage({ text: 'Please enter your Supabase database password.', isError: true });
+      return;
+    }
+
+    setConnectingDb(true);
+    setConnectMessage(null);
+    try {
+      const res = await fetch('/api/admin/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: dbPasswordInput.trim(), secretKey }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setConnectMessage({ text: data.message, isError: false });
+        setDbPasswordInput('');
+        loadData();
+      } else {
+        setConnectMessage({ text: data.error || 'Connection failed', isError: true });
+      }
+    } catch (err: any) {
+      setConnectMessage({ text: err.message, isError: true });
+    } finally {
+      setConnectingDb(false);
+    }
+  };
 
   const handleSaveRate = async (rate: MarketRate) => {
     setSaveStatus('Saving...');
@@ -270,11 +311,11 @@ export default function AdminDashboardPage() {
             </span>
             <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-mono flex items-center gap-1">
               <Radio className="h-3 w-3 text-emerald-600 animate-pulse" />
-              Live Data & Cron Pipeline (Open Preview)
+              Live Data &amp; Cron Pipeline
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            Admin Database & Automation Control
+            Admin Database &amp; Automation Control
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
             Manage live market rates, fuel price feeds, government civil service pay tables, and automated sync jobs.
@@ -288,7 +329,7 @@ export default function AdminDashboardPage() {
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
+            <span>Refresh Status</span>
           </button>
 
           <button
@@ -300,6 +341,57 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* Database Quick-Connect Banner (If not yet connected) */}
+      {!dbStatus?.connected && (
+        <div className="rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-6 dark:border-amber-900/60 dark:from-amber-950/40 dark:to-orange-950/20 shadow-xs space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300">
+                <KeyRound className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  Connect Supabase PostgreSQL Database
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                  Host: <code className="font-mono font-bold text-amber-900 dark:text-amber-300">aws-0-ap-northeast-2.pooler.supabase.com</code> (Project ID: <code>pwurutzomtjwaansduup</code>)
+                </p>
+                {dbStatus?.reason && (
+                  <p className="text-xs text-amber-800 dark:text-amber-400 font-semibold mt-1">
+                    Current Diagnosis: {dbStatus.reason}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleConnectSupabase} className="flex flex-col sm:flex-row gap-3 pt-1">
+            <input
+              type="password"
+              value={dbPasswordInput}
+              onChange={(e) => setDbPasswordInput(e.target.value)}
+              placeholder="Paste your Supabase database password here..."
+              className="flex-1 rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-900 shadow-xs focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            />
+            <button
+              type="submit"
+              disabled={connectingDb}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 text-xs font-bold shadow-xs shrink-0 disabled:opacity-50"
+            >
+              {connectingDb ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              <span>{connectingDb ? 'Testing Connection...' : 'Connect & Test Database'}</span>
+            </button>
+          </form>
+
+          {connectMessage && (
+            <div className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 ${connectMessage.isError ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}`}>
+              {connectMessage.isError ? <AlertCircle className="h-4 w-4 shrink-0" /> : <CheckCircle2 className="h-4 w-4 shrink-0" />}
+              <span>{connectMessage.text}</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Notifications Alert Banner */}
       {notifications.filter((n) => !n.isRead).length > 0 && (
@@ -341,7 +433,7 @@ export default function AdminDashboardPage() {
               {dbStatus?.connected ? (
                 <>
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                  <span>PostgreSQL Connected</span>
+                  <span className="text-emerald-700 dark:text-emerald-400">Supabase PostgreSQL Connected</span>
                 </>
               ) : (
                 <>
@@ -351,14 +443,14 @@ export default function AdminDashboardPage() {
               )}
             </div>
             <div className="text-[11px] text-slate-500 mt-0.5">
-              {dbStatus?.connected ? 'Supabase Pooler' : 'Local JSON Data System'}
+              {dbStatus?.connected ? 'Pooler Port 6543 (ap-northeast-2)' : 'Local JSON Data System'}
             </div>
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Live Syncs Executed</div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+          <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1 tabular-nums">
             {automationStats?.totalSyncs || syncLogs.length} Syncs
           </div>
           <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
@@ -368,7 +460,7 @@ export default function AdminDashboardPage() {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Pending Govt Approvals</div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+          <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1 tabular-nums">
             {automationStats?.pendingDrafts || govtDrafts.filter((d) => d.status === 'PENDING_REVIEW').length} Drafts
           </div>
           <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold mt-1">
@@ -378,7 +470,7 @@ export default function AdminDashboardPage() {
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Active Market Rates</div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+          <div className="text-2xl font-black font-mono text-slate-900 dark:text-white mt-1 tabular-nums">
             {rates.length > 0 ? rates.length : dbStatus?.counts.marketRates || 17} Items
           </div>
           <div className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold mt-1">
@@ -414,7 +506,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <Fuel className="h-3.5 w-3.5" />
-            <span>Fuel & Market Rates</span>
+            <span>Fuel &amp; Market Rates</span>
           </button>
 
           <button
@@ -426,7 +518,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <Activity className="h-3.5 w-3.5" />
-            <span>Automation & Data Pipeline</span>
+            <span>Automation &amp; Data Pipeline</span>
           </button>
 
           <button
@@ -462,7 +554,7 @@ export default function AdminDashboardPage() {
             }`}
           >
             <Database className="h-3.5 w-3.5" />
-            <span>Database Connection & Instructions</span>
+            <span>Database Connection &amp; Instructions</span>
           </button>
         </div>
 
@@ -473,7 +565,7 @@ export default function AdminDashboardPage() {
               <div>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Fuel className="h-4 w-4 text-emerald-700" />
-                  <span>Live Commodity & Market Rates Manager</span>
+                  <span>Live Commodity &amp; Market Rates Manager</span>
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">Click "Edit Rate" on any item to update prices across all website calculators immediately.</p>
               </div>
@@ -487,7 +579,7 @@ export default function AdminDashboardPage() {
                     <th className="px-6 py-3">Category</th>
                     <th className="px-6 py-3">Current Price</th>
                     <th className="px-6 py-3">Unit</th>
-                    <th className="px-6 py-3">Source & Verification</th>
+                    <th className="px-6 py-3">Source &amp; Verification</th>
                     <th className="px-6 py-3 text-right">Action</th>
                   </tr>
                 </thead>
@@ -505,14 +597,14 @@ export default function AdminDashboardPage() {
                             {rate.category}
                           </span>
                         </td>
-                        <td className="px-6 py-3.5 font-bold text-slate-900 dark:text-white">
+                        <td className="px-6 py-3.5 font-bold font-mono text-slate-900 dark:text-white tabular-nums text-sm">
                           {isEditing ? (
                             <input
                               type="number"
                               step="0.01"
                               value={editValue}
                               onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
-                              className="w-28 rounded-lg border border-emerald-500 bg-white px-2 py-1 text-xs font-bold text-slate-900 dark:bg-slate-800 dark:text-white"
+                              className="w-28 rounded-lg border border-emerald-500 bg-white px-2 py-1 text-xs font-bold font-mono text-slate-900 dark:bg-slate-800 dark:text-white"
                               autoFocus
                             />
                           ) : (
@@ -638,10 +730,10 @@ export default function AdminDashboardPage() {
                 <div>
                   <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-blue-600" />
-                    <span>Civil Service Gazette Review & Approval Workflow</span>
+                    <span>Civil Service Gazette Review &amp; Approval Workflow</span>
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Government salary & pension gazettes are staged in <code>PENDING_REVIEW</code> status to prevent unverified rate changes.
+                    Government salary &amp; pension gazettes are staged in <code>PENDING_REVIEW</code> status to prevent unverified rate changes.
                   </p>
                 </div>
               </div>
@@ -676,7 +768,7 @@ export default function AdminDashboardPage() {
                             className="inline-flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs"
                           >
                             <Check className="h-3.5 w-3.5" />
-                            <span>Approve & Publish</span>
+                            <span>Approve &amp; Publish</span>
                           </button>
                           <button
                             onClick={() => handleRejectDraft(draft.id)}
@@ -792,33 +884,27 @@ export default function AdminDashboardPage() {
                 <Database className="h-5 w-5 text-emerald-700" />
                 <span>Supabase PostgreSQL Integration Guide</span>
               </h2>
-              <p className="text-xs text-slate-500 mt-1">Your Supabase Project ID: <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-emerald-700 font-bold">pwurutzomtjwaansduup</code></p>
+              <p className="text-xs text-slate-500 mt-1">Your Supabase Project ID: <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-emerald-700 font-bold">pwurutzomtjwaansduup</code> (Region: <code>ap-northeast-2</code>)</p>
             </div>
 
             <div className="space-y-4 text-xs text-slate-600 dark:text-slate-300">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Step 1: Set your Database Password in .env</h3>
-                <p>Open <code>.env</code> in your root directory and replace <code>[YOUR-PASSWORD]</code> with your actual Supabase database password:</p>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Option A: Quick Connect in Dashboard</h3>
+                <p>Scroll to the top of this page, paste your Supabase password into the connection box, and click <strong>"Connect &amp; Test Database"</strong>.</p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Option B: Manual .env Configuration</h3>
+                <p>Open <code>.env</code> in your project root and paste your database password in place of <code>[YOUR-PASSWORD]</code>:</p>
                 <pre className="p-3 rounded-lg bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto">
-DATABASE_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+DATABASE_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres"
                 </pre>
               </div>
 
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Step 2: Push the Database Schema to Supabase</h3>
-                <p>In your terminal, run this single command to create all tables automatically:</p>
-                <pre className="p-3 rounded-lg bg-slate-900 text-emerald-400 font-mono text-[11px]">
-npx prisma db push
-                </pre>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Step 3: Seed All Initial Data</h3>
-                <p>Click the <strong>"1-Click Database Seed"</strong> button at the top of this dashboard, or run in terminal:</p>
-                <pre className="p-3 rounded-lg bg-slate-900 text-emerald-400 font-mono text-[11px]">
-npm run db:seed
-                </pre>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Create Tables &amp; Seed</h3>
+                <p>After saving the password, click the <strong>"1-Click Database Seed"</strong> button at the top to populate all tables!</p>
               </div>
             </div>
           </div>
