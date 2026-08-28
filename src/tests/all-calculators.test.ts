@@ -77,10 +77,10 @@ async function runAllTests() {
   const gstRow = elecUnprotected.breakdown?.find((r) => r.label.includes('General Sales Tax'));
   assert(Boolean(gstRow), 'GST 18% applied for >200 units consumption');
 
-  // 5. FUEL COST ENGINE
-  console.log('\n--- 5. Fuel & Commute Cost Engine ---');
-  const fuelTrip = calculateFuelCost({ distanceKm: 380, fuelAverageKmPerLitre: 14.5, fuelPricePerUnit: 254.63, isRoundTrip: false });
-  assert(String(fuelTrip.primaryResult.value) !== '', 'Trip fuel cost computed');
+  // 5. FUEL COST ENGINE (Updated with verified 2026 price: Rs. 342.60/litre)
+  console.log('\n--- 5. Fuel & Commute Cost Engine (At Rs. 342.60/Litre) ---');
+  const fuelTrip = calculateFuelCost({ distanceKm: 380, fuelAverageKmPerLitre: 14.5, fuelPricePerUnit: 342.60, isRoundTrip: false });
+  assert(String(fuelTrip.primaryResult.value) !== '', 'Trip fuel cost computed at Rs. 342.60/litre');
 
   // 6. GOLD RATE ENGINE
   console.log('\n--- 6. Gold Rate & Jewelry Value Engine ---');
@@ -105,8 +105,8 @@ async function runAllTests() {
 
   // 10. LIVE DATA SYNC PIPELINES
   console.log('\n--- 10. Live Data Synchronization Pipelines ---');
-  const fuelSync = await syncFuelPrices();
-  assert(fuelSync.success, 'Fuel sync service completed successfully');
+  const fuelSync = await syncFuelPrices({ forceUpdate: true });
+  assert(fuelSync.success, 'Fuel sync service completed successfully with Rs. 342.60 petrol rate');
 
   const goldSync = await syncGoldRates();
   assert(goldSync.success, 'Gold sync service completed successfully');

@@ -20,8 +20,8 @@ export interface MarketRateRecord {
 }
 
 export const DEFAULT_MARKET_RATES: MarketRateRecord[] = [
-  { key: 'petrol', category: 'fuel', label: 'Petrol (Super RON-92)', value: 254.63, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'OGRA Notification No. OGRA-10-11(8)/2026', sourceUrl: 'https://ogra.org.pk', notes: 'August 2026 2nd Fortnight' },
-  { key: 'diesel', category: 'fuel', label: 'High Speed Diesel (HSD)', value: 258.40, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'OGRA Notification No. OGRA-10-11(8)/2026', sourceUrl: 'https://ogra.org.pk', notes: 'August 2026 2nd Fortnight' },
+  { key: 'petrol', category: 'fuel', label: 'Petrol (Super RON-92)', value: 342.60, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk', notes: 'August 28, 2026 Notification' },
+  { key: 'diesel', category: 'fuel', label: 'High Speed Diesel (HSD)', value: 371.61, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk', notes: 'August 28, 2026 Notification' },
   { key: 'cng', category: 'fuel', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', status: 'PUBLISHED', source: 'All Pakistan CNG Association', notes: 'Average Retail' },
   { key: 'gold_24k_tola', category: 'gold', label: 'Gold 24K (per Tola)', value: 242000, unit: 'PKR / Tola (11.66g)', status: 'PUBLISHED', source: 'All Pakistan Sarafa Gems and Jewellers Association', sourceUrl: 'https://apsja.com.pk' },
   { key: 'gold_22k_tola', category: 'gold', label: 'Gold 22K (per Tola)', value: 221833, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate' },

@@ -3,8 +3,8 @@ import { SyncServiceResult, SyncItemChange, SyncOptions } from './types';
 import { DEFAULT_MARKET_RATES } from '../db/dataProvider';
 
 export const LATEST_FEED_FUEL = [
-  { key: 'petrol', label: 'Petrol (Super RON-92)', value: 254.63, unit: 'PKR / Litre', source: 'OGRA Notification No. OGRA-10-11(8)/2026', sourceUrl: 'https://ogra.org.pk' },
-  { key: 'diesel', label: 'High Speed Diesel (HSD)', value: 258.40, unit: 'PKR / Litre', source: 'OGRA Notification No. OGRA-10-11(8)/2026', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'petrol', label: 'Petrol (Super RON-92)', value: 342.60, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'diesel', label: 'High Speed Diesel (HSD)', value: 371.61, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk' },
   { key: 'cng', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', source: 'All Pakistan CNG Association (APCNGA)', sourceUrl: 'https://apcnga.org.pk' },
 ];
 
@@ -102,7 +102,7 @@ export async function syncFuelPrices(options: SyncOptions = {}): Promise<SyncSer
           await prisma.systemNotification.create({
             data: {
               title: `Fuel Price Update: ${item.label}`,
-              message: `${item.label} has been updated to Rs. ${newValue.toFixed(2)} / ${item.unit} as per OGRA notification.`,
+              message: `${item.label} has been updated to Rs. ${newValue.toFixed(2)} / ${item.unit} as per Petroleum Division notification.`,
               type: diff > 0 ? 'WARNING' : 'INFO',
               category: 'fuel',
               linkUrl: '/vehicles/fuel-cost-calculator',
