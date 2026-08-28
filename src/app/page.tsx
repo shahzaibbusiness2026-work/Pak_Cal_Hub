@@ -58,25 +58,53 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function HomePage() {
-  const trendingTools = ALL_CALCULATORS.filter((c) => c.trending || c.featured);
+  const DAILY_DEMAND_IDS = [
+    'bps-salary-calculator',
+    'income-tax-calculator',
+    'electricity-bill-calculator',
+    'solar-system-calculator',
+    'property-area-converter',
+    'university-merit-calculator',
+    'zakat-calculator',
+    'token-tax-calculator',
+    'gold-price-calculator',
+    'loan-emi-calculator',
+    'freelancer-tax-calculator',
+    'construction-cost-calculator',
+  ];
+
+  const dailyHighDemandTools = DAILY_DEMAND_IDS.map((id) =>
+    ALL_CALCULATORS.find((c) => c.id === id)
+  ).filter(Boolean) as typeof ALL_CALCULATORS;
+
+  const topHeroQuickLaunch = [
+    { title: 'BPS Salary 2026', subtitle: 'RBPS-2026 Net Pay & GP Fund', href: '/salary/bps-salary-calculator', badge: 'Updated 2026', color: 'emerald' },
+    { title: 'FBR Income Tax', subtitle: 'TY 2027 Monthly TDS Slabs', href: '/tax/income-tax-calculator', badge: 'New Slabs', color: 'rose' },
+    { title: 'Electricity Bill', subtitle: 'WAPDA & K-Electric Units', href: '/electricity/electricity-bill-calculator', badge: 'NEPRA 2026', color: 'amber' },
+    { title: 'Solar System ROI', subtitle: 'Net Billing & Payback', href: '/electricity/solar-system-calculator', badge: 'Rs 10.20 Buyback', color: 'amber' },
+    { title: 'Marla to Sq. Ft.', subtitle: '272.25 & 225 LDA Standard', href: '/property/property-area-converter', badge: 'Revenue Board', color: 'blue' },
+    { title: 'MDCAT Aggregate', subtitle: '50-40-10 PM&DC Formula', href: '/education/university-merit-calculator', badge: 'PM&DC 2026', color: 'purple' },
+    { title: 'Zakat & Nisab', subtitle: '2.5% on Gold, Silver & Cash', href: '/islamic/zakat-calculator', badge: 'Sarafa Nisab', color: 'emerald' },
+    { title: 'Vehicle Token Tax', subtitle: 'Annual Challan & Sec 234', href: '/vehicles/token-tax-calculator', badge: 'Punjab / ICT', color: 'teal' },
+  ];
 
   return (
     <div className="space-y-16 pb-20">
       {/* 1. Hero Section: Clean Modern CSS Emerald Gradient Background */}
-      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-emerald-50/80 via-white to-slate-50 px-4 pt-10 sm:pt-16 pb-14 sm:pb-20 sm:px-6 lg:px-8 dark:border-slate-800 dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-950 transition-colors">
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-b from-emerald-50/80 via-white to-slate-50 px-4 pt-8 sm:pt-14 pb-12 sm:pb-16 sm:px-6 lg:px-8 dark:border-slate-800 dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-950 transition-colors">
         {/* Subtle decorative glow */}
         <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-96 w-[600px] rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/15" />
 
         {/* Hero Content */}
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          {/* Badge */}
+          {/* Official Trust Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-600/20 bg-emerald-100/80 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-emerald-800 backdrop-blur-xs dark:border-emerald-500/30 dark:bg-emerald-950/80 dark:text-emerald-300 max-w-full">
             <Sparkles className="h-3.5 w-3.5 text-emerald-800 dark:text-emerald-400 shrink-0" />
-            <span className="truncate">Updated for 2026: FBR Tax Slabs, NEPRA Tariffs & BPS Pay Scales</span>
+            <span className="truncate">Updated August 2026: RBPS-2026 Pay Scales, FBR TY2027 &amp; NEPRA Tariffs</span>
           </div>
 
           {/* Main Hero Heading */}
-          <h1 className="mt-5 sm:mt-6 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="mt-4 sm:mt-5 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Pakistan Calculator{' '}
             <span className="bg-gradient-to-r from-emerald-800 to-emerald-950 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-200">
               Hub
@@ -84,24 +112,21 @@ export default function HomePage() {
           </h1>
 
           <p className="mx-auto mt-3 sm:mt-4 max-w-2xl text-sm sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-            The authoritative financial, governmental, and daily calculation engine built specifically for Pakistan. Fast, precise, and completely free.
+            Pakistan&apos;s authoritative financial, governmental, and daily calculation engine. 100% verified, fast, and completely free.
           </p>
 
           {/* Prominent Hero Search Bar */}
           <HeroSearch />
 
-          {/* Quick Search Jump Buttons */}
-          <div className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Popular:</span>
+          {/* Quick Jump Badges */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Direct Jump:</span>
             {[
               { label: '🏛️ Govt Suite', href: '#govt-suite' },
               { label: '💼 FBR Tax Portal', href: '#fbr-tax-suite' },
               { label: '🚗 Excise & Vehicles', href: '#excise-suite' },
-              { label: 'BPS Salary 2026', href: '/salary/bps-salary-calculator' },
-              { label: 'Income Tax 2026-27', href: '/tax/income-tax-calculator' },
-              { label: 'Electricity Bill', href: '/electricity/electricity-bill-calculator' },
-              { label: 'Solar Sizing & ROI', href: '/electricity/solar-system-calculator' },
-              { label: 'Token Tax', href: '/vehicles/token-tax-calculator' },
+              { label: '⚡ Top Daily Tools', href: '#daily-demand' },
+              { label: '📂 All 13 Categories', href: '#categories' },
             ].map((tag) => (
               <Link
                 key={tag.label}
@@ -111,6 +136,44 @@ export default function HomePage() {
                 {tag.label}
               </Link>
             ))}
+          </div>
+
+          {/* ⚡ High-Visibility Quick Launch Matrix (Top 8 Daily Tools) */}
+          <div className="mt-8 pt-6 border-t border-slate-200/70 dark:border-slate-800/70 text-left">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-amber-500" />
+                Daily Most-Searched Calculators — Quick Launch
+              </span>
+              <Link href="#daily-demand" className="text-xs font-semibold text-emerald-800 hover:underline dark:text-emerald-400">
+                View all 12 tools →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+              {topHeroQuickLaunch.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white/90 p-3 shadow-2xs backdrop-blur-xs transition-all hover:-translate-y-0.5 hover:border-emerald-600/40 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 px-1.5 py-0.5 rounded">
+                        {item.badge}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-emerald-800 dark:text-slate-600 dark:group-hover:text-emerald-400 transform transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                    <div className="mt-2 text-xs sm:text-sm font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors">
+                      {item.title}
+                    </div>
+                  </div>
+                  <div className="mt-1 text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                    {item.subtitle}
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -671,26 +734,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. Tools Section: Trending & Essential Tools */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
-              <TrendingUp className="h-4 w-4" />
+      {/* ═══════════════════════════════════════════════════════
+           TOP 12 MOST-DEMANDED DAILY CALCULATORS IN PAKISTAN
+          ═══════════════════════════════════════════════════════ */}
+      <section id="daily-demand" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-20">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 border-b border-slate-200/80 pb-4 dark:border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 ring-1 ring-amber-600/20">
+              <TrendingUp className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                Trending & Essential Calculators
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                Top 12 Most-Demanded Daily Calculators
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Most used tools by professionals, students, and citizens in Pakistan
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                Pakistan&apos;s most searched tools for salary, taxes, utility bills, property, admissions &amp; banking
               </p>
             </div>
           </div>
+          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 self-start sm:self-auto">
+            100% Free · Real-Time Calculations
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {trendingTools.slice(0, 8).map((calc) => (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {dailyHighDemandTools.map((calc) => (
             <CalculatorCard key={calc.id} calc={calc} />
           ))}
         </div>
