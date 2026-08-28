@@ -65,7 +65,8 @@ export function calculateInvestment(inputs: Record<string, any>): CalculatorOutp
  */
 export function calculateInflation(inputs: Record<string, any>): CalculatorOutput {
   const currentAmount = safeNumber(inputs.currentAmount, 1000000); // 10 Lakh
-  const annualInflationPct = safeNumber(inputs.annualInflationPct, 11.1); // 11.1% (June/July 2026 PBS/SBP headline CPI rate)
+  // PBS/SBP Headline CPI July 2026: ~9.0% (post IMF-period disinflation from 38% peak in 2023)
+  const annualInflationPct = safeNumber(inputs.annualInflationPct, 9.0);
   const years = safeNumber(inputs.years, 5);
 
   // Future equivalent cost needed to buy today's basket: P * (1 + i)^n
@@ -78,12 +79,12 @@ export function calculateInflation(inputs: Record<string, any>): CalculatorOutpu
   return {
     primaryResult: {
       id: 'futureCost',
-      label: `Cost of Basket in ${years} Years`,
+      label: `Cost of Same Basket in ${years} Years`,
       value: formatPKR(futureEquivalentCost),
       type: 'currency',
       highlight: true,
       color: 'warning',
-      subtext: `At ${annualInflationPct}% annual inflation`,
+      subtext: `At ${annualInflationPct}% annual inflation (PBS CPI July 2026)`,
     },
     secondaryResults: [
       { id: 'realValue', label: `Today's ${formatPKR(currentAmount)} Value in ${years} Yrs`, value: formatPKR(futurePurchasingPower), type: 'currency', color: 'error' },
@@ -94,6 +95,10 @@ export function calculateInflation(inputs: Record<string, any>): CalculatorOutpu
       { label: 'Assumed Annual Inflation Rate', amount: `${annualInflationPct}% per year` },
       { label: `Future Cost to Buy Same Goods after ${years} Years`, amount: formatPKR(futureEquivalentCost) },
       { label: `Residual Purchasing Value of ${formatPKR(currentAmount)}`, amount: formatPKR(futurePurchasingPower), isTotal: true },
+    ],
+    notes: [
+      'Default inflation rate: 9.0% based on PBS/SBP Headline CPI for July 2026 (significantly lower than the 2023 peak of ~38%).',
+      'Enter a custom rate to model different inflation scenarios. Historical Pakistan average: ~8–12% per year.',
     ],
   };
 }

@@ -82,23 +82,22 @@ export function calculateAreaConverter(inputs: Record<string, any>): CalculatorO
  */
 export function calculateConstructionCost(inputs: Record<string, any>): CalculatorOutput {
   const coveredArea = safeNumber(inputs.coveredArea, 2200); // 5 Marla double story is ~2000-2400 sq ft
-  const constructionGrade = inputs.grade || 'a-standard'; // standard, a-plus, luxury
+  const constructionGrade = inputs.grade || 'a-standard'; // economy, a-standard, a-plus, luxury
 
-  // Rates in Pakistan (2024-2026 prevailing market rates)
-  // Grey Structure: ~Rs. 2,500 - 3,200 per sq ft
-  // Finishing: ~Rs. 2,200 - 3,500 per sq ft
-  let greyRate = 2800;
-  let finishRate = 2400;
+  // Rates in Pakistan — August 2026 prevailing market rates
+  // Grey Structure: Rs. 2,600–3,800/sq ft | Finishing: Rs. 2,200–4,800/sq ft
+  let greyRate = 2900;
+  let finishRate = 2500;
 
   if (constructionGrade === 'a-plus') {
-    greyRate = 3200;
-    finishRate = 3200;
+    greyRate = 3300;
+    finishRate = 3300;
   } else if (constructionGrade === 'luxury') {
-    greyRate = 3600;
-    finishRate = 4500;
+    greyRate = 3800;
+    finishRate = 4800;
   } else if (constructionGrade === 'economy') {
-    greyRate = 2400;
-    finishRate = 1800;
+    greyRate = 2600;
+    finishRate = 2000;
   }
 
   const totalRatePerSqFt = greyRate + finishRate;
@@ -106,25 +105,25 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
   const totalFinishCost = coveredArea * finishRate;
   const totalCost = coveredArea * totalRatePerSqFt;
 
-  // Material Breakdown Estimations for Grey Structure:
-  // Bricks: ~25-28 bricks per sq ft covered area
+  // Material Breakdown Estimations for Grey Structure (August 2026 rates):
+  // Bricks: ~26 bricks per sq ft covered area — Awwal grade Rs. 21,000 per 1000
   const bricksCount = Math.round(coveredArea * 26);
-  const bricksCost = (bricksCount / 1000) * 14500; // Rs. 14,500 per 1000 bricks A-grade
+  const bricksCost = (bricksCount / 1000) * 21000;
 
-  // Cement: ~0.45 bags per sq ft covered area
+  // Cement: ~0.46 bags per sq ft covered area — Rs. 1,480 per bag
   const cementBags = Math.round(coveredArea * 0.46);
-  const cementCost = cementBags * 1450; // Rs. 1,450 per bag
+  const cementCost = cementBags * 1480;
 
-  // Steel / Rebar: ~3.5 kg per sq ft covered area (Grade 60)
+  // Steel / Rebar: ~3.5 kg per sq ft covered area (Grade 60 deformed) — Rs. 268,000 per ton
   const steelTons = (coveredArea * 3.5) / 1000;
-  const steelCost = steelTons * 260000; // Rs. 260,000 per ton Grade 60
+  const steelCost = steelTons * 268000;
 
   // Sand & Crush:
-  const sandCost = coveredArea * 180;
-  const crushCost = coveredArea * 280;
+  const sandCost = coveredArea * 200;
+  const crushCost = coveredArea * 300;
 
-  // Labour & Plumbing/Electric rough-in
-  const labourCost = coveredArea * 550;
+  // Labour & rough-in plumbing/electrical:
+  const labourCost = coveredArea * 600;
 
   return {
     primaryResult: {
@@ -134,23 +133,23 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
       type: 'currency',
       highlight: true,
       color: 'success',
-      subtext: `@ Rs. ${totalRatePerSqFt.toLocaleString()} / Sq. Ft.`,
+      subtext: `@ Rs. ${totalRatePerSqFt.toLocaleString()} / Sq. Ft. (${coveredArea.toLocaleString()} sq ft)`,
     },
     secondaryResults: [
       { id: 'greyCost', label: 'Grey Structure Cost', value: formatPKR(totalGreyCost), type: 'currency' },
       { id: 'finishCost', label: 'Finishing Cost', value: formatPKR(totalFinishCost), type: 'currency' },
-      { id: 'ratePerSqFt', label: 'Rate per Sq. Ft.', value: `Rs. ${totalRatePerSqFt}`, type: 'text' },
-      { id: 'cementBags', label: 'Cement Required', value: `${cementBags.toLocaleString()} Bags`, type: 'text' },
+      { id: 'ratePerSqFt', label: 'All-In Rate per Sq. Ft.', value: `Rs. ${totalRatePerSqFt.toLocaleString()}`, type: 'text' },
+      { id: 'cementBags', label: 'Estimated Cement Required', value: `${cementBags.toLocaleString()} Bags`, type: 'text' },
     ],
     breakdown: [
-      { label: `Covered Area (${coveredArea} sq ft) - Grey Structure`, amount: formatPKR(totalGreyCost) },
-      { label: `Bricks (~${bricksCount.toLocaleString()} Awwal bricks)`, amount: formatPKR(bricksCost) },
-      { label: `Cement (~${cementBags.toLocaleString()} Bags)`, amount: formatPKR(cementCost) },
-      { label: `Steel Rebar Grade 60 (~${steelTons.toFixed(2)} Tons)`, amount: formatPKR(steelCost) },
+      { label: `Grey Structure (${coveredArea.toLocaleString()} sq ft × Rs. ${greyRate.toLocaleString()})`, amount: formatPKR(totalGreyCost) },
+      { label: `Bricks — ${bricksCount.toLocaleString()} Awwal (@ Rs. 21,000 per 1,000)`, amount: formatPKR(bricksCost) },
+      { label: `Cement — ${cementBags.toLocaleString()} Bags (@ Rs. 1,480 per bag)`, amount: formatPKR(cementCost) },
+      { label: `Steel Rebar Grade 60 — ${steelTons.toFixed(2)} Tons (@ Rs. 268,000/ton)`, amount: formatPKR(steelCost) },
       { label: `Sand (Ravi/Chenab) & Margalla Crush`, amount: formatPKR(sandCost + crushCost) },
-      { label: `Labour Charges for Grey Structure`, amount: formatPKR(labourCost) },
+      { label: `Labour Charges — Grey Structure`, amount: formatPKR(labourCost) },
       { label: `Complete Finishing (Tiles, Paint, Woodwork, Sanitary, Electricals)`, amount: formatPKR(totalFinishCost) },
-      { label: `Total Estimated Construction Cost`, amount: formatPKR(totalCost), isTotal: true },
+      { label: `Total Estimated Construction Budget`, amount: formatPKR(totalCost), isTotal: true },
     ],
     chartType: 'pie',
     chartData: [
@@ -158,8 +157,9 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
       { name: 'Finishing & Fittings', value: Math.round(totalFinishCost), color: '#16a34a' },
     ],
     notes: [
-      'Estimates based on current Pakistan market rates (2024–2026) for A-grade construction quality.',
-      'Finishing cost includes flooring tiles, sanitary ware, kitchen cabinets, internal doors, ceiling and paint.',
+      'Rates based on Pakistan construction market benchmarks for August 2026 (Grade-A quality).',
+      'Steel: Grade-60 deformed rebar @ Rs. 268,000/ton. Cement: OPC @ Rs. 1,480/bag. Bricks: Awwal-grade @ Rs. 21,000 per 1,000.',
+      'Finishing cost includes flooring tiles, sanitary ware, kitchen cabinets, internal doors, ceiling plaster, and paint.',
     ],
   };
 }

@@ -10,18 +10,22 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Pakistan Calculator Hub (Pak Calc Hub) | 100+ Free Pakistan Calculators',
+  title: 'Pakistan Calculator Hub (Pak Calc Hub) | 100+ Free Pakistan Calculators 2026',
   description:
-    'Free, accurate Pakistan calculators for BPS Government Salary, FBR Income Tax 2024-2026, WAPDA Electricity Bills, Solar Sizing, Marla/Kanal Land conversions, MDCAT Entry Test Aggregates, Zakat Nisab & KIBOR Loans.',
+    'Free, accurate Pakistan calculators: RBPS-2026 Government Salary, FBR Income Tax 2026-27, NEPRA Electricity Bills, Solar Net Billing, Marla/Kanal conversions, MDCAT Aggregates, Zakat Nisab & KIBOR Loans. Updated August 2026.',
   keywords: [
     'Pakistan Calculator Hub',
-    'BPS Salary Calculator',
-    'FBR Income Tax 2024-2025',
+    'BPS Salary Calculator 2026',
+    'RBPS 2026 Pay Scale',
+    'FBR Income Tax 2026 2027',
     'Pakistan Electricity Bill Calculator',
+    'Solar Calculator Pakistan 2026',
     'Marla to Sq Ft Calculator',
-    'MDCAT Aggregate Calculator',
+    'MDCAT Aggregate Calculator 2026',
     'Zakat Calculator Pakistan',
-    'Solar Calculator Pakistan',
+    'Pension Calculator Pakistan',
+    'Freelancer Tax Pakistan',
+    'Pak Calc Hub',
   ],
   authors: [{ name: 'Pakistan Calculator Hub' }],
 };

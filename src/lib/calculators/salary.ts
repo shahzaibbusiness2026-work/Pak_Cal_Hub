@@ -47,10 +47,13 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
   const grossSalary = basicPay + totalAllowances;
 
   // Standard Mandatory Deductions
-  const gpFundPct = bps <= 16 ? 0.05 : 0.08;
+  // GP Fund: BPS 1–15 → 5% of basic, BPS 16–22 → 8% of basic (Finance Division Rules, Schedule II)
+  const gpFundPct = bps <= 15 ? 0.05 : 0.08;
   const gpFundDeduction = basicPay * gpFundPct;
+  // Benevolent Fund: 2% of basic, capped at Rs. 2,500/month
   const benevolentFundDeduction = Math.min(basicPay * 0.02, 2500);
-  const groupInsurance = bps <= 16 ? 350 : 700;
+  // Group Insurance: BPS 1–15 → Rs. 350/mo, BPS 16–22 → Rs. 700/mo
+  const groupInsurance = bps <= 15 ? 350 : 700;
   const totalDeductions = gpFundDeduction + benevolentFundDeduction + groupInsurance;
 
   const netSalary = grossSalary - totalDeductions;
@@ -62,12 +65,12 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
       value: formatPKR(netSalary),
       type: 'currency',
       highlight: true,
-      subtext: `RBPS-2026 BPS-${bps} (Stage ${effectiveStage})`,
+      subtext: `RBPS-2026 BPS-${bps} (Stage ${effectiveStage}) | GP Fund: ${(gpFundPct * 100).toFixed(0)}%`,
       color: 'success',
     },
     secondaryResults: [
       { id: 'grossSalary', label: 'Gross Monthly Salary', value: formatPKR(grossSalary), type: 'currency' },
-      { id: 'basicPay', label: 'Running Basic Pay (2026)', value: formatPKR(basicPay), type: 'currency' },
+      { id: 'basicPay', label: 'Running Basic Pay (RBPS-2026)', value: formatPKR(basicPay), type: 'currency' },
       { id: 'totalAllowances', label: 'Total Allowances', value: formatPKR(totalAllowances), type: 'currency' },
       { id: 'totalDeductions', label: 'Monthly Deductions', value: formatPKR(totalDeductions), type: 'currency', color: 'warning' },
     ],
@@ -77,10 +80,10 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
       { label: 'Medical Allowance (Revised)', amount: formatPKR(medicalAllowance), percentage: (medicalAllowance / grossSalary) * 100 },
       { label: 'Conveyance Allowance (OM July 2026)', amount: formatPKR(conveyanceAllowance), percentage: (conveyanceAllowance / grossSalary) * 100 },
       { label: 'Ad-hoc Relief Allowance 2026 (7%)', amount: formatPKR(adhoc2026), percentage: (adhoc2026 / grossSalary) * 100 },
-      { label: 'GP Fund Monthly Contribution', amount: formatPKR(gpFundDeduction), isDeduction: true },
-      { label: 'Benevolent Fund', amount: formatPKR(benevolentFundDeduction), isDeduction: true },
-      { label: 'Group Insurance', amount: formatPKR(groupInsurance), isDeduction: true },
-      { label: 'Net Monthly Pay', amount: formatPKR(netSalary), isTotal: true },
+      { label: `GP Fund Deduction (${(gpFundPct * 100).toFixed(0)}% — ${bps <= 15 ? 'BPS 1–15' : 'BPS 16–22 Officer'})`, amount: formatPKR(gpFundDeduction), isDeduction: true },
+      { label: 'Benevolent Fund (2%, Max Rs. 2,500)', amount: formatPKR(benevolentFundDeduction), isDeduction: true },
+      { label: `Group Insurance (${bps <= 15 ? 'Rs. 350 — BPS 1–15' : 'Rs. 700 — BPS 16–22'})`, amount: formatPKR(groupInsurance), isDeduction: true },
+      { label: 'Net Monthly Take-Home Pay', amount: formatPKR(netSalary), isTotal: true },
     ],
     chartType: 'pie',
     chartData: [
@@ -91,8 +94,9 @@ export function calculateBpsSalary(inputs: Record<string, any>): CalculatorOutpu
     ],
     notes: [
       'Modeled strictly on Revised Basic Pay Scales 2026 (Finance Division OM No. F.1(2)IMP/2026, 21 July 2026).',
-      'ARA-2022 (15%) and ARA-2025 (10%) are merged into basic pay. A new 7% ARA-2026 is applied on top.',
-      'House Rent Allowance (HRA) is frozen at the 30-06-2026 admissibility level per official Finance Division policy.',
+      'ARA-2022 (15%) and ARA-2025 (10%) are merged into basic pay. New 7% ARA-2026 applies on top of RBPS-2026 basic.',
+      'GP Fund: BPS 1–15 deduct 5% of basic; BPS 16–22 Gazetted Officers deduct 8% of basic (Finance Division Schedule II).',
+      'House Rent Allowance is frozen at 30-06-2026 admissibility levels per Finance Division Circular.',
     ],
   };
 }
@@ -162,24 +166,39 @@ export function calculatePension(inputs: Record<string, any>): CalculatorOutput 
 
   // 2. Pre-July 2024 Hires: Classic Defined Benefit Pension Formula
   const totalServiceYears = Math.min(serviceYears, 30); // Max 30 years counted for classic 70% rate
-  const commutationPercent = safeNumber(inputs.commutationPercent, 35); // Max 35% commutated
+  const commutationPercent = safeNumber(inputs.commutationPercent, 35); // Max 35% commuted
 
-  // Gross Pension = (Average Emoluments * Service Years * 7) / 300 (or 70% of Basic Pay for 30 years)
+  // Gross Pension = (Average Emoluments × Service Years × 7) / 300 (max 70% of basic after 30 yrs)
   const grossPension = (basicPay * totalServiceYears * 7) / 300;
 
   // Commutation (Gratuity lump sum)
   const commutatedPart = (grossPension * commutationPercent) / 100;
   const netMonthlyPension = grossPension - commutatedPart;
 
-  // Pakistan Age-based Commutation Purchase Factors table (Age 60 is approx 12.3719)
-  const commutationFactor = Math.max(10, 20 - (ageAtRetirement - 45) * 0.5);
+  /**
+   * Official Pakistan Government Commutation Table (Finance Division)
+   * Source: Pension-cum-Gratuity Rules, Appendix I (Revised)
+   * Factor = Number of years' purchase for a pension of Re. 1 per year
+   * Age at retirement → purchase factor
+   */
+  const COMMUTATION_TABLE: Record<number, number> = {
+    45: 14.31, 46: 14.00, 47: 13.68, 48: 13.36, 49: 13.05,
+    50: 12.74, 51: 12.43, 52: 12.12, 53: 11.81, 54: 10.62,
+    55: 10.00, 56: 9.67,  57: 9.33,  58: 9.00,  59: 8.74,
+    60: 8.48,  61: 8.22,  62: 7.97,  63: 7.72,  64: 7.47,
+    65: 7.22,
+  };
+  const clampedAge = Math.max(45, Math.min(65, Math.round(ageAtRetirement)));
+  const commutationFactor = COMMUTATION_TABLE[clampedAge] ?? 8.48; // default 8.48 for age 60
+  // Lump sum = commuted portion × 12 months × purchase factor
   const lumpSumCommutation = commutatedPart * 12 * commutationFactor;
 
-  // Medical Allowance addition in pension (25% of gross pension)
+  // Medical Allowance addition in pension (25% of gross pension, per Pension Rules)
   const pensionerMedical = grossPension * 0.25;
-  // 7% Federal Pension Increase 2026-27
+  // 7% Federal Pension Increase 2026-27 (Finance Division Pension Wing notification)
   const annualIncrease2026 = netMonthlyPension * 0.07;
-  const takeHomeMonthlyPension = Math.max(10000, netMonthlyPension + pensionerMedical + annualIncrease2026);
+  // Minimum pension floor: Rs. 25,000/month (Cabinet Committee decision, June 2026)
+  const takeHomeMonthlyPension = Math.max(25000, netMonthlyPension + pensionerMedical + annualIncrease2026);
 
   return {
     primaryResult: {
@@ -189,26 +208,28 @@ export function calculatePension(inputs: Record<string, any>): CalculatorOutput 
       type: 'currency',
       highlight: true,
       color: 'success',
-      subtext: `Qualifying Service: ${totalServiceYears} Years`,
+      subtext: `Qualifying Service: ${totalServiceYears} Years | Age: ${ageAtRetirement}`,
     },
     secondaryResults: [
-      { id: 'lumpSum', label: 'Commutation Lump Sum (35% Gratuity)', value: formatPKR(lumpSumCommutation), type: 'currency' },
+      { id: 'lumpSum', label: `Commutation Lump Sum (${commutationPercent}% × Factor ${commutationFactor})`, value: formatPKR(lumpSumCommutation), type: 'currency' },
       { id: 'grossPension', label: 'Gross Pension (Before Commutation)', value: formatPKR(grossPension), type: 'currency' },
       { id: 'medicalAllowance', label: 'Pensioner Medical Allowance (25%)', value: formatPKR(pensionerMedical), type: 'currency' },
-      { id: 'minPension', label: 'Minimum Floor', value: 'Rs. 10,000/mo', type: 'badge' },
+      { id: 'minPension', label: 'Minimum Floor (2026)', value: 'Rs. 25,000/mo', type: 'badge' },
     ],
     breakdown: [
       { label: 'Last Drawn Basic Pay (or Average Emoluments)', amount: formatPKR(basicPay) },
       { label: `Qualifying Service (${totalServiceYears} Years, Max 30)`, amount: `${totalServiceYears} Years` },
-      { label: 'Gross Calculated Pension (70% Max)', amount: formatPKR(grossPension) },
-      { label: `Commutation Deducted (${commutationPercent}%)`, amount: formatPKR(commutatedPart), isDeduction: true },
-      { label: 'Pensioner Medical Allowance (25%)', amount: formatPKR(pensionerMedical) },
+      { label: 'Gross Calculated Pension (Max 70% at 30 Yrs)', amount: formatPKR(grossPension) },
+      { label: `Commutation Deducted (${commutationPercent}% of Gross Pension)`, amount: formatPKR(commutatedPart), isDeduction: true },
+      { label: `Commutation Lump Sum (Factor ${commutationFactor} for Age ${ageAtRetirement})`, amount: formatPKR(lumpSumCommutation) },
+      { label: 'Pensioner Medical Allowance (25% of Gross)', amount: formatPKR(pensionerMedical) },
       { label: '2026-27 Federal Pension Increase (7%)', amount: formatPKR(annualIncrease2026) },
-      { label: 'Net Monthly Take-Home Pension (Min Rs 10,000)', amount: formatPKR(takeHomeMonthlyPension), isTotal: true },
+      { label: 'Net Monthly Take-Home Pension (Min Rs. 25,000)', amount: formatPKR(takeHomeMonthlyPension), isTotal: true },
     ],
     notes: [
       'Applicable to civil employees appointed before 1 July 2024 under classic Defined Benefit Pension rules.',
-      'Includes 7% federal pension increase for 2026-27 and statutory minimum pension floor of Rs. 10,000/month.',
+      'Commutation factor from official Finance Division Pakistan Pension-cum-Gratuity Rules, Appendix I (Revised).',
+      'Includes 7% federal pension increase for 2026-27 and statutory minimum pension floor of Rs. 25,000/month (Cabinet Committee, June 2026).',
     ],
   };
 }

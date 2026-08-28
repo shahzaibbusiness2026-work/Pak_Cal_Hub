@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { CalculatorDefinition, CalculatorOutput } from '../../types/calculator';
 import { getCalculatorBySlug } from '../../lib/data/categories';
 import { formatPKR } from '../../lib/utils/formatters';
@@ -29,6 +29,8 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   }, [calculator]);
 
   const [inputs, setInputs] = useState<Record<string, any>>(initialValues);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   if (!calculator) {
     return <div className="p-4 text-center text-slate-500">Calculator not found</div>;
@@ -36,6 +38,14 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
 
   const handleFieldChange = (id: string, value: any) => {
     setInputs((prev) => ({ ...prev, [id]: value }));
+
+    // Mobile/tablet: scroll results into view after a short debounce (only on narrow screens)
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
+    }
   };
 
   const handleReset = () => {
@@ -143,17 +153,25 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
                   >
                     <label
                       htmlFor={field.id}
-                      className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200"
+                      className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-200 flex-1 pr-4"
                     >
                       {field.label}
                     </label>
                     <button
                       type="button"
+                      id={field.id}
                       role="switch"
                       aria-checked={checked}
+                      aria-label={field.label}
                       onClick={() => handleFieldChange(field.id, !checked)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                        checked ? 'bg-emerald-800' : 'bg-slate-300 dark:bg-slate-700'
+                      onKeyDown={(e) => {
+                        if (e.key === ' ' || e.key === 'Enter') {
+                          e.preventDefault();
+                          handleFieldChange(field.id, !checked);
+                        }
+                      }}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+                        checked ? 'bg-emerald-700' : 'bg-slate-300 dark:bg-slate-700'
                       }`}
                     >
                       <span
@@ -192,7 +210,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         </div>
 
         {/* Right Column: Dynamic Results & Visual Breakdowns (7 cols on Desktop) */}
-        <div className="space-y-6 lg:col-span-7">
+        <div ref={resultsRef} className="space-y-6 lg:col-span-7" aria-live="polite" aria-atomic="false">
           {/* Main Key Result Card */}
           <ResultCard
             primary={results.primaryResult}

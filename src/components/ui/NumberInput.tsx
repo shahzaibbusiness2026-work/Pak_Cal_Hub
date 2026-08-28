@@ -69,10 +69,15 @@ export default function NumberInput({
 
   const handleStep = (delta: number) => {
     const current = numValue;
-    const nextVal = Math.max(min !== undefined ? min : 0, current + delta);
-    if (max !== undefined && nextVal > max) return;
+    const effectiveMin = min !== undefined ? min : 0;
+    const effectiveMax = max !== undefined ? max : Infinity;
+    const nextVal = Math.min(effectiveMax, Math.max(effectiveMin, current + delta));
     onChange(nextVal);
   };
+
+  const canDecrement = numValue > (min !== undefined ? min : 0);
+  const canIncrement = max === undefined || numValue < max;
+  const stepAmount = step || (isCurrency ? 1000 : 1);
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -97,6 +102,7 @@ export default function NumberInput({
         <input
           type="number"
           id={id}
+          name={id}
           value={value ?? ''}
           onChange={handleChange}
           onFocus={handleFocus}
@@ -105,6 +111,7 @@ export default function NumberInput({
           max={max}
           step={step}
           placeholder={placeholder || (isCurrency ? '0' : '')}
+          aria-label={label}
           className={`block w-full rounded-xl border border-slate-300 bg-white py-2.5 text-base sm:text-sm font-semibold text-slate-900 shadow-xs transition-all focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white ${
             isCurrency ? 'pl-11 pr-22' : unit ? 'pl-3.5 pr-22' : 'px-3.5 pr-22'
           }`}
@@ -117,17 +124,19 @@ export default function NumberInput({
           )}
           <button
             type="button"
-            onClick={() => handleStep(-(step || (isCurrency ? 1000 : 1)))}
-            className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
-            title="Decrease"
+            onClick={() => handleStep(-stepAmount)}
+            disabled={!canDecrement}
+            aria-label={`Decrease ${label} by ${stepAmount}`}
+            className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
-            onClick={() => handleStep(step || (isCurrency ? 1000 : 1))}
-            className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
-            title="Increase"
+            onClick={() => handleStep(stepAmount)}
+            disabled={!canIncrement}
+            aria-label={`Increase ${label} by ${stepAmount}`}
+            className="flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>

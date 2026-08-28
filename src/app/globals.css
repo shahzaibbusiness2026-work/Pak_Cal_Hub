@@ -60,4 +60,38 @@
   header, footer, .print\:hidden {
     display: none !important;
   }
+  @page {
+    margin: 20mm;
+  }
+}
+
+/* Keyboard focus-visible ring — WCAG 2.1 AA */
+:focus-visible {
+  outline: 2px solid #16a34a;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Smooth color transitions for dark/light mode toggle */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+/* But don't transition layout properties (causes jank) */
+.no-transition, input, button {
+  transition: none;
+}
+/* Re-add specific transitions for interactive elements */
+button, a, input, select, textarea {
+  transition-property: background-color, border-color, color, opacity, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/* iOS safe area inset for bottom navigation */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

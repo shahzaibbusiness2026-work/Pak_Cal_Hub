@@ -1,18 +1,19 @@
 import { formatPKR, formatPercent, safeNumber, formatNumber } from '../utils/formatters';
 import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 
-// Current Baseline State Bank & Open Market Reference Rates for PKR (August 2026 benchmark)
+// Current Indicative Open Market / SBP Interbank Reference Rates for PKR (August 2026)
+// IMPORTANT: Rates updated as of 28 August 2026. For live rates use SBP or Forex.pk
 export const BASELINE_FX_RATES: Record<string, { name: string; rateInPKR: number; symbol: string }> = {
-  USD: { name: 'US Dollar', rateInPKR: 278.00, symbol: '$' },
-  GBP: { name: 'British Pound Sterling', rateInPKR: 365.20, symbol: '£' },
-  EUR: { name: 'Euro', rateInPKR: 305.40, symbol: '€' },
-  AED: { name: 'UAE Dirham', rateInPKR: 75.70, symbol: 'AED' },
-  SAR: { name: 'Saudi Riyal', rateInPKR: 74.10, symbol: 'SAR' },
-  CAD: { name: 'Canadian Dollar', rateInPKR: 202.50, symbol: 'C$' },
-  AUD: { name: 'Australian Dollar', rateInPKR: 183.80, symbol: 'A$' },
-  CNY: { name: 'Chinese Yuan', rateInPKR: 38.80, symbol: '¥' },
-  QAR: { name: 'Qatari Riyal', rateInPKR: 76.30, symbol: 'QAR' },
-  KWD: { name: 'Kuwaiti Dinar', rateInPKR: 908.50, symbol: 'KWD' },
+  USD: { name: 'US Dollar',            rateInPKR: 280.50, symbol: '$' },
+  GBP: { name: 'British Pound',        rateInPKR: 357.00, symbol: '£' },
+  EUR: { name: 'Euro',                 rateInPKR: 302.80, symbol: '€' },
+  AED: { name: 'UAE Dirham',           rateInPKR: 76.40,  symbol: 'AED' },
+  SAR: { name: 'Saudi Riyal',          rateInPKR: 74.80,  symbol: 'SAR' },
+  CAD: { name: 'Canadian Dollar',      rateInPKR: 207.50, symbol: 'C$' },
+  AUD: { name: 'Australian Dollar',    rateInPKR: 186.40, symbol: 'A$' },
+  CNY: { name: 'Chinese Yuan',         rateInPKR: 38.60,  symbol: '¥' },
+  QAR: { name: 'Qatari Riyal',         rateInPKR: 77.05,  symbol: 'QAR' },
+  KWD: { name: 'Kuwaiti Dinar',        rateInPKR: 915.00, symbol: 'KWD' },
 };
 
 /**

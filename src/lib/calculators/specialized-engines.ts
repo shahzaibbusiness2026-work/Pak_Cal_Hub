@@ -289,8 +289,9 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
   const monthlyKm = safeNumber(inputs.monthlyKm, 1500);
   const monthlyCost = costPerKm * monthlyKm;
 
-  // Comparison with Petrol car doing 12 km/L at current Rs. 330/L benchmark (Rs. 27.50 / km)
-  const petrolCostPerKm = 330 / 12;
+  // Comparison with Petrol car doing 12 km/L at OGRA August 2026 RON-92 rate: Rs. 254.63/L (~Rs. 21.22/km)
+  const petrolPricePerLiter = 254.63;
+  const petrolCostPerKm = petrolPricePerLiter / 12;
   const monthlyPetrolCost = petrolCostPerKm * monthlyKm;
   const monthlySavingsVsPetrol = monthlyPetrolCost - monthlyCost;
 
@@ -307,18 +308,18 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
     secondaryResults: [
       { id: 'monthlyCost', label: 'Monthly Charging Cost', value: formatPKR(monthlyCost), type: 'currency' },
       { id: 'monthlySavings', label: 'Monthly Fuel Savings vs Petrol', value: formatPKR(monthlySavingsVsPetrol), type: 'currency', color: 'success' },
-      { id: 'petrolComparison', label: 'Petrol Car Equivalent (12 km/L)', value: formatPKR(monthlyPetrolCost), type: 'currency' },
+      { id: 'petrolComparison', label: `Petrol Car Equiv. (12 km/L @ Rs.${petrolPricePerLiter}/L)`, value: formatPKR(monthlyPetrolCost), type: 'currency' },
     ],
     breakdown: [
       { label: `Battery Usable Capacity (${batteryCapacityKwh} kWh)`, amount: `${batteryCapacityKwh} Units` },
       { label: `Electricity Charging Tariff`, amount: `Rs. ${electricityRate.toFixed(2)} / Unit` },
       { label: `Cost of Full Charge (${fullRangeKm} km Range)`, amount: formatPKR(fullChargeCost) },
       { label: `Monthly EV Cost (${monthlyKm} km / month)`, amount: formatPKR(monthlyCost) },
-      { label: `Monthly Fuel Savings vs Petrol @ Rs. 330/L`, amount: formatPKR(monthlySavingsVsPetrol), isTotal: true },
+      { label: `Monthly Fuel Savings vs Petrol Car @ Rs. ${petrolPricePerLiter}/L`, amount: formatPKR(monthlySavingsVsPetrol), isTotal: true },
     ],
     notes: [
       'NEPRA off-peak residential rate is ~Rs. 23.57/kWh under SRO 279(I)/2026. Public fast charging pumps retail at ~Rs. 110–140/kWh.',
-      'Comparison assumes a 1.5L petrol car averaging 12 km/L at Rs. 330/L.',
+      `Comparison assumes a 1.5L petrol car averaging 12 km/L at Rs. ${petrolPricePerLiter}/L (OGRA RON-92 rate, August 2026).`,
     ],
   };
 }

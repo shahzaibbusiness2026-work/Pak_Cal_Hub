@@ -18,26 +18,30 @@ export function calculateIncomeTax(inputs: Record<string, any>): CalculatorOutpu
   let variableTax = 0;
   let totalAnnualTax = 0;
   let activeSlab = slabs[0];
+  let marginalRate = 0;
 
+  // Fixed: single-pass loop — handles all slabs including the last (max: Infinity) correctly
   for (const slab of slabs) {
     if (annualIncome > slab.min) {
       activeSlab = slab;
+      marginalRate = slab.rate * 100;
       if (annualIncome <= slab.max) {
+        // Income falls within this slab
         baseTax = slab.baseTax;
         variableTax = (annualIncome - slab.min) * slab.rate;
         totalAnnualTax = baseTax + variableTax;
-        break;
+        break; // Found the correct slab — no further iteration needed
       }
+      // For max: Infinity slabs this condition is never true so loop continues
+      // to the last slab naturally without a separate fallback block
     }
   }
 
-  // If income exceeds highest slab
-  if (annualIncome > slabs[slabs.length - 1].min) {
-    const highestSlab = slabs[slabs.length - 1];
-    activeSlab = highestSlab;
-    baseTax = highestSlab.baseTax;
-    variableTax = (annualIncome - highestSlab.min) * highestSlab.rate;
-    totalAnnualTax = baseTax + variableTax;
+  // Handle edge case: income exactly = 0 or below the first slab minimum
+  if (annualIncome <= slabs[0].max) {
+    totalAnnualTax = 0;
+    activeSlab = slabs[0];
+    marginalRate = 0;
   }
 
   // Surcharge: Abolished for salaried individuals in Finance Act 2026; applies only to Non-Salaried > Rs 10M
@@ -54,18 +58,18 @@ export function calculateIncomeTax(inputs: Record<string, any>): CalculatorOutpu
 
   const breakdown: BreakdownRow[] = [
     { label: 'Gross Annual Taxable Income', amount: formatPKR(annualIncome) },
-    { label: 'Applicable FBR Slab (FY 2026-27)', detail: activeSlab.description, amount: `${(activeSlab.rate * 100).toFixed(0)}% Slab` },
+    { label: 'Applicable FBR Slab (FY 2026-27)', detail: activeSlab.description, amount: `${marginalRate.toFixed(0)}% Marginal Rate` },
     { label: 'Base Fixed Tax of Slab', amount: formatPKR(baseTax) },
     { label: `Variable Tax on Excess above ${formatPKR(activeSlab.min)}`, amount: formatPKR(variableTax) },
   ];
 
   if (surcharge > 0) {
-    breakdown.push({ label: 'Non-Salaried Surcharge (10% on tax)', amount: formatPKR(surcharge) });
+    breakdown.push({ label: 'Non-Salaried Surcharge (10% on tax for income > Rs. 10M)', amount: formatPKR(surcharge) });
   }
 
   breakdown.push(
     { label: 'Total Annual Income Tax', amount: formatPKR(totalAnnualTax), isTotal: true },
-    { label: 'Monthly Tax Deduction at Source', amount: formatPKR(monthlyTax), isTotal: true }
+    { label: 'Monthly Tax Deduction at Source (TDS)', amount: formatPKR(monthlyTax), isTotal: true }
   );
 
   const chartData: ChartDataPoint[] = [
@@ -76,26 +80,27 @@ export function calculateIncomeTax(inputs: Record<string, any>): CalculatorOutpu
   return {
     primaryResult: {
       id: 'monthlyTax',
-      label: 'Monthly Tax Deduction',
+      label: 'Monthly Tax Deduction (TDS)',
       value: formatPKR(monthlyTax),
       type: 'currency',
       highlight: true,
-      subtext: `Effective Rate: ${effectiveRate.toFixed(2)}%`,
+      subtext: `Effective: ${effectiveRate.toFixed(2)}% | Marginal: ${marginalRate.toFixed(0)}%`,
       color: totalAnnualTax > 0 ? 'error' : 'success',
     },
     secondaryResults: [
       { id: 'annualTax', label: 'Total Annual Tax', value: formatPKR(totalAnnualTax), type: 'currency' },
       { id: 'monthlyTakeHome', label: 'Monthly Net Take-Home', value: formatPKR(monthlyTakeHome), type: 'currency' },
       { id: 'effectiveRate', label: 'Effective Tax Rate', value: formatPercent(effectiveRate), type: 'percentage' },
+      { id: 'marginalRate', label: 'Marginal (Slab) Rate', value: formatPercent(marginalRate), type: 'percentage' },
     ],
     breakdown,
     chartType: 'pie',
     chartData,
     notes: [
-      'Calculated as per Federal Board of Revenue (FBR) Tax Year 2027 (FY 2026-27) slabs under the Finance Act.',
+      'Calculated as per Federal Board of Revenue (FBR) Tax Year 2027 (FY 2026-27) slabs under the Finance Act 2026.',
       isSalaried
-        ? 'Salaried individual tax slabs applied (>75% salary). Surcharge on income above Rs. 10M is abolished for salaried individuals.'
-        : 'Non-salaried / Business tax slabs applied.',
+        ? 'Salaried individual tax slabs applied (>75% income from salary). Surcharge abolished for salaried persons under Finance Act 2026.'
+        : 'Non-salaried / Business individual tax slabs applied. 10% surcharge applies if annual income exceeds Rs. 10 Million.',
     ],
   };
 }

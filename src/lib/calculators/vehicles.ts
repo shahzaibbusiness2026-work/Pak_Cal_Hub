@@ -7,7 +7,8 @@ import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 export function calculateFuelCost(inputs: Record<string, any>): CalculatorOutput {
   const distanceKm = safeNumber(inputs.distanceKm, 380); // e.g. Lahore to Islamabad
   const fuelAverageKmPerLiter = safeNumber(inputs.fuelAverageKmPerLiter, 14.5); // 14.5 km/L
-  const fuelPricePerLiter = safeNumber(inputs.fuelPricePerLiter, 330); // Rs. 330/L petrol benchmark (August 2026 OGRA rolling rate)
+  // OGRA August 2026 notified price for RON-92 Motor Spirit: Rs. 254.63/L
+  const fuelPricePerLiter = safeNumber(inputs.fuelPricePerLiter, 254.63);
   const roundTrip = inputs.roundTrip === true;
 
   const effectiveDistance = roundTrip ? distanceKm * 2 : distanceKm;
@@ -23,7 +24,7 @@ export function calculateFuelCost(inputs: Record<string, any>): CalculatorOutput
       type: 'currency',
       highlight: true,
       color: 'success',
-      subtext: `Cost: Rs. ${costPerKm.toFixed(2)} / km`,
+      subtext: `Rs. ${costPerKm.toFixed(2)} / km | ${litersConsumed.toFixed(2)} Litres`,
     },
     secondaryResults: [
       { id: 'liters', label: 'Fuel Required', value: `${litersConsumed.toFixed(2)} Litres`, type: 'text' },
@@ -33,12 +34,12 @@ export function calculateFuelCost(inputs: Record<string, any>): CalculatorOutput
     breakdown: [
       { label: `Journey Distance (${roundTrip ? 'Round Trip' : 'One Way'})`, amount: `${effectiveDistance} km` },
       { label: 'Vehicle Fuel Average', amount: `${fuelAverageKmPerLiter} km / Litre` },
-      { label: 'Fuel Rate (OGRA)', amount: `Rs. ${fuelPricePerLiter} / Litre` },
+      { label: 'Fuel Rate (OGRA RON-92, August 2026)', amount: `Rs. ${fuelPricePerLiter.toFixed(2)} / Litre` },
       { label: 'Fuel Required for Journey', amount: `${litersConsumed.toFixed(2)} Litres` },
       { label: 'Total Estimated Fuel Expense', amount: formatPKR(totalFuelCost), isTotal: true },
     ],
     notes: [
-      'As of August 2026, OGRA prices fuel on daily rolling international benchmarks. Users can overwrite the rate with today\'s pump price.',
+      'Default price: Rs. 254.63/L for RON-92 Motor Spirit as notified by OGRA (August 2026). Enter today\'s pump price for the most accurate estimate.',
     ],
   };
 }
