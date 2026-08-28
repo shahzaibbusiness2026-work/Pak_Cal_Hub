@@ -32,8 +32,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Inter", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
+        sans: ["var(--font-sans)", "Plus Jakarta Sans", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        mono: ["var(--font-mono)", "JetBrains Mono", "Fira Code", "Courier New", "monospace"],
+        display: ["var(--font-sans)", "Plus Jakarta Sans", "sans-serif"],
       },
     },
   },

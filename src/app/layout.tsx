@@ -1,8 +1,24 @@
 import type { Metadata, Viewport } from 'next';
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import ThemeRegistry from '../components/ui/ThemeRegistry';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
+import Analytics from '../components/ui/Analytics';
+
+const sansFont = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const monoFont = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -30,16 +46,14 @@ export const metadata: Metadata = {
   authors: [{ name: 'Pakistan Calculator Hub' }],
 };
 
-import Analytics from '../components/ui/Analytics';
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className="min-h-screen flex flex-col justify-between">
+    <html lang="en" className={`scroll-smooth ${sansFont.variable} ${monoFont.variable}`}>
+      <body className="min-h-screen flex flex-col justify-between font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
         <Analytics />
         <ThemeRegistry>
           <Navbar />

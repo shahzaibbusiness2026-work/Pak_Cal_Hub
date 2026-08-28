@@ -13,8 +13,8 @@ export default function BreakdownTable({ rows, title = 'Detailed Itemized Breakd
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-200 bg-slate-50/70 px-4 sm:px-5 py-3 dark:border-slate-800 dark:bg-slate-800/50">
-        <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+      <div className="border-b border-slate-200 bg-slate-50/70 px-4 sm:px-6 py-3.5 dark:border-slate-800 dark:bg-slate-800/50">
+        <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
           {title}
         </h3>
       </div>
@@ -22,18 +22,18 @@ export default function BreakdownTable({ rows, title = 'Detailed Itemized Breakd
         {rows.map((row, idx) => (
           <div
             key={idx}
-            className={`flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm transition-colors ${
+            className={`flex items-center justify-between gap-4 px-4 sm:px-6 py-3 text-xs sm:text-sm transition-colors ${
               row.isTotal
-                ? 'bg-emerald-50/60 font-bold text-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-300'
+                ? 'bg-emerald-50/70 font-bold text-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-300'
                 : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
             }`}
           >
             <div className="min-w-0 pr-2">
-              <div className={`font-medium break-words ${row.isTotal ? 'text-emerald-900 dark:text-emerald-300 font-bold' : 'text-slate-800 dark:text-slate-200'}`}>
+              <div className={`break-words ${row.isTotal ? 'text-emerald-950 dark:text-emerald-300 font-extrabold text-sm sm:text-base' : 'text-slate-800 dark:text-slate-200 font-semibold'}`}>
                 {row.label}
               </div>
               {row.detail && (
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 break-words mt-0.5">
+                <div className="text-xs text-slate-500 dark:text-slate-400 break-words mt-0.5 leading-relaxed">
                   {row.detail}
                 </div>
               )}
@@ -41,18 +41,18 @@ export default function BreakdownTable({ rows, title = 'Detailed Itemized Breakd
 
             <div className="text-right shrink-0">
               <span
-                className={`font-semibold ${
+                className={`font-mono font-bold tabular-nums ${
                   row.isDeduction
                     ? 'text-red-600 dark:text-red-400'
                     : row.isTotal
-                    ? 'text-emerald-900 dark:text-emerald-400 text-sm sm:text-base font-bold'
-                    : 'text-slate-900 dark:text-white'
+                    ? 'text-emerald-900 dark:text-emerald-400 text-sm sm:text-lg font-black'
+                    : 'text-slate-900 dark:text-white text-xs sm:text-sm'
                 }`}
               >
                 {row.isDeduction ? `- ${row.amount}` : row.amount}
               </span>
               {row.percentage !== undefined && (
-                <span className="block sm:inline sm:ml-2 text-[10px] sm:text-xs font-normal text-slate-400">
+                <span className="block sm:inline sm:ml-2 font-mono text-xs font-normal text-slate-400">
                   ({row.percentage.toFixed(1)}%)
                 </span>
               )}
