@@ -25,6 +25,14 @@ import {
   Award,
   TrendingDown,
   BadgeCheck,
+  FileText,
+  Coins,
+  Laptop,
+  Home,
+  Fuel,
+  Scale,
+  FileCheck,
+  Percent,
 } from 'lucide-react';
 import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories';
 import CalculatorCard from '../components/ui/CalculatorCard';
@@ -87,13 +95,13 @@ export default function HomePage() {
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Popular:</span>
             {[
               { label: '🏛️ Govt Suite', href: '#govt-suite' },
+              { label: '💼 FBR Tax Portal', href: '#fbr-tax-suite' },
+              { label: '🚗 Excise & Vehicles', href: '#excise-suite' },
               { label: 'BPS Salary 2026', href: '/salary/bps-salary-calculator' },
-              { label: 'FBR Income Tax', href: '/tax/income-tax-calculator' },
+              { label: 'Income Tax 2026-27', href: '/tax/income-tax-calculator' },
               { label: 'Electricity Bill', href: '/electricity/electricity-bill-calculator' },
               { label: 'Solar Sizing & ROI', href: '/electricity/solar-system-calculator' },
-              { label: 'Marla to Sq Ft', href: '/property/property-area-converter' },
-              { label: 'MDCAT Aggregate', href: '/education/university-merit-calculator' },
-              { label: 'Zakat & Nisab', href: '/islamic/zakat-calculator' },
+              { label: 'Token Tax', href: '/vehicles/token-tax-calculator' },
             ].map((tag) => (
               <Link
                 key={tag.label}
@@ -351,6 +359,314 @@ export default function HomePage() {
           >
             <BadgeCheck className="h-3.5 w-3.5" />
             Full Government Suite →
+          </Link>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+           FBR TAX PORTAL — Federal Board of Revenue Featured Suite
+          ═══════════════════════════════════════════════════════ */}
+      <section id="fbr-tax-suite" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-20">
+
+        {/* Section Header — Official FBR Banner */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-950 via-rose-900 to-slate-950 p-6 sm:p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-rose-600/20 blur-3xl" />
+          <div className="pointer-events-none absolute right-32 bottom-0 h-32 w-32 rounded-full bg-amber-500/10 blur-2xl" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-600/30 ring-1 ring-rose-400/30">
+                <Receipt className="h-6 w-6 text-rose-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="rounded-full bg-rose-500/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-rose-300">
+                    💼 Federal Board of Revenue
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-300">
+                    Tax Year 2027 (FY 2026-27)
+                  </span>
+                </div>
+                <h2 className="mt-1.5 text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                  FBR Income Tax &amp; Withholding Portal
+                </h2>
+                <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-lg">
+                  Official tax engines under Finance Act 2026: Salaried slabs, Freelancer 0.25% PSEB regime, Property 236C/236K, and Monthly TDS deductions.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/tax"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition-all active:scale-95"
+            >
+              All Tax Calculators
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+
+        {/* FBR Tools Cards Grid */}
+        <div className="mt-5 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+
+          {/* Card 1: Salaried Income Tax */}
+          <Link href="/tax/income-tax-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-rose-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-rose-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-700 ring-1 ring-rose-600/15 group-hover:bg-rose-700 group-hover:text-white transition-colors dark:bg-rose-950/60 dark:text-rose-400">
+                <Receipt className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+                Surcharge Abolished
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-rose-700 dark:text-white dark:group-hover:text-rose-400 transition-colors">
+              Salaried Income Tax
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Tax Year 2027 slabs (0% up to 600k, 1% up to 1.2M). Monthly TDS and marginal rate calculator.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-rose-700 dark:text-rose-400">
+              Calculate Tax <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 2: Freelancer Section 154A */}
+          <Link href="/tax/freelancer-tax-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-rose-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-rose-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/15 group-hover:bg-emerald-800 group-hover:text-white transition-colors dark:bg-emerald-950/60 dark:text-emerald-400">
+                <Laptop className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                0.25% PSEB Final
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-rose-700 dark:text-white dark:group-hover:text-rose-400 transition-colors">
+              Freelancer &amp; IT Export Tax
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Section 154A 0.25% concessionary final tax for PSEB exporters &amp; 1.25% foreign remittance tax.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-rose-700 dark:text-rose-400">
+              Calculate Tax <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 3: Property Tax 236C & 236K */}
+          <Link href="/tax/property-tax-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-rose-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-rose-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-600/15 group-hover:bg-blue-700 group-hover:text-white transition-colors dark:bg-blue-950/60 dark:text-blue-400">
+                <Home className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                236C &amp; 236K
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-rose-700 dark:text-white dark:group-hover:text-rose-400 transition-colors">
+              Property Advance Tax
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Seller 236C (flat 2.75% Filer / 10% Non-Filer) and Buyer 236K (1.5% Filer / 10.5% Non-Filer).
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-rose-700 dark:text-rose-400">
+              Calculate Tax <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 4: Business / Non-Salaried Tax */}
+          <Link href="/tax/income-tax-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-rose-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-rose-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-700 ring-1 ring-amber-600/15 group-hover:bg-amber-700 group-hover:text-white transition-colors dark:bg-amber-950/60 dark:text-amber-400">
+                <Briefcase className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+                Business &amp; AOP
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-rose-700 dark:text-white dark:group-hover:text-rose-400 transition-colors">
+              Business &amp; Non-Salaried Tax
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Sole proprietors, AOPs &amp; business income tax slabs with 10% surcharge on income &gt; Rs. 10M.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-rose-700 dark:text-rose-400">
+              Calculate Tax <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+        </div>
+
+        {/* Bottom Cheat-Sheet Row */}
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/50">
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">FBR Slabs FY 2026-27:</span> Exempt up to Rs. 600,000/yr · 1% up to Rs. 1.2M · 11% up to Rs. 2.2M · Max 35%.
+          </p>
+          <Link
+            href="/tax"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-rose-700 px-4 py-2 text-xs font-bold text-white hover:bg-rose-800 active:scale-95 transition-all shrink-0"
+          >
+            <Receipt className="h-3.5 w-3.5" />
+            FBR Tax Slabs Overview →
+          </Link>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+           EXCISE & TAXATION DEPARTMENT HUB — Motor Vehicles & Rates
+          ═══════════════════════════════════════════════════════ */}
+      <section id="excise-suite" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-20">
+
+        {/* Section Header — Official Excise Banner */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 p-6 sm:p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-blue-600/20 blur-3xl" />
+          <div className="pointer-events-none absolute right-32 bottom-0 h-32 w-32 rounded-full bg-indigo-400/10 blur-2xl" />
+
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600/30 ring-1 ring-blue-400/30">
+                <Car className="h-6 w-6 text-blue-300" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="rounded-full bg-blue-500/20 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-blue-300">
+                    🚗 Excise &amp; Taxation Department
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-300">
+                    Punjab · Sindh · KPK · ICT
+                  </span>
+                </div>
+                <h2 className="mt-1.5 text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                  Excise, Motor Vehicle &amp; Fuel Hub
+                </h2>
+                <p className="mt-1 text-xs sm:text-sm text-slate-300 max-w-lg">
+                  Calculate annual motor vehicle token tax, FBR Section 234 advance tax (filers vs non-filers), registration transfer fees, and trip fuel expenses.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/vehicles"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 px-4 py-2.5 text-sm font-bold text-white transition-all active:scale-95"
+            >
+              All Vehicle Tools
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Excise Tools Cards Grid */}
+        <div className="mt-5 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+
+          {/* Card 1: Token Tax */}
+          <Link href="/vehicles/token-tax-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-600/15 group-hover:bg-blue-700 group-hover:text-white transition-colors dark:bg-blue-950/60 dark:text-blue-400">
+                <Car className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                Section 234
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400 transition-colors">
+              Vehicle Token Tax Calculator
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Annual motor vehicle excise tax + FBR advance tax for 1000cc, 1300cc, 1500cc, 1800cc &amp; 2000cc+.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-blue-700 dark:text-blue-400">
+              Calculate Challan <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 2: Fuel Trip Cost */}
+          <Link href="/vehicles/fuel-cost-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/15 group-hover:bg-emerald-800 group-hover:text-white transition-colors dark:bg-emerald-950/60 dark:text-emerald-400">
+                <Fuel className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                Rs. 254.63/L
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400 transition-colors">
+              Fuel Cost &amp; Trip Expense
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Calculate liters required, total trip cost (one-way / return), and cost per kilometer at OGRA rates.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-blue-700 dark:text-blue-400">
+              Plan Journey <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 3: EV Charging Running Cost */}
+          <Link href="/vehicles/ev-charging-cost-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-teal-600/15 group-hover:bg-teal-700 group-hover:text-white transition-colors dark:bg-teal-950/60 dark:text-teal-400">
+                <Zap className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-teal-50 px-2 py-0.5 text-[10px] font-bold text-teal-700 dark:bg-teal-950/60 dark:text-teal-300">
+                NEPRA Off-Peak
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400 transition-colors">
+              EV Charging &amp; Running Cost
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Compare electric car running costs (Rs. ~4.5/km) vs petrol car (Rs. ~21.2/km) and monthly savings.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-blue-700 dark:text-blue-400">
+              Calculate EV Cost <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+          {/* Card 4: Car Depreciation */}
+          <Link href="/vehicles/car-depreciation-calculator"
+            className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-blue-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-700/50"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-700 ring-1 ring-violet-600/15 group-hover:bg-violet-700 group-hover:text-white transition-colors dark:bg-violet-950/60 dark:text-violet-400">
+                <TrendingDown className="h-5 w-5" />
+              </div>
+              <span className="rounded-lg bg-violet-50 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:bg-violet-950/60 dark:text-violet-300">
+                Resale Value
+              </span>
+            </div>
+            <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400 transition-colors">
+              Car Depreciation &amp; Resale
+            </h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+              Estimate annual depreciation loss and residual fair market value of used cars in Pakistan.
+            </p>
+            <div className="mt-auto pt-3 flex items-center gap-1 text-[11px] font-semibold text-blue-700 dark:text-blue-400">
+              Estimate Resale <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </Link>
+
+        </div>
+
+        {/* Bottom Excise Cheat Sheet Row */}
+        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/50">
+          <p className="text-xs text-slate-600 dark:text-slate-400">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">Excise Schedules:</span> Active Tax Filers on the FBR ATL receive up to 66% discount on annual advance motor vehicle tax.
+          </p>
+          <Link
+            href="/vehicles"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blue-800 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 active:scale-95 transition-all shrink-0"
+          >
+            <Car className="h-3.5 w-3.5" />
+            Excise &amp; Vehicle Tools →
           </Link>
         </div>
       </section>
