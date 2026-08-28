@@ -1,0 +1,37 @@
+{
+  "conveyance": {
+    "1-4": 2678,
+    "5-10": 2898,
+    "11-15": 4284,
+    "16-19": 7056,
+    "20-22": 0
+  },
+  "medical": {
+    "1-15": 3500,
+    "16-22": 4000
+  },
+  "specifiedBigCities": [
+    "Islamabad",
+    "Rawalpindi",
+    "Lahore",
+    "Karachi",
+    "Peshawar",
+    "Quetta",
+    "Faisalabad",
+    "Multan",
+    "Hyderabad",
+    "Gujranwala",
+    "Sialkot",
+    "Sargodha",
+    "Bahawalpur",
+    "Sukkur",
+    "Larkana",
+    "Mardan",
+    "Abbottabad"
+  ],
+  "houseRentRates": {
+    "bigCityPercent": 0.45,
+    "otherCityPercent": 0.30,
+    "officialAccommodationMaintenanceDeductionPercent": 0.05
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "government": "balochistan",
+  "governmentName": "Government of Balochistan",
+  "year": "2024-25",
+  "scaleTitle": "Balochistan Basic Pay Scales 2022 (with Adhoc Reliefs 2022-2024)",
+  "effectiveDate": "2024-07-01",
+  "notificationNumber": "Finance Department, Govt of Balochistan Notification No. FD(R-I)/2024",
+  "minimumWage": 37000,
+  "scales": {
+    "1": { "bps": 1, "minPay": 13550, "increment": 430, "maxPay": 26450, "stages": 30, "frozenHraBigCity": 2154, "frozenHraOtherCity": 1436, "conveyanceAllowance": 2678, "medicalAllowance": 1500 },
+    "2": { "bps": 2, "minPay": 13960, "increment": 490, "maxPay": 28660, "stages": 30, "frozenHraBigCity": 2238, "frozenHraOtherCity": 1492, "conveyanceAllowance": 2678, "medicalAllowance": 1500 },
+    "3": { "bps": 3, "minPay": 14590, "increment": 580, "maxPay": 31990, "stages": 30, "frozenHraBigCity": 2367, "frozenHraOtherCity": 1578, "conveyanceAllowance": 2678, "medicalAllowance": 1500 },
+    "4": { "bps": 4, "minPay": 15200, "increment": 660, "maxPay": 35000, "stages": 30, "frozenHraBigCity": 2492, "frozenHraOtherCity": 1661, "conveyanceAllowance": 2678, "medicalAllowance": 1500 },
+    "5": { "bps": 5, "minPay": 15880, "increment": 750, "maxPay": 38380, "stages": 30, "frozenHraBigCity": 2624, "frozenHraOtherCity": 1749, "conveyanceAllowance": 2898, "medicalAllowance": 1500 },
+    "6": { "bps": 6, "minPay": 16540, "increment": 840, "maxPay": 41740, "stages": 30, "frozenHraBigCity": 2752, "frozenHraOtherCity": 1835, "conveyanceAllowance": 2898, "medicalAllowance": 1500 },
+    "7": { "bps": 7, "minPay": 17220, "increment": 910, "maxPay": 44520, "stages": 30, "frozenHraBigCity": 2887, "frozenHraOtherCity": 1925, "conveyanceAllowance": 2898, "medicalAllowance": 1500 },
+    "8": { "bps": 8, "minPay": 18060, "increment": 1010, "maxPay": 48360, "stages": 30, "frozenHraBigCity": 3055, "frozenHraOtherCity": 2037, "conveyanceAllowance": 2898, "medicalAllowance": 1500 },
+    "9": { "bps": 9, "minPay": 18950, "increment": 1110, "maxPay": 52250, "stages": 30, "frozenHraBigCity": 3230, "frozenHraOtherCity": 2153, "conveyanceAllowance": 2898, "medicalAllowance": 1500 },
+    "10": { "bps": 10, "minPay": 19820, "increment": 1220, "maxPay": 56420, "stages": 30, "frozenHraBigCity": 3407, "frozenHraOtherCity": 2271, "conveyanceAllowance": 2898, "medicalAllowance": 1500 },
+    "11": { "bps": 11, "minPay": 20900, "increment": 1350, "maxPay": 61400, "stages": 30, "frozenHraBigCity": 3632, "frozenHraOtherCity": 2421, "conveyanceAllowance": 4284, "medicalAllowance": 1500 },
+    "12": { "bps": 12, "minPay": 22530, "increment": 1540, "maxPay": 68730, "stages": 30, "frozenHraBigCity": 3962, "frozenHraOtherCity": 2641, "conveyanceAllowance": 4284, "medicalAllowance": 1500 },
+    "13": { "bps": 13, "minPay": 24740, "increment": 1730, "maxPay": 76640, "stages": 30, "frozenHraBigCity": 4402, "frozenHraOtherCity": 2935, "conveyanceAllowance": 4284, "medicalAllowance": 1500 },
+    "14": { "bps": 14, "minPay": 26920, "increment": 1940, "maxPay": 85120, "stages": 30, "frozenHraBigCity": 4845, "frozenHraOtherCity": 3230, "conveyanceAllowance": 4284, "medicalAllowance": 1500 },
+    "15": { "bps": 15, "minPay": 29100, "increment": 2160, "maxPay": 93900, "stages": 30, "frozenHraBigCity": 5290, "frozenHraOtherCity": 3527, "conveyanceAllowance": 4284, "medicalAllowance": 1500 },
+    "16": { "bps": 16, "minPay": 33650, "increment": 2420, "maxPay": 106250, "stages": 30, "frozenHraBigCity": 6242, "frozenHraOtherCity": 4161, "conveyanceAllowance": 7056, "medicalAllowance": 1500 },
+    "17": { "bps": 17, "minPay": 45070, "increment": 3420, "maxPay": 113470, "stages": 20, "frozenHraBigCity": 8367, "frozenHraOtherCity": 5578, "conveyanceAllowance": 7056, "medicalAllowance": 1500 },
+    "18": { "bps": 18, "minPay": 57540, "increment": 4360, "maxPay": 144740, "stages": 20, "frozenHraBigCity": 10772, "frozenHraOtherCity": 7181, "conveyanceAllowance": 7056, "medicalAllowance": 1500 },
+    "19": { "bps": 19, "minPay": 86900, "increment": 4720, "maxPay": 181300, "stages": 20, "frozenHraBigCity": 16335, "frozenHraOtherCity": 10890, "conveyanceAllowance": 7056, "medicalAllowance": 1500 },
+    "20": { "bps": 20, "minPay": 105820, "increment": 6540, "maxPay": 197380, "stages": 14, "frozenHraBigCity": 20016, "frozenHraOtherCity": 13344, "conveyanceAllowance": 0, "medicalAllowance": 1500 },
+    "21": { "bps": 21, "minPay": 115240, "increment": 7260, "maxPay": 216880, "stages": 14, "frozenHraBigCity": 22041, "frozenHraOtherCity": 14694, "conveyanceAllowance": 0, "medicalAllowance": 1500 },
+    "22": { "bps": 22, "minPay": 122190, "increment": 8710, "maxPay": 244130, "stages": 14, "frozenHraBigCity": 23892, "frozenHraOtherCity": 15928, "conveyanceAllowance": 0, "medicalAllowance": 1500 }
+  },
+  "adhocReliefs": [
+    { "id": "ara2022", "name": "Balochistan Ad-hoc Relief Allowance 2022 (15%)", "rate": 0.15, "appliesTo": "runningBasic" },
+    { "id": "ara2023", "name": "Balochistan Ad-hoc Relief Allowance 2023 (35%/30%)", "rate": 0.30, "appliesTo": "runningBasic", "bpsCondition": [{ "min": 1, "max": 16, "rate": 0.35 }, { "min": 17, "max": 22, "rate": 0.30 }] },
+    { "id": "ara2024", "name": "Balochistan Ad-hoc Relief Allowance 2024 (25%/20%)", "rate": 0.20, "appliesTo": "runningBasic", "bpsCondition": [{ "min": 1, "max": 16, "rate": 0.25 }, { "min": 17, "max": 22, "rate": 0.20 }] }
+  ],
+  "specialAllowances": [
+    { "id": "balochistan_sca", "name": "Special Compensatory / Hardship Allowance", "rate": 0.20, "appliesTo": "runningBasic" }
+  ],
+  "notes": ["Balochistan Budget 2024-25 rules."]
+}

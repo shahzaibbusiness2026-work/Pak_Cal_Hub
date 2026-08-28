@@ -1,0 +1,111 @@
+{
+  "federal": {
+    "government": "federal",
+    "governmentName": "Federal Government",
+    "minimumPension": 25000,
+    "familyPensionRate": 0.75,
+    "familyPensionLifetimeWidow": false,
+    "familyPensionLifetimeUnmarriedDaughter": false,
+    "commutationMaxPercent": 35,
+    "gratuityFormulaFactor": 7,
+    "voluntaryRetirementMinYears": 25,
+    "superannuationAge": 60,
+    "post2024Scheme": {
+      "enabled": true,
+      "employeeContributionRate": 0.10,
+      "governmentContributionRate": 0.12,
+      "vpsNominalGrowthRate": 0.12
+    },
+    "notes": [
+      "Federal Defined Benefit Pension (Pre-1 July 2024): Gross pension = (Last Basic Pay * Service Years * 7) / 300 (up to 70% max).",
+      "Commutation capped at 35% of gross pension.",
+      "Minimum monthly pension is fixed at Rs. 25,000.",
+      "Federal post-July 2024 hires are covered under FGDC Defined Contribution Scheme (10% employee + 12% government contribution)."
+    ]
+  },
+  "punjab": {
+    "government": "punjab",
+    "governmentName": "Government of Punjab",
+    "minimumPension": 25000,
+    "familyPensionRate": 0.75,
+    "familyPensionLifetimeWidow": true,
+    "familyPensionLifetimeUnmarriedDaughter": true,
+    "commutationMaxPercent": 35,
+    "gratuityFormulaFactor": 7,
+    "voluntaryRetirementMinYears": 25,
+    "superannuationAge": 60,
+    "post2024Scheme": {
+      "enabled": true,
+      "employeeContributionRate": 0.10,
+      "governmentContributionRate": 0.12,
+      "vpsNominalGrowthRate": 0.12
+    },
+    "notes": [
+      "Punjab Cabinet Notification (July 2026): Restored lifetime family pension for surviving widows and unmarried/divorced daughters.",
+      "Commutation capped at 35% with restoration after completion of commutation purchase period."
+    ]
+  },
+  "sindh": {
+    "government": "sindh",
+    "governmentName": "Government of Sindh",
+    "minimumPension": 25000,
+    "familyPensionRate": 0.75,
+    "familyPensionLifetimeWidow": true,
+    "familyPensionLifetimeUnmarriedDaughter": true,
+    "commutationMaxPercent": 35,
+    "gratuityFormulaFactor": 7,
+    "voluntaryRetirementMinYears": 25,
+    "superannuationAge": 60,
+    "post2024Scheme": {
+      "enabled": false,
+      "employeeContributionRate": 0.10,
+      "governmentContributionRate": 0.12,
+      "vpsNominalGrowthRate": 0.12
+    },
+    "notes": [
+      "Sindh Civil Servants Pension Rules maintain classic Defined Benefit structure with lifetime family pension admissibility."
+    ]
+  },
+  "kpk": {
+    "government": "kpk",
+    "governmentName": "Government of Khyber Pakhtunkhwa",
+    "minimumPension": 25000,
+    "familyPensionRate": 0.75,
+    "familyPensionLifetimeWidow": false,
+    "familyPensionLifetimeUnmarriedDaughter": false,
+    "commutationMaxPercent": 35,
+    "gratuityFormulaFactor": 7,
+    "voluntaryRetirementMinYears": 25,
+    "superannuationAge": 60,
+    "post2024Scheme": {
+      "enabled": true,
+      "employeeContributionRate": 0.10,
+      "governmentContributionRate": 0.12,
+      "vpsNominalGrowthRate": 0.12
+    },
+    "notes": [
+      "KPK Pension Reforms: Voluntary retirement eligibility is 25 qualifying service years with early retirement age restrictions."
+    ]
+  },
+  "balochistan": {
+    "government": "balochistan",
+    "governmentName": "Government of Balochistan",
+    "minimumPension": 25000,
+    "familyPensionRate": 0.75,
+    "familyPensionLifetimeWidow": true,
+    "familyPensionLifetimeUnmarriedDaughter": true,
+    "commutationMaxPercent": 35,
+    "gratuityFormulaFactor": 7,
+    "voluntaryRetirementMinYears": 25,
+    "superannuationAge": 60,
+    "post2024Scheme": {
+      "enabled": false,
+      "employeeContributionRate": 0.10,
+      "governmentContributionRate": 0.12,
+      "vpsNominalGrowthRate": 0.12
+    },
+    "notes": [
+      "Balochistan Civil Service Pension regulations."
+    ]
+  }
+}

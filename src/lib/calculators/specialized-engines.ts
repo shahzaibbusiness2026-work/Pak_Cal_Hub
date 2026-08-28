@@ -7,128 +7,38 @@ import { BASELINE_FX_RATES } from './currency';
 import { ZAKAT_DEFAULTS } from '../data/zakat-data';
 import { PAK_UNIVERSITY_FORMULAS } from '../data/universities-data';
 
+import { calculateLeaveEncashment as calcLeaveEncashmentEngine, calculateFamilyPension as calcFamilyPensionEngine, calculatePromotion as calcPromotionEngine } from '../calculations';
+
 // ==========================================
 // 1. SALARY & GOVT EMPLOYEES ENGINES
 // ==========================================
 
 export function calculateLeaveEncashment(inputs: Record<string, any>): CalculatorOutput {
-  const lastBasic = safeNumber(inputs.lastBasic, 75000);
-  const leaveDays = Math.min(safeNumber(inputs.leaveDays, 365), 365); // Max 365 days / 1 year
-
-  // Leave Encashment = (Last Basic Pay * Leave Days) / 30
-  const encashmentAmount = (lastBasic * leaveDays) / 30;
-
-  return {
-    primaryResult: {
-      id: 'encashment',
-      label: 'Total Leave Encashment Amount',
-      value: formatPKR(encashmentAmount),
-      type: 'currency',
-      highlight: true,
-      color: 'success',
-      subtext: `For ${leaveDays} Days of Accumulated LPR`,
-    },
-    secondaryResults: [
-      { id: 'dailyRate', label: 'Daily Basic Rate', value: formatPKR(lastBasic / 30), type: 'currency' },
-      { id: 'lastBasic', label: 'Last Drawn Basic Pay', value: formatPKR(lastBasic), type: 'currency' },
-    ],
-    breakdown: [
-      { label: 'Last Drawn Basic Pay', amount: formatPKR(lastBasic) },
-      { label: `Accumulated Un-availed Leave Days (LPR)`, amount: `${leaveDays} Days` },
-      { label: 'Calculated Encashment Lump Sum', amount: formatPKR(encashmentAmount), isTotal: true },
-    ],
-    notes: ['Under Revised Leave Rules, maximum encashment payable in lieu of LPR is 365 days basic pay.'],
-  };
+  return calcLeaveEncashmentEngine({
+    government: inputs.government,
+    year: inputs.year,
+    basicPay: inputs.lastBasic || inputs.basicPay,
+    leaveDays: inputs.leaveDays,
+  });
 }
 
 export function calculateFamilyPension(inputs: Record<string, any>): CalculatorOutput {
-  const jurisdiction = inputs.jurisdiction || 'punjab'; // 'punjab' or 'federal'
-  const pensionerBasicPay = safeNumber(inputs.pensionerBasicPay, 80000);
-  const serviceYears = Math.min(safeNumber(inputs.serviceYears, 28), 30);
-  
-  // Full gross pension
-  const grossPension = (pensionerBasicPay * serviceYears * 7) / 300;
-  // Family pension is 75% of Gross Pension in federal and provincial rules
-  const familyPensionMonthly = grossPension * 0.75;
-  const medicalAllowance = grossPension * 0.25;
-  const totalFamilyPension = Math.max(10000, familyPensionMonthly + medicalAllowance);
-
-  const durationNote = jurisdiction === 'punjab'
-    ? 'Punjab Notification (July 2026): Lifetime family pension for widows and unmarried daughters (10-year limit abolished).'
-    : 'Federal / General OM: Lifetime for widow until remarriage; eligible dependent children up to age 21.';
-
-  return {
-    primaryResult: {
-      id: 'familyPension',
-      label: 'Monthly Net Family Pension',
-      value: formatPKR(totalFamilyPension),
-      type: 'currency',
-      highlight: true,
-      color: 'success',
-      subtext: '75% of Gross Pension + Medical Allowance',
-    },
-    secondaryResults: [
-      { id: 'grossPension', label: 'Original Gross Pension', value: formatPKR(grossPension), type: 'currency' },
-      { id: 'medical', label: 'Medical Allowance (25%)', value: formatPKR(medicalAllowance), type: 'currency' },
-      { id: 'jurisdiction', label: 'Jurisdiction & Duration', value: jurisdiction === 'punjab' ? 'Punjab: Lifetime Restored' : 'Federal: Standard', type: 'badge' },
-    ],
-    breakdown: [
-      { label: 'Deceased Employee Basic Pay', amount: formatPKR(pensionerBasicPay) },
-      { label: `Service Rendered (${serviceYears} Years)`, amount: `${serviceYears} Years` },
-      { label: 'Base Family Pension (75%)', amount: formatPKR(familyPensionMonthly) },
-      { label: 'Pensioner Medical Allowance', amount: formatPKR(medicalAllowance) },
-      { label: 'Total Monthly Family Pension (Min Rs 10,000)', amount: formatPKR(totalFamilyPension), isTotal: true },
-    ],
-    notes: [
-      durationNote,
-      'If multiple surviving widows exist, the pension is divided in equal shares among them.',
-    ],
-  };
+  return calcFamilyPensionEngine({
+    government: inputs.jurisdiction || inputs.government,
+    lastBasicPay: inputs.pensionerBasicPay || inputs.lastBasicPay,
+    serviceYears: inputs.serviceYears,
+    deceasedBps: inputs.deceasedBps || inputs.bps,
+  });
 }
 
 export function calculatePromotionPay(inputs: Record<string, any>): CalculatorOutput {
-  const currentBps = safeNumber(inputs.currentBps, 16);
-  const currentBasic = safeNumber(inputs.currentBasic, 48000);
-  const nextBps = safeNumber(inputs.nextBps, 17);
-
-  const currentScale = BPS_SCALES_2026[currentBps] || BPS_SCALES_2026[16];
-  const nextScale = BPS_SCALES_2026[nextBps] || BPS_SCALES_2026[17];
-
-  // In Pakistan Pay Fixation rules on promotion:
-  // Add 1 presumptive premature increment of the lower scale to current basic pay
-  const presumptiveBasic = currentBasic + currentScale.increment;
-
-  // Fix in higher scale at equal stage, or next higher stage if not equal, or minimum if below minimum
-  let newFixedBasic = nextScale.minPay;
-  if (presumptiveBasic > nextScale.minPay) {
-    const diff = presumptiveBasic - nextScale.minPay;
-    const stage = Math.ceil(diff / nextScale.increment);
-    newFixedBasic = nextScale.minPay + stage * nextScale.increment;
-  }
-
-  const monthlyGain = newFixedBasic - currentBasic;
-
-  return {
-    primaryResult: {
-      id: 'newFixedBasic',
-      label: `New Fixed Basic Pay (BPS-${nextBps})`,
-      value: formatPKR(newFixedBasic),
-      type: 'currency',
-      highlight: true,
-      color: 'success',
-      subtext: `Monthly Basic Pay Increase: +${formatPKR(monthlyGain)}`,
-    },
-    secondaryResults: [
-      { id: 'presumptive', label: 'Premature Increment Added', value: formatPKR(currentScale.increment), type: 'currency' },
-      { id: 'annualGain', label: 'Annual Basic Gain', value: formatPKR(monthlyGain * 12), type: 'currency' },
-    ],
-    breakdown: [
-      { label: `Current Basic Pay (BPS-${currentBps})`, amount: formatPKR(currentBasic) },
-      { label: `Premature Increment of BPS-${currentBps}`, amount: formatPKR(currentScale.increment) },
-      { label: 'Presumptive Pay for Fixation', amount: formatPKR(presumptiveBasic) },
-      { label: `New Fixed Basic in BPS-${nextBps}`, amount: formatPKR(newFixedBasic), isTotal: true },
-    ],
-  };
+  return calcPromotionEngine({
+    government: inputs.government,
+    year: inputs.year,
+    currentBps: inputs.currentBps,
+    promotedBps: inputs.nextBps || inputs.promotedBps,
+    currentBasic: inputs.currentBasic,
+  });
 }
 
 // ==========================================

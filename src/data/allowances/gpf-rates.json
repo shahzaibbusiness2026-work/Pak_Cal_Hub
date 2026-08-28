@@ -1,0 +1,46 @@
+{
+  "rates": {
+    "2026-27": {
+      "financialYear": "2026-27",
+      "profitRate": 12.05,
+      "mandatoryDeductions": {
+        "bps1To15Rate": 0.05,
+        "bps16To22Rate": 0.08
+      },
+      "benevolentFundRate": 0.02,
+      "benevolentFundMax": 2500,
+      "groupInsurance": {
+        "bps1To15": 350,
+        "bps16To22": 700
+      }
+    },
+    "2025-26": {
+      "financialYear": "2025-26",
+      "profitRate": 12.05,
+      "mandatoryDeductions": {
+        "bps1To15Rate": 0.05,
+        "bps16To22Rate": 0.08
+      },
+      "benevolentFundRate": 0.02,
+      "benevolentFundMax": 2500,
+      "groupInsurance": {
+        "bps1To15": 350,
+        "bps16To22": 700
+      }
+    },
+    "2024-25": {
+      "financialYear": "2024-25",
+      "profitRate": 13.50,
+      "mandatoryDeductions": {
+        "bps1To15Rate": 0.05,
+        "bps16To22Rate": 0.08
+      },
+      "benevolentFundRate": 0.02,
+      "benevolentFundMax": 2500,
+      "groupInsurance": {
+        "bps1To15": 350,
+        "bps16To22": 700
+      }
+    }
+  }
+}

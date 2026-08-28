@@ -1,0 +1,23 @@
+[
+  { "age": 45, "factor": 14.31 },
+  { "age": 46, "factor": 13.91 },
+  { "age": 47, "factor": 13.52 },
+  { "age": 48, "factor": 13.13 },
+  { "age": 49, "factor": 12.74 },
+  { "age": 50, "factor": 12.35 },
+  { "age": 51, "factor": 11.96 },
+  { "age": 52, "factor": 11.57 },
+  { "age": 53, "factor": 11.18 },
+  { "age": 54, "factor": 10.79 },
+  { "age": 55, "factor": 10.40 },
+  { "age": 56, "factor": 10.02 },
+  { "age": 57, "factor": 9.63 },
+  { "age": 58, "factor": 9.25 },
+  { "age": 59, "factor": 8.86 },
+  { "age": 60, "factor": 8.48 },
+  { "age": 61, "factor": 8.16 },
+  { "age": 62, "factor": 7.84 },
+  { "age": 63, "factor": 7.53 },
+  { "age": 64, "factor": 7.22 },
+  { "age": 65, "factor": 7.22 }
+]

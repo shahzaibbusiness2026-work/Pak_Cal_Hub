@@ -1,0 +1,42 @@
+{
+  "taxYear": "2026-27",
+  "assessmentYear": "Tax Year 2027 (FY 2026-27)",
+  "actTitle": "Finance Act 2026",
+  "salariedSlabs": [
+    { "min": 0, "max": 600000, "fixedTax": 0, "rate": 0.0, "rateLabel": "0% (Exempt)" },
+    { "min": 600000, "max": 1200000, "fixedTax": 0, "rate": 0.01, "rateLabel": "1% on amount exceeding Rs. 600,000" },
+    { "min": 1200000, "max": 2200000, "fixedTax": 6000, "rate": 0.11, "rateLabel": "Rs. 6,000 + 11% on amount exceeding Rs. 1,200,000" },
+    { "min": 2200000, "max": 3200000, "fixedTax": 116000, "rate": 0.23, "rateLabel": "Rs. 116,000 + 23% on amount exceeding Rs. 2,200,000" },
+    { "min": 3200000, "max": 4100000, "fixedTax": 346000, "rate": 0.30, "rateLabel": "Rs. 346,000 + 30% on amount exceeding Rs. 3,200,000" },
+    { "min": 4100000, "max": 999999999999, "fixedTax": 616000, "rate": 0.35, "rateLabel": "Rs. 616,000 + 35% on amount exceeding Rs. 4,100,000" }
+  ],
+  "nonSalariedSlabs": [
+    { "min": 0, "max": 600000, "fixedTax": 0, "rate": 0.0, "rateLabel": "0% (Exempt)" },
+    { "min": 600000, "max": 1200000, "fixedTax": 0, "rate": 0.15, "rateLabel": "15% on amount exceeding Rs. 600,000" },
+    { "min": 1200000, "max": 1600000, "fixedTax": 90000, "rate": 0.20, "rateLabel": "Rs. 90,000 + 20% on amount exceeding Rs. 1,200,000" },
+    { "min": 1600000, "max": 3200000, "fixedTax": 170000, "rate": 0.30, "rateLabel": "Rs. 170,000 + 30% on amount exceeding Rs. 1,600,000" },
+    { "min": 3200000, "max": 5600000, "fixedTax": 650000, "rate": 0.40, "rateLabel": "Rs. 650,000 + 40% on amount exceeding Rs. 3,200,000" },
+    { "min": 5600000, "max": 999999999999, "fixedTax": 1610000, "rate": 0.45, "rateLabel": "Rs. 1,610,000 + 45% on amount exceeding Rs. 5,600,000" }
+  ],
+  "surcharge": {
+    "threshold": 10000000,
+    "rate": 0.10,
+    "appliesToSalaried": false
+  },
+  "freelancerExportTax": {
+    "psebRate": 0.0025,
+    "generalRate": 0.0125,
+    "section": "Section 154A of Income Tax Ordinance 2001"
+  },
+  "propertyTax": {
+    "sellerFilerRate": 0.0275,
+    "sellerNonFilerRate": 0.10,
+    "buyerFilerRate": 0.015,
+    "buyerNonFilerRate": 0.105
+  },
+  "notes": [
+    "Tax Year 2027 (FY 2026-27) notified under Finance Act 2026.",
+    "Salaried surcharge has been abolished.",
+    "Non-salaried individual/AOP surcharge of 10% applies on income exceeding Rs. 10,000,000."
+  ]
+}
