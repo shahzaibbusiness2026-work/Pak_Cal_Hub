@@ -333,14 +333,21 @@ const ENTRIES: ToolSourceEntry[] = [
     sources: [
       {
         ...A.ogra,
-        description: 'Petrol & diesel ex-depot prices — Petroleum Division notification',
+        description: 'Petrol & diesel ex-depot prices — Petroleum Division notification (official authority)',
         effectiveDate: '3rd October 2026',
+      },
+      {
+        name: 'autoones.com Fuel Prices API',
+        url: 'https://autoones.com/fuel-prices-api',
+        description:
+          'Free aggregator that republishes OGRA-notified prices nightly — this is what the app polls automatically, not OGRA itself',
+        notificationStatus: 'verified',
       },
     ],
     ratesVerifiedOn: '2026-10-03',
     ratesStatus: 'verified',
-    rateKeys: ['petrol-392.76', 'diesel-399.64'],
-    note: 'Petrol Rs. 392.76/L and HSD Rs. 399.64/L per the Petroleum Division notification effective 3–5 Oct 2026. Prices revise frequently — confirm the latest OGRA notification.',
+    rateKeys: ['petrol-live', 'diesel-live'],
+    note: 'Fuel rates now update automatically every day via the autoones.com API (which republishes OGRA-notified prices). Shown with a "Live rate" badge in the calculator; if the feed fails, the last verified rate is kept.',
   },
   {
     toolId: 'token-tax-calculator',
@@ -377,13 +384,19 @@ const ENTRIES: ToolSourceEntry[] = [
     sources: [
       {
         ...A.sarafa,
-        description: 'Daily 24K gold & silver bullion benchmarks (Karachi sarafa market)',
+        description: 'Daily 24K gold & silver bullion benchmarks (Karachi sarafa market) — official authority; publishes to the press, no machine feed',
+      },
+      {
+        name: 'Live derived rate (indicative)',
+        description:
+          'Auto-updated from international XAU/XAG spot × USD/PKR (PKR/tola = spot × FX × 0.375 × 1.02 premium). Tracks the market but is NOT the official APGJSA announcement — confirm the sarafa rate before trading.',
+        notificationStatus: 'verified',
       },
     ],
     ratesVerifiedOn: '2026-10-02',
     ratesStatus: 'verified',
-    rateKeys: ['gold-24k-tola-440636', 'silver-tola-6528'],
-    note: 'Gold Rs. 440,636/tola and silver Rs. 6,528/tola per APSGJA rates reported 2 Oct 2026. Bullion prices move daily — confirm the latest sarafa rate before trading.',
+    rateKeys: ['gold-24k-tola-live-derived', 'silver-tola-live-derived'],
+    note: 'Gold/silver rates now refresh automatically from international spot prices (indicative). The official APGJSA sarafa announcement may differ slightly — confirm before trading.',
   },
   {
     toolId: 'zakat-calculator',
@@ -395,8 +408,8 @@ const ENTRIES: ToolSourceEntry[] = [
     ],
     ratesVerifiedOn: '2026-10-02',
     ratesStatus: 'verified',
-    rateKeys: ['gold-24k-tola-440636', 'silver-tola-6528', 'zakat-nisab-7.5-tola', 'zakat-nisab-52.5-tola'],
-    note: 'Zakat 2.5% on net zakatable wealth; Nisab = 7.5 tola gold or 52.5 tola silver, valued at current sarafa rates.',
+    rateKeys: ['gold-24k-tola-live-derived', 'silver-tola-live-derived', 'zakat-nisab-7.5-tola', 'zakat-nisab-52.5-tola'],
+    note: 'Zakat 2.5% on net zakatable wealth; Nisab = 7.5 tola gold or 52.5 tola silver, valued at the current (auto-updated, indicative) bullion rates.',
   },
   {
     toolId: 'islamic-inheritance-calculator',

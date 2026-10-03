@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { CalculatorDefinition, CalculatorOutput } from '../../types/calculator';
 import { getCalculatorBySlug } from '../../lib/data/categories';
 import { formatPKR } from '../../lib/utils/formatters';
@@ -32,6 +32,57 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   const resultsRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Live rate overrides: input id -> live value, fetched client-side from
+  // /api/rates/live (DB first, verified constants fallback). On fetch failure
+  // this stays empty and the built-in defaults are used silently — no error
+  // UI, no fake data. Client-only effect: safe for SSR/static generation.
+  const [liveOverrides, setLiveOverrides] = useState<Record<string, number>>({});
+  const [liveAsOf, setLiveAsOf] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+
+    // /api/rates/live payload key -> calculator input id
+    const RATE_INPUT_MAP: Record<string, string> = {
+      petrol: 'fuelPricePerLiter',
+      gold24kTola: 'goldRate24kPerTola',
+    };
+
+    fetch('/api/rates/live', { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: Record<string, any>) => {
+        if (cancelled || !calculator) return;
+        const validIds = new Set(calculator.inputs.map((f) => f.id));
+        const overrides: Record<string, number> = {};
+        for (const [payloadKey, inputId] of Object.entries(RATE_INPUT_MAP)) {
+          const v = data?.[payloadKey];
+          if (validIds.has(inputId) && typeof v === 'number' && Number.isFinite(v) && v > 0) {
+            overrides[inputId] = v;
+          }
+        }
+        if (Object.keys(overrides).length > 0) {
+          setLiveOverrides(overrides);
+          setInputs((prev) => ({ ...prev, ...overrides }));
+          if (typeof data?.asOf === 'string') setLiveAsOf(data.asOf);
+        }
+      })
+      .catch(() => {
+        // Silent: keep built-in defaults. Nothing to show the user.
+      })
+      .finally(() => clearTimeout(timer));
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [calculator]);
+
   if (!calculator) {
     return <div className="p-4 text-center text-slate-500">Calculator not found</div>;
   }
@@ -49,7 +100,9 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   };
 
   const handleReset = () => {
-    setInputs(initialValues);
+    // Reset to defaults, then re-apply any live rates so "Reset" never
+    // silently downgrades the user to a stale built-in default.
+    setInputs({ ...initialValues, ...liveOverrides });
   };
 
   // Reactive calculation execution
@@ -97,20 +150,33 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
           <div className="mt-5 space-y-4">
             {calculator.inputs.map((field) => {
               if (field.type === 'number' || field.type === 'currency') {
+                const isLive = liveOverrides[field.id] !== undefined;
                 return (
-                  <NumberInput
-                    key={field.id}
-                    id={field.id}
-                    label={field.label}
-                    value={inputs[field.id]}
-                    onChange={(val) => handleFieldChange(field.id, val)}
-                    type={field.type}
-                    min={field.min}
-                    max={field.max}
-                    step={field.step}
-                    unit={field.unit}
-                    helpText={field.helpText}
-                  />
+                  <div key={field.id}>
+                    <NumberInput
+                      id={field.id}
+                      label={field.label}
+                      value={inputs[field.id]}
+                      onChange={(val) => handleFieldChange(field.id, val)}
+                      type={field.type}
+                      min={field.min}
+                      max={field.max}
+                      step={field.step}
+                      unit={field.unit}
+                      helpText={field.helpText}
+                    />
+                    {isLive && (
+                      <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                        <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
+                        Live rate
+                        {liveAsOf && (
+                          <span className="font-normal text-slate-500 dark:text-slate-400">
+                            · updated {new Date(liveAsOf).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        )}
+                      </p>
+                    )}
+                  </div>
                 );
               }
 

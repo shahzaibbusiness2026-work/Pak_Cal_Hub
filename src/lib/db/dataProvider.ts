@@ -112,15 +112,24 @@ export interface RateFreshnessEntry {
   /** True when the rate is older than its expected refresh cadence. */
   stale: boolean;
   fromDatabase: boolean;
+  /** ISO timestamp of the most recent live-fetch attempt for this rate's pipeline (null if never attempted / DB offline). */
+  lastLiveAttemptAt: string | null;
+  /** Error message of the most recent FAILED live attempt (null when the last attempt succeeded or none). */
+  lastLiveError: string | null;
+  /** True when the most recent live-fetch attempt for this pipeline succeeded. */
+  liveOk: boolean | null;
 }
 
 /**
  * Admin-visible freshness report for every tracked rate key.
- * None of the tracked authorities (OGRA, SBP, Sarafa) expose a public
- * machine-readable feed, so syncMode is honestly 'manual-verified' everywhere:
- * the cron pipelines publish manually verified constants, they do not scrape
- * live data. Staleness thresholds reflect each rate's natural cadence
- * (fuel: fortnightly/daily; gold & currency: daily; construction: monthly).
+ *
+ * Fuel and bullion now have a genuine live pipeline (autoones.com for
+ * OGRA-notified fuel prices; derived XAU/XAG × USD/PKR for indicative bullion
+ * rates), so syncMode is 'live-fetch' for rows the live-sync pipeline
+ * published (updatedBy === 'live-sync') and 'manual-verified' otherwise.
+ * Per-pipeline live status (last attempt, last error, ok) comes from SyncLog.
+ * Staleness thresholds reflect each rate's natural cadence (fuel: weekly;
+ * gold & currency: 3 days; construction: 45 days).
  */
 export async function getRateFreshnessReport(): Promise<RateFreshnessEntry[]> {
   const rates = await getMarketRates(true);
@@ -134,6 +143,37 @@ export async function getRateFreshnessReport(): Promise<RateFreshnessEntry[]> {
     construction: 45,
   };
 
+  // Latest live-sync attempt per pipeline type, for the live status columns.
+  // Best-effort: if the DB is offline there is simply no live status.
+  const liveStatusByType: Record<string, { at: string | null; error: string | null; ok: boolean | null }> = {};
+  try {
+    const connected = await isDatabaseConnected();
+    if (connected) {
+      const recentLogs = await prisma.syncLog.findMany({
+        where: { type: { in: ['fuel', 'gold'] }, source: 'live-sync' },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      });
+      for (const log of recentLogs) {
+        if (!liveStatusByType[log.type]) {
+          liveStatusByType[log.type] = {
+            at: log.createdAt ? new Date(log.createdAt).toISOString() : null,
+            error: log.status === 'FAILED' ? log.message : null,
+            ok: log.status === 'SUCCESS',
+          };
+        }
+      }
+    }
+  } catch {
+    // DB hiccup — live status stays null; the report still renders.
+  }
+
+  const typeForKey = (key: string): string | null => {
+    if (['petrol', 'diesel', 'cng'].includes(key)) return 'fuel';
+    if (key.startsWith('gold') || key.startsWith('silver')) return 'gold';
+    return null;
+  };
+
   return DEFAULT_MARKET_RATES.map((def) => {
     const live = rates.find((r) => r.key === def.key);
     const rec = live || def;
@@ -142,6 +182,8 @@ export async function getRateFreshnessReport(): Promise<RateFreshnessEntry[]> {
       ? Math.floor((now - verified.getTime()) / 86400000)
       : null;
     const cadence = cadenceDays[rec.category] ?? 30;
+    const pipelineType = typeForKey(rec.key);
+    const liveStatus = pipelineType ? liveStatusByType[pipelineType] : undefined;
 
     return {
       key: rec.key,
@@ -153,9 +195,12 @@ export async function getRateFreshnessReport(): Promise<RateFreshnessEntry[]> {
       sourceUrl: rec.sourceUrl,
       verifiedOn: verified ? verified.toISOString().slice(0, 10) : null,
       daysSinceVerified,
-      syncMode: 'manual-verified',
+      syncMode: rec.updatedBy === 'live-sync' ? 'live-fetch' : 'manual-verified',
       stale: daysSinceVerified === null ? true : daysSinceVerified > cadence,
       fromDatabase: fromDb && !!live,
+      lastLiveAttemptAt: liveStatus?.at ?? null,
+      lastLiveError: liveStatus?.error ?? null,
+      liveOk: liveStatus ? liveStatus.ok : null,
     };
   });
 }

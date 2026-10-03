@@ -18,7 +18,16 @@ export async function GET(req: NextRequest) {
     }
 
     const result = await syncFuelPrices();
-    return NextResponse.json(result);
+    return NextResponse.json({
+      success: result.success,
+      updated: result.changesDetected > 0,
+      rates: Object.fromEntries(result.changes.map((c) => [c.key, c.newValue])),
+      changes: result.changes,
+      source: result.syncMode || 'manual-verified',
+      asOf: result.timestamp,
+      message: result.message,
+      ...(result.error ? { error: result.error } : {}),
+    });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
