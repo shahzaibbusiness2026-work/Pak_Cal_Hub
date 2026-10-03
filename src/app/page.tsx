@@ -1,21 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  Calculator,
   Sparkles,
   TrendingUp,
-  Building2,
-  Receipt,
-  Zap,
-  Building,
-  GraduationCap,
-  Landmark,
-  Moon,
-  Briefcase,
-  Car,
-  DollarSign,
-  Calendar,
-  Compass,
   ArrowRight,
   ShieldCheck,
   CheckCircle2,
@@ -25,37 +12,21 @@ import {
   Award,
   TrendingDown,
   BadgeCheck,
-  FileText,
-  Coins,
   Laptop,
   Home,
   Fuel,
-  Scale,
-  FileCheck,
-  Percent,
+  Zap,
+  Receipt,
+  Car,
+  Briefcase,
+  Calendar,
 } from 'lucide-react';
 import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories';
 import CalculatorCard from '../components/ui/CalculatorCard';
 import HeroSearch from '../components/ui/HeroSearch';
 import ArticlesSection from '../components/ui/ArticlesSection';
 import NewsletterSection from '../components/ui/NewsletterSection';
-
-// Category Icon Mapping helper
-const iconMap: Record<string, React.ReactNode> = {
-  Building2: <Building2 className="h-6 w-6" />,
-  Receipt: <Receipt className="h-6 w-6" />,
-  Zap: <Zap className="h-6 w-6" />,
-  Building: <Building className="h-6 w-6" />,
-  GraduationCap: <GraduationCap className="h-6 w-6" />,
-  Landmark: <Landmark className="h-6 w-6" />,
-  Moon: <Moon className="h-6 w-6" />,
-  Briefcase: <Briefcase className="h-6 w-6" />,
-  Car: <Car className="h-6 w-6" />,
-  DollarSign: <DollarSign className="h-6 w-6" />,
-  TrendingUp: <TrendingUp className="h-6 w-6" />,
-  Calendar: <Calendar className="h-6 w-6" />,
-  Compass: <Compass className="h-6 w-6" />,
-};
+import { CategoryIcon } from '../components/ui/categoryIcons';
 
 export default function HomePage() {
   const DAILY_DEMAND_IDS = [
@@ -785,7 +756,7 @@ export default function HomePage() {
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/10 group-hover:bg-emerald-800 group-hover:text-white transition-colors dark:bg-emerald-950/60 dark:text-emerald-300">
-                    {iconMap[cat.icon] || <Calculator className="h-6 w-6" />}
+                    <CategoryIcon icon={cat.icon} className="h-6 w-6" />
                   </div>
                   <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {cat.tools.length} Tools

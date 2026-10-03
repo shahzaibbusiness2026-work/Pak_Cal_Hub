@@ -1,10 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { getMarketRates, updateMarketRate } from '../../../../lib/db/dataProvider';
+import { getMarketRates, updateMarketRate, getRateFreshnessReport } from '../../../../lib/db/dataProvider';
 
 export async function GET() {
   try {
     const rates = await getMarketRates();
-    return NextResponse.json({ success: true, rates });
+    const freshness = await getRateFreshnessReport();
+    return NextResponse.json({ success: true, rates, freshness });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

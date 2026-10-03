@@ -1,6 +1,7 @@
 import { GovernmentType, BudgetYear } from '../../types/government';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
 import { getSalaryDataset } from '../../data/salary';
+import { BPS_2017_MINIMUM, BPS_2022_MINIMUM } from '../../data/salary/initial-pay-tables';
 import { getGpfConfig } from '../../data/allowances';
 import { formatPKR, safeNumber } from '../utils/formatters';
 
@@ -32,7 +33,11 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   const qualPay = Math.max(safeNumber(inputs.qualificationPay, 0), 0);
   const userSpecialAllowance = Math.max(safeNumber(inputs.specialAllowance, 0), 0);
   const includeAdhoc = inputs.includeAdhoc !== false;
-  const includeDRA = Boolean(inputs.includeDRA);
+  // DRA toggle: the federal DRA-2021 (25%) + DRA-2022 (15%) package is near-universal for BPS 1-19,
+  // so it defaults ON there; other governments keep the previous opt-in default. An explicit
+  // includeDRA value from the caller always wins.
+  const includeDRA =
+    inputs.includeDRA !== undefined ? Boolean(inputs.includeDRA) : govType === 'federal' && bps <= 19;
 
   const dataset = getSalaryDataset(govType, budgetYear);
   const scale = dataset.scales[bps] || dataset.scales[17];
@@ -58,7 +63,11 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   // 2. Conveyance Allowance (OM Flat schedule)
   const conveyanceAllowance = scale.conveyanceAllowance;
 
-  // 3. Medical Allowance
+  // 3. Medical Allowance (flat schedule from the dataset: Rs. 1,500 for BPS 1-15 in 2024-25/2025-26).
+  // NOTE: verify the officer medical-allowance rule against the official notification before
+  // replacing this with a percentage formula - the Finance Division compilation shows BPS-16 to 22
+  // at 15% of BPS-2008 pay frozen at 30-06-2011 level, which does NOT corroborate a
+  // "25% of running basic, capped at Rs. 4,500" rule.
   const medicalAllowance = scale.medicalAllowance;
 
   // 4. Ad-hoc Relief Allowances (from dynamic dataset)
@@ -89,9 +98,22 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   const specialAllowanceDetails: { name: string; amount: number }[] = [];
   if (includeDRA && dataset.specialAllowances && dataset.specialAllowances.length > 0) {
     dataset.specialAllowances.forEach((sa) => {
+      // Honor the BPS scope (e.g. federal DRA-2021/2022 is admissible to BPS 1-19 only).
+      if (sa.applicableBps && sa.applicableBps.length > 0 && !sa.applicableBps.includes(bps)) {
+        return;
+      }
       let amount = 0;
       if (sa.rate) {
-        amount = Math.round(basicPay * sa.rate);
+        // Honor the computation base: 'initial2017' / 'initial2022' entries are computed on the
+        // FROZEN initial (minimum) of that pay scale - e.g. DRA = 25%/15% of BPS-2017 minimum -
+        // not on the employee's current running basic pay.
+        let rateBase = basicPay;
+        if (sa.appliesTo === 'initial2017') {
+          rateBase = BPS_2017_MINIMUM[bps] ?? basicPay;
+        } else if (sa.appliesTo === 'initial2022') {
+          rateBase = BPS_2022_MINIMUM[bps] ?? basicPay;
+        }
+        amount = Math.round(rateBase * sa.rate);
       } else if (sa.fixedAmount) {
         amount = sa.fixedAmount;
       }
@@ -171,7 +193,7 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   );
 
   if (houseRentDeduction > 0) {
-    breakdown.push({ label: 'Govt Accommodation 5% Maintenance Deduction (HRD)', amount: formatPKR(houseRentDeduction), isDeduction: true });
+    breakdown.push({ label: '5% House-Rent Deduction (Govt Accommodation)', amount: formatPKR(houseRentDeduction), isDeduction: true });
   }
 
   breakdown.push({ label: 'Net Monthly Take-Home Pay', amount: formatPKR(netSalary), isTotal: true });

@@ -1,6 +1,8 @@
 import { calculateTax } from '../calculations/taxEngine';
 import { formatPKR, safeNumber } from '../utils/formatters';
 import { CalculatorOutput } from '../../types/calculator';
+import { getTaxDataset } from '../../data/tax';
+import { TaxYear } from '../../types/government';
 
 /**
  * Calculates FBR Pakistan Income Tax for Salaried & Non-Salaried Individuals
@@ -22,12 +24,12 @@ export function calculateIncomeTax(inputs: Record<string, any>): CalculatorOutpu
  * Delegates to pure taxEngine
  */
 export function calculateFreelancerTax(inputs: Record<string, any>): CalculatorOutput {
-  const isPseb = inputs.isRegistered !== false;
+  const isPseb = inputs.isPsebRegistered !== false;
   return calculateTax({
     taxYear: inputs.taxYear || '2026-27',
     incomeType: 'freelancer',
-    incomePeriod: inputs.period || 'monthly',
-    income: inputs.foreignIncome || inputs.income,
+    incomePeriod: inputs.period || 'annual',
+    income: inputs.annualIncome || inputs.foreignIncome || inputs.income,
     isPsebRegistered: isPseb,
   });
 }
@@ -39,18 +41,24 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
   const propertyValue = safeNumber(inputs.propertyValue, 18000000); // Rs 1.8 Crore
   const isFiler = inputs.isFiler !== false;
   const isBuying = inputs.transactionType === 'buy';
+  const taxYear = (inputs.taxYear as TaxYear) || '2026-27';
+
+  // Rates come from the selected tax year's dataset (Sections 236C & 236K)
+  const dataset = getTaxDataset(taxYear);
+  const pt = dataset.propertyTax;
 
   let advanceTaxRate = 0;
   if (isBuying) {
-    advanceTaxRate = isFiler ? 0.015 : 0.105; // 1.5% filer vs 10.5% non-filer
+    advanceTaxRate = isFiler ? pt.buyerFilerRate : pt.buyerNonFilerRate; // Section 236K
   } else {
-    advanceTaxRate = isFiler ? 0.0275 : 0.10; // 2.75% filer vs 10% non-filer
+    advanceTaxRate = isFiler ? pt.sellerFilerRate : pt.sellerNonFilerRate; // Section 236C
   }
 
   const advanceTax = propertyValue * advanceTaxRate;
+  // VERIFY: provincial stamp duty and local TMA/transfer fees vary by province and transaction year — these are estimates.
   const stampDutyRate = 0.01; // 1%
   const stampDuty = propertyValue * stampDutyRate;
-  const tmaFee = propertyValue * 0.01; // 1% Local TMA/Corporation fee
+  const tmaFee = propertyValue * 0.01; // 1% Local TMA/Corporation fee (estimate — verify locally)
 
   const totalGovtCharges = advanceTax + stampDuty + tmaFee;
 
@@ -78,8 +86,8 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
       { label: 'Total Government Transfer Charges', amount: formatPKR(totalGovtCharges), isTotal: true },
     ],
     notes: [
-      'Under Finance Act 2026 salient features, Section 236K (Buyer) is flat 1.5% and Section 236C (Seller) is flat 2.75% for active filers.',
-      'Non-filers face punitive rates of 10.5% (Buyer) and 10% (Seller).',
+      `Advance tax rates read from the ${dataset.assessmentYear} dataset: Section 236K (Buyer) ${(pt.buyerFilerRate * 100).toFixed(2)}% filer / ${(pt.buyerNonFilerRate * 100).toFixed(2)}% non-filer; Section 236C (Seller) ${(pt.sellerFilerRate * 100).toFixed(2)}% filer / ${(pt.sellerNonFilerRate * 100).toFixed(2)}% non-filer.`,
+      'Stamp duty (1%) and TMA / transfer fee (1%) are estimates — verify against your provincial Excise & Taxation / LDA / development-authority schedule before paying.',
     ],
   };
 }

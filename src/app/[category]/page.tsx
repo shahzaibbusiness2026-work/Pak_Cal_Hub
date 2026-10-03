@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { getCategoryById, CATEGORIES_DATA } from '../../lib/data/categories';
 import CalculatorCard from '../../components/ui/CalculatorCard';
-import { ChevronRight, Home, Sparkles } from 'lucide-react';
+import DataSource from '../../components/ui/DataSource';
+import { ChevronRight, Home, Sparkles, ShieldCheck } from 'lucide-react';
 
 interface CategoryPageProps {
   params: {
@@ -35,7 +36,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-10">
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs font-medium text-slate-500">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500">
         <Link href="/" className="hover:text-emerald-800 flex items-center gap-1">
           <Home className="h-3.5 w-3.5" />
           <span>Home</span>
@@ -73,6 +74,24 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {category.tools.map((calc) => (
             <CalculatorCard key={calc.id} calc={calc} />
+          ))}
+        </div>
+      </div>
+
+      {/* Official sources & rate verification for every tool in this category */}
+      <div className="space-y-4">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-white">
+          <ShieldCheck className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
+          Official Sources & Rate Verification
+        </h2>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {category.tools.map((calc) => (
+            <div key={calc.id} className="space-y-1.5">
+              <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                {calc.shortTitle || calc.title}
+              </p>
+              <DataSource toolId={calc.id} />
+            </div>
           ))}
         </div>
       </div>

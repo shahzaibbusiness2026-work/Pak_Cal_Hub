@@ -4,7 +4,7 @@ import { DEFAULT_MARKET_RATES } from '../../../../lib/db/dataProvider';
 import { COMMUTATION_TABLE, getPensionRules } from '../../../../data/pension';
 import { getTaxDataset } from '../../../../data/tax';
 import { getSalaryDataset, SUPPORTED_GOVERNMENTS, SUPPORTED_BUDGET_YEARS } from '../../../../data/salary';
-import { PROTECTED_SLABS, UNPROTECTED_SLABS } from '../../../../lib/calculations/electricityEngine';
+import { PROTECTED_SLABS, UNPROTECTED_SLABS, LIFELINE_SLABS } from '../../../../lib/data/electricity-data';
 
 export async function POST(req: NextRequest) {
   try {
@@ -127,7 +127,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 6. Seed Electricity Tariffs
+    // 6. Seed Electricity Tariffs (canonical NEPRA dataset)
+    for (const slab of LIFELINE_SLABS) {
+      await prisma.electricityTariff.upsert({
+        where: {
+          provider_consumerType_slabMin_slabMax_effectiveYear: {
+            provider: 'NEPRA_NATIONAL',
+            consumerType: 'lifeline',
+            slabMin: slab.min,
+            slabMax: slab.max,
+            effectiveYear: '2026-27',
+          },
+        },
+        update: { baseRate: slab.rate, status: 'PUBLISHED' },
+        create: {
+          provider: 'NEPRA_NATIONAL',
+          consumerType: 'lifeline',
+          slabMin: slab.min,
+          slabMax: slab.max,
+          baseRate: slab.rate,
+          effectiveYear: '2026-27',
+          status: 'PUBLISHED',
+        },
+      });
+    }
+
     for (const slab of PROTECTED_SLABS) {
       await prisma.electricityTariff.upsert({
         where: {

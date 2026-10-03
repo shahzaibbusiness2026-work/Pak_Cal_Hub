@@ -40,17 +40,26 @@
   ],
   "specialAllowances": [
     {
-      "id": "dra",
-      "name": "Disparity Reduction Allowance (DRA)",
+      "id": "dra2021",
+      "name": "Disparity Reduction Allowance 2021 (25%)",
       "rate": 0.25,
-      "appliesTo": "initial2017"
+      "appliesTo": "initial2017",
+      "applicableBps": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    },
+    {
+      "id": "dra2022",
+      "name": "Disparity Reduction Allowance 2022 (15%)",
+      "rate": 0.15,
+      "appliesTo": "initial2017",
+      "applicableBps": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     }
   ],
   "notes": [
-    "Notified on 21 July 2026, effective 1 July 2026 under Finance Division OM No. F.1(2)IMP/2026.",
-    "ARA-2022 (15%) and ARA-2025 (10%) are merged into basic pay.",
-    "New 7% ARA-2026 applies to running basic pay.",
+    "PROVISIONAL / UNVERIFIED: the 2026-27 scale values in this file are approximately x1.20 of the 2025-26 (BPS-2022) values; they do not match a x1.25 merge of ARA-2022 (15%) and ARA-2025 (10%). Do not treat as the official RBPS-2026 until verified against the Finance Division notification.",
+    "Ad-hoc Relief Allowance 2026 (7%) applies to running basic pay.",
+    "Disparity Reduction Allowance 2021 (25%) + 2022 (15%) continues on the frozen initial of BPS-2017 for BPS 1-19 only.",
     "Conveyance Allowance is flat per OM No. 3(1)R-5/2010-P-001 (BPS 1-4: 2,678, BPS 5-10: 2,898, BPS 11-15: 4,284, BPS 16-19: 7,056).",
-    "BPS 20-22 are monetized transport eligible; official conveyance allowance is Rs. 0."
+    "BPS 20-22 are monetized transport eligible; official conveyance allowance is Rs. 0.",
+    "Medical allowance values for 2026-27 (Rs. 3,500 / Rs. 4,000) are unverified - verify against the official notification."
   ]
 }

@@ -2,10 +2,21 @@ import { prisma, isDatabaseConnected } from '../db/prisma';
 import { SyncServiceResult, SyncItemChange, SyncOptions } from './types';
 import { DEFAULT_MARKET_RATES } from '../db/dataProvider';
 
+/**
+ * Manually verified fuel benchmarks.
+ *
+ * Honesty note: OGRA / the Petroleum Division publish price notifications as
+ * human-readable notices, not a machine-readable feed. There is no live
+ * ingestion here — the cron "sync" publishes these manually verified
+ * constants to the DB. Update the values + VERIFIED_ON below whenever a new
+ * notification is issued; the admin freshness report surfaces staleness.
+ */
+export const FUEL_VERIFIED_ON = '2026-10-04';
+
 export const LATEST_FEED_FUEL = [
-  { key: 'petrol', label: 'Petrol (Super RON-92)', value: 342.60, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk' },
-  { key: 'diesel', label: 'High Speed Diesel (HSD)', value: 371.61, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk' },
-  { key: 'cng', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', source: 'All Pakistan CNG Association (APCNGA)', sourceUrl: 'https://apcnga.org.pk' },
+  { key: 'petrol', label: 'Petrol (Super RON-92)', value: 392.76, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (3 Oct 2026) — manually verified', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'diesel', label: 'High Speed Diesel (HSD)', value: 399.64, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (3 Oct 2026) — manually verified', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'cng', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', source: 'All Pakistan CNG Association (APCNGA) — manually verified', sourceUrl: 'https://apcnga.org.pk' },
 ];
 
 /**
@@ -26,7 +37,9 @@ export async function syncFuelPrices(options: SyncOptions = {}): Promise<SyncSer
         itemsProcessed: LATEST_FEED_FUEL.length,
         changesDetected: 0,
         changes: [],
-        message: 'Database in fallback mode: Fuel sync completed in memory.',
+        message: 'Database in fallback mode: manually verified fuel constants served from memory.',
+        syncMode: 'manual-verified',
+        verifiedOn: FUEL_VERIFIED_ON,
       };
     }
 
@@ -145,7 +158,9 @@ export async function syncFuelPrices(options: SyncOptions = {}): Promise<SyncSer
       itemsProcessed: LATEST_FEED_FUEL.length,
       changesDetected,
       changes,
-      message: `Fuel sync completed successfully: ${changesDetected} rate changes detected.`,
+      message: `Fuel publish completed (manual-verified constants, verified ${FUEL_VERIFIED_ON}): ${changesDetected} rate changes detected.`,
+      syncMode: 'manual-verified',
+      verifiedOn: FUEL_VERIFIED_ON,
     };
   } catch (err: any) {
     // Log failure

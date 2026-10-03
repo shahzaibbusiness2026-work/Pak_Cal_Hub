@@ -1,6 +1,5 @@
 import { formatPKR, formatPercent, safeNumber, formatNumber } from '../utils/formatters';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
-import { BPS_SCALES_2026, ADHOC_ALLOWANCES } from '../data/bps-data';
 import { SALARIED_TAX_SLABS, NON_SALARIED_TAX_SLABS } from '../data/tax-slabs-data';
 import { PROTECTED_SLABS, UNPROTECTED_SLABS, ELECTRICITY_CONSTANTS } from '../data/electricity-data';
 import { BASELINE_FX_RATES } from './currency';

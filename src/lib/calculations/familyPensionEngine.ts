@@ -24,17 +24,20 @@ export function calculateFamilyPension(inputs: FamilyPensionInputs): CalculatorO
 
   // Full Gross Pension of deceased = (Basic * Service * 7) / 300 (max 70%)
   const fullGrossPension = Math.min((basicPay * serviceYears * 7) / 300, basicPay * 0.70);
-  // Family pension is 75% of gross pension
-  const familyBasicPension = fullGrossPension * rules.familyPensionRate;
+  // Family pension is 75% of gross pension, subject to the minimum family pension floor
+  // (Rs. 9,000/month w.e.f. 01-07-2023 per Finance Division OM No.F.15(1)-Reg.6/2023;
+  // "Commutation of any part of the increase ... will not be admissible").
+  const familyBasicPension = Math.max(
+    fullGrossPension * rules.familyPensionRate,
+    rules.minimumFamilyPension ?? 9000
+  );
 
-  // Medical Allowance (25% for BPS 1-16, 20% for BPS 17-22, minimum 4,000)
-  const medRate = bps <= 16 ? 0.25 : 0.20;
-  const medicalAllowance = Math.max(Math.round(familyBasicPension * medRate), 4000);
+  // Medical Allowance for Pensioners: 25% for BPS 1-15, 20% for BPS 16-22
+  // (Finance Division 2010 notification). No statutory minimum floor applies.
+  const medRate = bps <= 15 ? 0.25 : 0.20;
+  const medicalAllowance = Math.round(familyBasicPension * medRate);
 
-  let totalDisbursed = familyBasicPension + medicalAllowance;
-  if (totalDisbursed < rules.minimumPension) {
-    totalDisbursed = rules.minimumPension;
-  }
+  const totalDisbursed = familyBasicPension + medicalAllowance;
 
   const isLifetime = rules.familyPensionLifetimeWidow;
 
@@ -47,7 +50,7 @@ export function calculateFamilyPension(inputs: FamilyPensionInputs): CalculatorO
       amount: formatPKR(familyBasicPension),
     },
     {
-      label: `Pensioners Medical Allowance (${(medRate * 100).toFixed(0)}% — Min Rs. 4,000)`,
+      label: `Pensioners Medical Allowance (${(medRate * 100).toFixed(0)}% of family pension)`,
       amount: formatPKR(medicalAllowance),
     },
     {

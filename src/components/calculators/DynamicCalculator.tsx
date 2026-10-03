@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { CalculatorDefinition, CalculatorOutput } from '../../types/calculator';
 import { getCalculatorBySlug } from '../../lib/data/categories';
 import { formatPKR } from '../../lib/utils/formatters';

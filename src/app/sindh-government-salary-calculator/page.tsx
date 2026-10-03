@@ -86,13 +86,7 @@ export default function SindhGovernmentSalaryCalculatorPage() {
 
         <DynamicCalculator slug="bps-salary-calculator" />
 
-        <DataSource
-          sourceName="Government of Sindh, Finance Department Notification No. FD(SR-I)1(32)/2026"
-          sourceUrl="https://finance.sindh.gov.pk"
-          notificationNo="FD(SR-I)1(32)/2026-RBPS"
-          effectiveDate="1st July 2026"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="bps-salary-calculator" />
 
         <ShareButtons title="Sindh Government Salary Calculator 2026-27" />
 

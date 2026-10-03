@@ -27,7 +27,8 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Daily Market Rates Sync Simulation / Update
+    // Daily publish of MANUALLY VERIFIED rate constants (no live feed exists for
+    // OGRA / SBP / Sarafa — the cron republishes the verified constants in code).
     const syncResults = [];
     for (const rate of DEFAULT_MARKET_RATES) {
       const updated = await updateMarketRate(
@@ -37,14 +38,14 @@ export async function GET(req: NextRequest) {
         rate.unit,
         rate.category,
         'Vercel Cron Service',
-        rate.source || 'Automated SBP / OGRA Daily Sync'
+        rate.source || 'Manually verified benchmark constants'
       );
-      syncResults.push({ key: rate.key, value: rate.value, status: 'synced' });
+      syncResults.push({ key: rate.key, value: rate.value, status: 'published' });
     }
 
     return NextResponse.json({
       success: true,
-      message: 'Market rates, fuel prices, and exchange rates synchronized successfully.',
+      message: 'Manually verified market-rate constants republished successfully (no live feed — see verified dates).',
       syncedCount: syncResults.length,
       timestamp: new Date().toISOString(),
     });

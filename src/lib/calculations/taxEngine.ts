@@ -134,7 +134,7 @@ export function calculateTax(inputs: TaxEngineInputs): CalculatorOutput {
 
   if (surcharge > 0) {
     breakdown.push({
-      label: `High Earner Surcharge (10% on tax exceeding Rs. 10M income)`,
+      label: `High Earner Surcharge (${(dataset.surcharge.rate * 100).toFixed(0)}% on tax where taxable income exceeds Rs. 10M)`,
       amount: formatPKR(surcharge),
       isDeduction: true,
     });

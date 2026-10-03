@@ -31,8 +31,10 @@ export function calculateGPF(inputs: GpfEngineInputs): CalculatorOutput {
 
   for (let y = 1; y <= years; y++) {
     const annualDeposit = monthlySubscription * 12;
-    // Average balance earning interest: Opening + (AnnualDeposit / 2)
-    const yearInterest = (balance + annualDeposit / 2) * (rate / 100);
+    // GP Fund Rules: interest is credited on monthly progressive balances. The standard
+    // approximation credits a full year on the opening balance plus an average of 6.5 months
+    // on the year's subscriptions ((12+11+...+1)/12 = 6.5), and rounds the yearly interest.
+    const yearInterest = Math.round((balance + monthlySubscription * 6.5) * (rate / 100));
     balance += annualDeposit + yearInterest;
     totalDeposited += annualDeposit;
     totalInterest += yearInterest;
@@ -76,8 +78,13 @@ export function calculateGPF(inputs: GpfEngineInputs): CalculatorOutput {
     chartType: 'pie',
     chartData,
     notes: [
+      // Finance Division No.8(1)GS-I/2018 dated 31-07-2025: FY2024-25 GP Fund mark-up = 12.46%
+      // (FY2023-24: 13.97%, FY2022-23: 14.22%).
       `Official Finance Division Notification rate: ${rate.toFixed(2)}% per annum.`,
-      `Interest credited annually on monthly progressive progressive balance.`,
+      `Interest credited annually on monthly progressive balances (6.5-month average on yearly subscriptions).`,
+      ...(budgetYear === '2026-27'
+        ? ['FY2026-27 rate is provisional - verify against the Finance Division notification.']
+        : []),
     ],
   };
 }

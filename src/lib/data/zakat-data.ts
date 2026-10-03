@@ -1,11 +1,14 @@
+// Single source of truth for gold/silver market defaults: ./market-rates.ts (src/lib/data/)
+import { DEFAULT_GOLD_24K_PER_TOLA, DEFAULT_SILVER_PER_TOLA } from './market-rates';
+
 export interface ZakatConstants {
   goldNisabTola: number; // 7.5 tola
   goldNisabGrams: number; // 87.48 grams
   silverNisabTola: number; // 52.5 tola
   silverNisabGrams: number; // 612.36 grams
   zakatRate: number; // 2.5%
-  defaultGoldPricePerTola: number; // Current approximate 24K gold PKR rate
-  defaultSilverPricePerTola: number; // Current approximate silver PKR rate
+  defaultGoldPricePerTola: number; // Current 24K gold PKR rate
+  defaultSilverPricePerTola: number; // Current silver PKR rate
 }
 
 export const ZAKAT_DEFAULTS: ZakatConstants = {
@@ -14,6 +17,6 @@ export const ZAKAT_DEFAULTS: ZakatConstants = {
   silverNisabTola: 52.5,
   silverNisabGrams: 612.36,
   zakatRate: 0.025, // 2.5%
-  defaultGoldPricePerTola: 475000, // PKR ~475k per tola (August 2026 Sarafa rate benchmark)
-  defaultSilverPricePerTola: 6800,  // PKR ~6,800 per tola (August 2026 Sarafa silver benchmark)
+  defaultGoldPricePerTola: DEFAULT_GOLD_24K_PER_TOLA, // from market-rates.ts (DB-verified benchmark)
+  defaultSilverPricePerTola: DEFAULT_SILVER_PER_TOLA, // from market-rates.ts (DB-verified benchmark)
 };

@@ -20,22 +20,26 @@ export interface MarketRateRecord {
 }
 
 export const DEFAULT_MARKET_RATES: MarketRateRecord[] = [
-  { key: 'petrol', category: 'fuel', label: 'Petrol (Super RON-92)', value: 342.60, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk', notes: 'August 28, 2026 Notification' },
-  { key: 'diesel', category: 'fuel', label: 'High Speed Diesel (HSD)', value: 371.61, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'Petroleum Division & OGRA Notification (August 28, 2026)', sourceUrl: 'https://ogra.org.pk', notes: 'August 28, 2026 Notification' },
-  { key: 'cng', category: 'fuel', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', status: 'PUBLISHED', source: 'All Pakistan CNG Association', notes: 'Average Retail' },
-  { key: 'gold_24k_tola', category: 'gold', label: 'Gold 24K (per Tola)', value: 242000, unit: 'PKR / Tola (11.66g)', status: 'PUBLISHED', source: 'All Pakistan Sarafa Gems and Jewellers Association', sourceUrl: 'https://apsja.com.pk' },
-  { key: 'gold_22k_tola', category: 'gold', label: 'Gold 22K (per Tola)', value: 221833, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate' },
-  { key: 'gold_21k_tola', category: 'gold', label: 'Gold 21K (per Tola)', value: 211750, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate' },
-  { key: 'gold_18k_tola', category: 'gold', label: 'Gold 18K (per Tola)', value: 181500, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate' },
-  { key: 'silver_tola', category: 'gold', label: 'Silver (per Tola)', value: 2850, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate' },
-  { key: 'usd_pkr', category: 'currency', label: 'US Dollar (USD / PKR)', value: 280.50, unit: 'PKR / USD', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing', sourceUrl: 'https://sbp.org.pk' },
-  { key: 'aed_pkr', category: 'currency', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'sar_pkr', category: 'currency', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'gbp_pkr', category: 'currency', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'eur_pkr', category: 'currency', label: 'Euro (EUR / PKR)', value: 302.80, unit: 'PKR / EUR', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'cad_pkr', category: 'currency', label: 'Canadian Dollar (CAD / PKR)', value: 204.50, unit: 'PKR / CAD', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'steel_grade60', category: 'construction', label: 'Deformed Steel Bar Grade-60', value: 255000, unit: 'PKR / Ton', status: 'PUBLISHED', source: 'Pakistan Steel Re-rolling Mills Association' },
-  { key: 'cement_bag', category: 'construction', label: 'Portland Cement (50kg Bag)', value: 1450, unit: 'PKR / 50kg Bag', status: 'PUBLISHED', source: 'All Pakistan Cement Manufacturers Association' },
+  // Fuel — Petroleum Division / OGRA notification effective 3–5 Oct 2026 (manually verified 2026-10-04).
+  // No machine-readable OGRA feed exists; these constants are the sync mechanism.
+  { key: 'petrol', category: 'fuel', label: 'Petrol (Super RON-92)', value: 392.76, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'Petroleum Division & OGRA Notification (3 Oct 2026) — manually verified', sourceUrl: 'https://ogra.org.pk', verifiedAt: new Date('2026-10-04'), notes: 'Effective 3–5 Oct 2026' },
+  { key: 'diesel', category: 'fuel', label: 'High Speed Diesel (HSD)', value: 399.64, unit: 'PKR / Litre', status: 'PUBLISHED', source: 'Petroleum Division & OGRA Notification (3 Oct 2026) — manually verified', sourceUrl: 'https://ogra.org.pk', verifiedAt: new Date('2026-10-04'), notes: 'Effective 3–5 Oct 2026' },
+  { key: 'cng', category: 'fuel', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', status: 'PUBLISHED', source: 'All Pakistan CNG Association — manually verified', verifiedAt: new Date('2026-08-28'), notes: 'Average Retail' },
+  // Gold — APSGJA rates reported 2 Oct 2026 (manually verified 2026-10-04). No official machine feed.
+  { key: 'gold_24k_tola', category: 'gold', label: 'Gold 24K (per Tola)', value: 440636, unit: 'PKR / Tola (11.66g)', status: 'PUBLISHED', source: 'All Pakistan Sarafa Gems and Jewellers Association — manually verified', verifiedAt: new Date('2026-10-04'), notes: 'APSGJA rate reported 2 Oct 2026' },
+  { key: 'gold_22k_tola', category: 'gold', label: 'Gold 22K (per Tola)', value: 403916, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate — derived from 24K', verifiedAt: new Date('2026-10-04') },
+  { key: 'gold_21k_tola', category: 'gold', label: 'Gold 21K (per Tola)', value: 385557, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate — derived from 24K', verifiedAt: new Date('2026-10-04') },
+  { key: 'gold_18k_tola', category: 'gold', label: 'Gold 18K (per Tola)', value: 330477, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate — derived from 24K', verifiedAt: new Date('2026-10-04') },
+  { key: 'silver_tola', category: 'gold', label: 'Silver (per Tola)', value: 6528, unit: 'PKR / Tola', status: 'PUBLISHED', source: 'Sarafa Association Bullion Rate — manually verified', verifiedAt: new Date('2026-10-04'), notes: 'APSGJA rate reported 2 Oct 2026' },
+  // Currency — SBP interbank (manually verified 2026-10-04; SBP offers no public machine-readable feed).
+  { key: 'usd_pkr', category: 'currency', label: 'US Dollar (USD / PKR)', value: 277.10, unit: 'PKR / USD', status: 'PUBLISHED', source: 'State Bank of Pakistan M2M Revaluation Rate (1 Oct 2026) — manually verified', sourceUrl: 'https://www.sbp.org.pk', verifiedAt: new Date('2026-10-04') },
+  { key: 'aed_pkr', category: 'currency', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing — manually verified', verifiedAt: new Date('2026-08-28') },
+  { key: 'sar_pkr', category: 'currency', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing — manually verified', verifiedAt: new Date('2026-08-28') },
+  { key: 'gbp_pkr', category: 'currency', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing — manually verified', verifiedAt: new Date('2026-08-28') },
+  { key: 'eur_pkr', category: 'currency', label: 'Euro (EUR / PKR)', value: 302.80, unit: 'PKR / EUR', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing — manually verified', verifiedAt: new Date('2026-08-28') },
+  { key: 'cad_pkr', category: 'currency', label: 'Canadian Dollar (CAD / PKR)', value: 204.50, unit: 'PKR / CAD', status: 'PUBLISHED', source: 'State Bank of Pakistan Interbank Closing — manually verified', verifiedAt: new Date('2026-08-28') },
+  { key: 'steel_grade60', category: 'construction', label: 'Deformed Steel Bar Grade-60', value: 255000, unit: 'PKR / Ton', status: 'PUBLISHED', source: 'Pakistan Steel Re-rolling Mills Association — manually verified', verifiedAt: new Date('2026-08-28') },
+  { key: 'cement_bag', category: 'construction', label: 'Portland Cement (50kg Bag)', value: 1450, unit: 'PKR / 50kg Bag', status: 'PUBLISHED', source: 'All Pakistan Cement Manufacturers Association — manually verified', verifiedAt: new Date('2026-08-28') },
 ];
 
 /**
@@ -88,6 +92,72 @@ export async function getMarketRateValue(key: string, defaultValue: number): Pro
   } catch (err) {
     return defaultValue;
   }
+}
+
+/** One entry of the admin-visible rate freshness report. */
+export interface RateFreshnessEntry {
+  key: string;
+  label: string;
+  category: string;
+  value: number;
+  unit: string;
+  source?: string;
+  sourceUrl?: string;
+  /** ISO date the rate was last verified. */
+  verifiedOn: string | null;
+  /** Days since verification (null when unknown). */
+  daysSinceVerified: number | null;
+  /** 'live-fetch' only when a genuine official feed is polled; otherwise 'manual-verified'. */
+  syncMode: 'live-fetch' | 'manual-verified';
+  /** True when the rate is older than its expected refresh cadence. */
+  stale: boolean;
+  fromDatabase: boolean;
+}
+
+/**
+ * Admin-visible freshness report for every tracked rate key.
+ * None of the tracked authorities (OGRA, SBP, Sarafa) expose a public
+ * machine-readable feed, so syncMode is honestly 'manual-verified' everywhere:
+ * the cron pipelines publish manually verified constants, they do not scrape
+ * live data. Staleness thresholds reflect each rate's natural cadence
+ * (fuel: fortnightly/daily; gold & currency: daily; construction: monthly).
+ */
+export async function getRateFreshnessReport(): Promise<RateFreshnessEntry[]> {
+  const rates = await getMarketRates(true);
+  const fromDb = rates !== DEFAULT_MARKET_RATES;
+  const now = Date.now();
+
+  const cadenceDays: Record<string, number> = {
+    fuel: 7,
+    gold: 3,
+    currency: 3,
+    construction: 45,
+  };
+
+  return DEFAULT_MARKET_RATES.map((def) => {
+    const live = rates.find((r) => r.key === def.key);
+    const rec = live || def;
+    const verified = rec.verifiedAt ? new Date(rec.verifiedAt) : null;
+    const daysSinceVerified = verified && !Number.isNaN(verified.getTime())
+      ? Math.floor((now - verified.getTime()) / 86400000)
+      : null;
+    const cadence = cadenceDays[rec.category] ?? 30;
+
+    return {
+      key: rec.key,
+      label: rec.label,
+      category: rec.category,
+      value: rec.value,
+      unit: rec.unit,
+      source: rec.source,
+      sourceUrl: rec.sourceUrl,
+      verifiedOn: verified ? verified.toISOString().slice(0, 10) : null,
+      daysSinceVerified,
+      syncMode: 'manual-verified',
+      stale: daysSinceVerified === null ? true : daysSinceVerified > cadence,
+      fromDatabase: fromDb && !!live,
+    };
+  });
 }
 
 /**

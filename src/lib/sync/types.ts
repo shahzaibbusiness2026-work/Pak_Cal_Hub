@@ -20,6 +20,15 @@ export interface SyncServiceResult {
   changes: SyncItemChange[];
   message: string;
   error?: string;
+  /**
+   * How the rates were obtained. 'live-fetch' only when a genuine official
+   * feed is polled; 'manual-verified' when the pipeline publishes manually
+   * verified constants (the honest mode for OGRA/SBP/Sarafa, which expose
+   * no public machine-readable feed).
+   */
+  syncMode?: 'live-fetch' | 'manual-verified';
+  /** ISO date the published constants were last manually verified. */
+  verifiedOn?: string;
 }
 
 export interface SyncOptions {

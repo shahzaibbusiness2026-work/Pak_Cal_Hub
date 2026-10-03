@@ -86,13 +86,7 @@ export default function PunjabGovernmentSalaryCalculatorPage() {
 
         <DynamicCalculator slug="bps-salary-calculator" />
 
-        <DataSource
-          sourceName="Government of the Punjab, Finance Department Circular No. FD.PR.12-5/2026"
-          sourceUrl="https://finance.punjab.gov.pk"
-          notificationNo="FD.PR.12-5/2026-RBPS"
-          effectiveDate="1st July 2026"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="bps-salary-calculator" />
 
         <ShareButtons title="Punjab Government Salary Calculator 2026-27" />
 

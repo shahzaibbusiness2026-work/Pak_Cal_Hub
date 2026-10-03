@@ -1,11 +1,18 @@
 import { prisma, isDatabaseConnected } from '../db/prisma';
 import { SyncServiceResult, SyncItemChange, SyncOptions } from './types';
-import { PROTECTED_SLABS, UNPROTECTED_SLABS } from '../calculations/electricityEngine';
+import { PROTECTED_SLABS, UNPROTECTED_SLABS, LIFELINE_SLABS } from '../data/electricity-data';
 
 export async function syncElectricityTariffs(options: SyncOptions = {}): Promise<SyncServiceResult> {
   const timestamp = new Date().toISOString();
   const changes: SyncItemChange[] = [];
   let changesDetected = 0;
+
+  const ALL_SLABS: Array<{ consumerType: string; slabs: typeof PROTECTED_SLABS }> = [
+    { consumerType: 'lifeline', slabs: LIFELINE_SLABS },
+    { consumerType: 'protected', slabs: PROTECTED_SLABS },
+    { consumerType: 'unprotected', slabs: UNPROTECTED_SLABS },
+  ];
+  const totalSlabs = ALL_SLABS.reduce((n, g) => n + g.slabs.length, 0);
 
   try {
     const connected = await isDatabaseConnected();
@@ -14,98 +21,59 @@ export async function syncElectricityTariffs(options: SyncOptions = {}): Promise
         service: 'electricity',
         success: true,
         timestamp,
-        itemsProcessed: PROTECTED_SLABS.length + UNPROTECTED_SLABS.length,
+        itemsProcessed: totalSlabs,
         changesDetected: 0,
         changes: [],
-        message: 'Database in fallback mode: Electricity tariff sync completed in memory.',
+        message: 'Database in fallback mode: canonical NEPRA tariff dataset served from code.',
+        syncMode: 'manual-verified',
+        verifiedOn: '2026-10-04',
       };
     }
 
-    // 1. Sync Protected Slabs
-    for (const slab of PROTECTED_SLABS) {
-      const existing = await prisma.electricityTariff.findUnique({
-        where: {
-          provider_consumerType_slabMin_slabMax_effectiveYear: {
-            provider: 'NEPRA_NATIONAL',
-            consumerType: 'protected',
-            slabMin: slab.min,
-            slabMax: slab.max > 9999 ? 9999 : slab.max,
-            effectiveYear: '2026-27',
-          },
-        },
-      });
-
-      const oldValue = existing ? existing.baseRate : slab.rate;
-      const newValue = slab.rate;
-      const isChanged = existing ? Math.abs(oldValue - newValue) > 0.01 : true;
-
-      if (isChanged || options.forceUpdate) {
-        changesDetected++;
-        await prisma.electricityTariff.upsert({
+    // Sync each consumer category's slabs from the canonical NEPRA dataset
+    for (const group of ALL_SLABS) {
+      for (const slab of group.slabs) {
+        const slabMax = slab.max === Infinity ? 99999 : slab.max;
+        const existing = await prisma.electricityTariff.findUnique({
           where: {
             provider_consumerType_slabMin_slabMax_effectiveYear: {
               provider: 'NEPRA_NATIONAL',
-              consumerType: 'protected',
+              consumerType: group.consumerType,
               slabMin: slab.min,
-              slabMax: slab.max > 9999 ? 9999 : slab.max,
+              slabMax,
               effectiveYear: '2026-27',
             },
           },
-          update: { baseRate: newValue, status: 'PUBLISHED', verifiedAt: new Date() },
-          create: {
-            provider: 'NEPRA_NATIONAL',
-            consumerType: 'protected',
-            slabMin: slab.min,
-            slabMax: slab.max > 9999 ? 9999 : slab.max,
-            baseRate: newValue,
-            effectiveYear: '2026-27',
-            status: 'PUBLISHED',
-          },
         });
-      }
-    }
 
-    // 2. Sync Unprotected Slabs
-    for (const slab of UNPROTECTED_SLABS) {
-      const existing = await prisma.electricityTariff.findUnique({
-        where: {
-          provider_consumerType_slabMin_slabMax_effectiveYear: {
-            provider: 'NEPRA_NATIONAL',
-            consumerType: 'unprotected',
-            slabMin: slab.min,
-            slabMax: slab.max > 99999 ? 99999 : slab.max,
-            effectiveYear: '2026-27',
-          },
-        },
-      });
+        const oldValue = existing ? existing.baseRate : slab.rate;
+        const newValue = slab.rate;
+        const isChanged = existing ? Math.abs(oldValue - newValue) > 0.01 : true;
 
-      const oldValue = existing ? existing.baseRate : slab.rate;
-      const newValue = slab.rate;
-      const isChanged = existing ? Math.abs(oldValue - newValue) > 0.01 : true;
-
-      if (isChanged || options.forceUpdate) {
-        changesDetected++;
-        await prisma.electricityTariff.upsert({
-          where: {
-            provider_consumerType_slabMin_slabMax_effectiveYear: {
+        if (isChanged || options.forceUpdate) {
+          changesDetected++;
+          await prisma.electricityTariff.upsert({
+            where: {
+              provider_consumerType_slabMin_slabMax_effectiveYear: {
+                provider: 'NEPRA_NATIONAL',
+                consumerType: group.consumerType,
+                slabMin: slab.min,
+                slabMax,
+                effectiveYear: '2026-27',
+              },
+            },
+            update: { baseRate: newValue, status: 'PUBLISHED', verifiedAt: new Date() },
+            create: {
               provider: 'NEPRA_NATIONAL',
-              consumerType: 'unprotected',
+              consumerType: group.consumerType,
               slabMin: slab.min,
-              slabMax: slab.max > 99999 ? 99999 : slab.max,
+              slabMax,
+              baseRate: newValue,
               effectiveYear: '2026-27',
+              status: 'PUBLISHED',
             },
-          },
-          update: { baseRate: newValue, status: 'PUBLISHED', verifiedAt: new Date() },
-          create: {
-            provider: 'NEPRA_NATIONAL',
-            consumerType: 'unprotected',
-            slabMin: slab.min,
-            slabMax: slab.max > 99999 ? 99999 : slab.max,
-            baseRate: newValue,
-            effectiveYear: '2026-27',
-            status: 'PUBLISHED',
-          },
-        });
+          });
+        }
       }
     }
 
@@ -113,7 +81,7 @@ export async function syncElectricityTariffs(options: SyncOptions = {}): Promise
       data: {
         type: 'electricity',
         status: 'SUCCESS',
-        message: `Electricity tariff sync executed: ${PROTECTED_SLABS.length + UNPROTECTED_SLABS.length} slabs verified.`,
+        message: `Electricity tariff sync executed: ${totalSlabs} slabs verified.`,
         source: 'NEPRA Domestic Tariff Schedule',
       },
     });
@@ -122,10 +90,12 @@ export async function syncElectricityTariffs(options: SyncOptions = {}): Promise
       service: 'electricity',
       success: true,
       timestamp,
-      itemsProcessed: PROTECTED_SLABS.length + UNPROTECTED_SLABS.length,
+      itemsProcessed: totalSlabs,
       changesDetected,
       changes,
-      message: `Electricity tariff sync completed successfully.`,
+      message: `Electricity tariff publish completed (canonical NEPRA dataset, verified 2026-10-04): ${changesDetected} slab changes detected.`,
+      syncMode: 'manual-verified',
+      verifiedOn: '2026-10-04',
     };
   } catch (err: any) {
     try {

@@ -12,8 +12,8 @@ export default function BreakdownTable({ rows, title = 'Detailed Itemized Breakd
   if (!rows || rows.length === 0) return null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
-      <div className="border-b border-slate-200 bg-slate-50/70 px-4 sm:px-6 py-3.5 dark:border-slate-800 dark:bg-slate-800/50">
+    <div className="card-surface overflow-hidden">
+      <div className="card-header">
         <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
           {title}
         </h3>

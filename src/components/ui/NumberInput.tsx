@@ -80,7 +80,7 @@ export default function NumberInput({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
+        <label htmlFor={id} className="form-label text-xs sm:text-sm font-bold">
           {label}
         </label>
         {wordPreview && (
@@ -114,30 +114,30 @@ export default function NumberInput({
         />
 
         {/* Increment / Decrement Stepper Buttons */}
-        <div className="absolute right-1.5 flex items-center gap-1 z-10">
+        <div className="absolute right-1.5 flex items-center gap-1.5 z-10">
           <button
             type="button"
             onClick={() => handleStep(-stepAmount)}
             disabled={!canDecrement}
-            className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all"
-            aria-label="Decrease"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
+            aria-label={`Decrease ${label}`}
           >
-            <Minus className="h-3.5 w-3.5" />
+            <Minus className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={() => handleStep(stepAmount)}
             disabled={!canIncrement}
-            className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all"
-            aria-label="Increase"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
+            aria-label={`Increase ${label}`}
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {helpText && (
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
+        <p className="form-help mt-0.5">
           {helpText}
         </p>
       )}

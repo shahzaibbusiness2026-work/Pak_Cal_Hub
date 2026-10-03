@@ -84,7 +84,7 @@ export function calculateZakat(inputs: Record<string, any>): CalculatorOutput {
     chartData: chartData.length > 0 ? chartData : undefined,
     notes: [
       'Zakat is 2.5% (1/40th) on net zakatable wealth held for one full lunar year (Hawl).',
-      'The Silver Nisab standard (52.5 Tola = ~Rs. 170,000) is the preferred standard by the majority of contemporary scholars for cash, commercial goods, and combined wealth to maximize benefit for the poor.',
+      `The Silver Nisab standard (52.5 Tola = ${formatPKR(silverNisabValuePKR)}) is the preferred standard by the majority of contemporary scholars for cash, commercial goods, and combined wealth to maximize benefit for the poor.`,
     ],
   };
 }
@@ -110,28 +110,34 @@ export function calculateInheritance(inputs: Record<string, any>): CalculatorOut
   let fatherShareAmount = 0;
   let motherShareAmount = 0;
 
-  // 1. Mother Share: 1/6 if children or multiple siblings exist, else 1/3
+  // 1. Mother Share: 1/6 if children exist, else 1/3
+  let motherFractionUsed = 0;
   if (hasMother) {
-    const motherFraction = hasChildren ? 1 / 6 : 1 / 3;
-    motherShareAmount = netEstate * motherFraction;
+    motherFractionUsed = hasChildren ? 1 / 6 : 1 / 3;
+    motherShareAmount = netEstate * motherFractionUsed;
   }
 
-  // 2. Father Share: 1/6 if children exist
-  if (hasFather) {
-    const fatherFraction = hasChildren ? 1 / 6 : 1 / 3;
-    fatherShareAmount = netEstate * fatherFraction;
-  }
-
-  // 3. Spouse Share
+  // 2. Spouse Share
+  let spouseFractionUsed = 0;
   if (hasSpouse) {
     if (spouseType === 'wife') {
       // Wife gets 1/8 if children, 1/4 if no children
-      const wifeFraction = hasChildren ? 1 / 8 : 1 / 4;
-      spouseShareAmount = netEstate * wifeFraction;
+      spouseFractionUsed = hasChildren ? 1 / 8 : 1 / 4;
     } else {
       // Husband gets 1/4 if children, 1/2 if no children
-      const husbandFraction = hasChildren ? 1 / 4 : 1 / 2;
-      spouseShareAmount = netEstate * husbandFraction;
+      spouseFractionUsed = hasChildren ? 1 / 4 : 1 / 2;
+    }
+    spouseShareAmount = netEstate * spouseFractionUsed;
+  }
+
+  // 3. Father Share: 1/6 if children exist; with no children the father takes the residuary (remainder after spouse & mother)
+  let fatherIsResiduary = false;
+  if (hasFather) {
+    if (hasChildren) {
+      fatherShareAmount = netEstate * (1 / 6);
+    } else {
+      fatherIsResiduary = true;
+      fatherShareAmount = Math.max(0, netEstate - spouseShareAmount - motherShareAmount);
     }
   }
 
@@ -153,14 +159,17 @@ export function calculateInheritance(inputs: Record<string, any>): CalculatorOut
     { label: 'Net Distributable Estate (After Debts/Funeral)', amount: formatPKR(netEstate) },
   ];
 
+  const motherFractionLabel = motherFractionUsed === 1 / 6 ? '1/6' : motherFractionUsed > 0 ? '1/3' : '';
+  const spouseFractionLabel = hasChildren ? (spouseType === 'wife' ? '1/8' : '1/4') : (spouseType === 'wife' ? '1/4' : '1/2');
+
   if (hasSpouse) {
     breakdown.push({
-      label: `${spouseType === 'wife' ? 'Wife/Widow' : 'Husband'} Share (${hasChildren ? (spouseType === 'wife' ? '1/8' : '1/4') : (spouseType === 'wife' ? '1/4' : '1/2')})`,
+      label: `${spouseType === 'wife' ? 'Wife/Widow' : 'Husband'} Share (${spouseFractionLabel})`,
       amount: formatPKR(spouseShareAmount),
     });
   }
-  if (hasMother) breakdown.push({ label: 'Mother Share (1/6)', amount: formatPKR(motherShareAmount) });
-  if (hasFather) breakdown.push({ label: 'Father Share (1/6)', amount: formatPKR(fatherShareAmount) });
+  if (hasMother) breakdown.push({ label: `Mother Share (${motherFractionLabel})`, amount: formatPKR(motherShareAmount) });
+  if (hasFather) breakdown.push({ label: `Father Share (${fatherIsResiduary ? 'Residuary (remainder)' : '1/6'})`, amount: formatPKR(fatherShareAmount) });
 
   if (numSons > 0) {
     breakdown.push({
@@ -196,6 +205,9 @@ export function calculateInheritance(inputs: Record<string, any>): CalculatorOut
     notes: [
       'Calculated strictly under Islamic Faraid jurisprudence based on Surah An-Nisa (4:11-12).',
       'All debts, funeral expenses, and valid bequests (up to 1/3rd to non-heirs) must be settled before inheritance distribution.',
+      ...(fatherIsResiduary
+        ? ['With no children, the father takes the residuary (the remainder after the spouse and mother shares), per Hanafi Faraid.']
+        : []),
     ],
   };
 }

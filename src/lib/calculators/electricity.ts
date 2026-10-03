@@ -1,16 +1,39 @@
-import { PROTECTED_SLABS, UNPROTECTED_SLABS, ELECTRICITY_CONSTANTS, getFixedCharges } from '../data/electricity-data';
+import {
+  PROTECTED_SLABS,
+  UNPROTECTED_SLABS,
+  LIFELINE_SLABS,
+  ELECTRICITY_CONSTANTS,
+  getFixedCharges,
+  DomesticConsumerCategory,
+} from '../data/electricity-data';
+// Re-exported so the deprecated src/lib/calculations/electricityEngine.ts can delegate to this canonical module.
+export { PROTECTED_SLABS, UNPROTECTED_SLABS, LIFELINE_SLABS };
 import { formatPKR, formatPercent, safeNumber, formatNumber } from '../utils/formatters';
 import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 
 /**
  * Calculates Pakistan Electricity Bill (LESCO, IESCO, K-Electric, MEPCO, etc.)
+ *
+ * Billing order mirrors real DISCO bills:
+ *  1. Base energy charges with slab benefit (each unit block billed at its own slab rate)
+ *  2. Fixed charges = per-kW rate of the consumption tier × sanctioned load (Feb 2026 regime)
+ *  3. FC surcharge (Rs 3.23/unit) + FPA + QTA (user-supplied, vary per NEPRA notification) + meter rent
+ *  4. Electricity Duty = 1.5% of base energy charges only, plus 1.5% on the FPA amount
+ *  5. GST 18% on (energy + fixed + FC + FPA + QTA + meter + ED) — matches the real bill's
+ *     two-line presentation (main GST + 18% GST on FPA)
+ *  6. PTV fee Rs 35; total rounded to whole rupees
  */
 export function calculateElectricityBill(inputs: Record<string, any>): CalculatorOutput {
-  const units = safeNumber(inputs.units, 280);
-  const isProtected = inputs.consumerType === 'protected' && units <= 200;
+  const units = Math.max(0, Math.floor(safeNumber(inputs.units, 280)));
+  const requestedType = inputs.consumerType || 'unprotected';
+  // Lifeline status only holds up to 100 units; protected only up to 200 units.
+  const isLifeline = requestedType === 'lifeline' && units <= 100;
+  const isProtected = !isLifeline && requestedType === 'protected' && units <= 200;
+  const category: DomesticConsumerCategory = isLifeline ? 'lifeline' : isProtected ? 'protected' : 'unprotected';
   const includeTaxes = inputs.includeTaxes !== false;
+  const isTaxExempt = inputs.isTaxExempt === true;
 
-  const slabs = isProtected ? PROTECTED_SLABS : UNPROTECTED_SLABS;
+  const slabs = isLifeline ? LIFELINE_SLABS : isProtected ? PROTECTED_SLABS : UNPROTECTED_SLABS;
 
   let energyCost = 0;
   let remainingUnits = units;
@@ -35,37 +58,56 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
     }
   }
 
-  // 2026 Fixed Monthly Charges
-  const fixedCharges = getFixedCharges(units, isProtected);
+  // Fixed charges: per-kW of sanctioned load (post Feb-2026 regime); lifeline exempt
+  const sanctionedLoadKw = Math.max(0, safeNumber(inputs.sanctionedLoadKw, 2));
+  const fixedCharges = getFixedCharges(units, category, sanctionedLoadKw);
 
-  // Surcharges and Adjustments
+  // Surcharges and adjustments — user-supplied, because FPA/QTA vary monthly/quarterly per NEPRA
+  const fpaRate = Math.max(0, safeNumber(inputs.fpaRate, 0));
+  const qtaRate = Math.max(0, safeNumber(inputs.qtaRate, 0));
+  const meterRent = Math.max(0, safeNumber(inputs.meterRent, ELECTRICITY_CONSTANTS.meterRentDefault));
   const fcSurcharge = units * ELECTRICITY_CONSTANTS.fcSurchargePerUnit;
-  const fpaEstimate = units * ELECTRICITY_CONSTANTS.fpaPerUnitEstimate;
-  const qta = units * ELECTRICITY_CONSTANTS.quarterlyTariffAdjustment;
-  const baseTotal = energyCost + fixedCharges + fcSurcharge + fpaEstimate + qta;
+  const fpaCharges = units * fpaRate;
+  const qtaCharges = units * qtaRate;
 
   // Taxes
   let electricityDuty = 0;
+  let edOnFpa = 0;
   let gst = 0;
   let tvFee = 0;
 
   if (includeTaxes) {
-    electricityDuty = baseTotal * ELECTRICITY_CONSTANTS.electricityDutyPct;
-    // GST applies on total bill for unprotected consumption
-    gst = (baseTotal + electricityDuty) * (!isProtected && units > 200 ? ELECTRICITY_CONSTANTS.generalSalesTaxPct : 0.0);
+    electricityDuty = energyCost * ELECTRICITY_CONSTANTS.electricityDutyPct;
+    edOnFpa = fpaCharges * ELECTRICITY_CONSTANTS.electricityDutyPct;
     tvFee = ELECTRICITY_CONSTANTS.tvFee;
+    if (!isTaxExempt) {
+      const gstBase =
+        energyCost + fixedCharges + fcSurcharge + fpaCharges + qtaCharges + meterRent + electricityDuty + edOnFpa;
+      gst = gstBase * ELECTRICITY_CONSTANTS.generalSalesTaxPct;
+    }
   }
 
-  const totalBill = baseTotal + electricityDuty + gst + tvFee;
+  const totalBill = Math.round(
+    energyCost + fixedCharges + fcSurcharge + fpaCharges + qtaCharges + meterRent + electricityDuty + edOnFpa + gst + tvFee
+  );
   const effectiveCostPerUnit = units > 0 ? totalBill / units : 0;
+  const categoryLabel = isLifeline ? 'Lifeline' : isProtected ? 'Protected' : 'Unprotected';
 
   const breakdown: BreakdownRow[] = [
+    ...slabBreakdownDetails.map((d) => ({
+      label: `Energy: ${d.unitsInSlab} units @ Rs. ${d.rate.toFixed(2)} (${d.slab})`,
+      amount: formatPKR(d.cost),
+    })),
     { label: `Base Energy Charges (${units} Units consumed)`, amount: formatPKR(energyCost) },
-    ...(fixedCharges > 0 ? [{ label: 'Fixed Monthly Meter Charges', amount: formatPKR(fixedCharges) }] : []),
-    { label: 'Financing Cost (FC) Surcharge', amount: formatPKR(fcSurcharge) },
-    { label: 'Fuel Price Adjustment (FPA)', amount: formatPKR(fpaEstimate) },
-    { label: 'Quarterly Tariff Adjustment (QTA)', amount: formatPKR(qta) },
-    { label: 'Electricity Duty (1.5%)', amount: formatPKR(electricityDuty) },
+    ...(fixedCharges > 0
+      ? [{ label: `Fixed Charges (${sanctionedLoadKw} kW sanctioned load)`, amount: formatPKR(fixedCharges) }]
+      : []),
+    { label: 'Financing Cost (FC) Surcharge @ Rs. 3.23/unit', amount: formatPKR(fcSurcharge) },
+    ...(fpaCharges > 0 ? [{ label: `Fuel Price Adjustment (FPA @ Rs. ${fpaRate.toFixed(2)}/unit)`, amount: formatPKR(fpaCharges) }] : []),
+    ...(qtaCharges > 0 ? [{ label: `Quarterly Tariff Adjustment (QTA @ Rs. ${qtaRate.toFixed(2)}/unit)`, amount: formatPKR(qtaCharges) }] : []),
+    { label: 'Meter Rent', amount: formatPKR(meterRent) },
+    { label: 'Electricity Duty (1.5% of base energy)', amount: formatPKR(electricityDuty) },
+    ...(edOnFpa > 0 ? [{ label: 'Electricity Duty on FPA (1.5%)', amount: formatPKR(edOnFpa) }] : []),
     ...(gst > 0 ? [{ label: 'General Sales Tax (GST 18%)', amount: formatPKR(gst) }] : []),
     { label: 'PTV License Fee', amount: formatPKR(tvFee) },
     { label: 'Total Estimated Electricity Bill', amount: formatPKR(totalBill), isTotal: true },
@@ -85,18 +127,20 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
       { id: 'units', label: 'Units Consumed', value: `${units} kWh`, type: 'text' },
       { id: 'energyCharges', label: 'Base Energy Cost', value: formatPKR(energyCost), type: 'currency' },
       { id: 'taxesAndSurcharges', label: 'Taxes & Surcharges', value: formatPKR(totalBill - energyCost), type: 'currency' },
-      { id: 'consumerCategory', label: 'Category', value: isProtected ? 'Protected' : 'Unprotected', type: 'badge' },
+      { id: 'consumerCategory', label: 'Category', value: categoryLabel, type: 'badge' },
     ],
     breakdown,
     chartType: 'pie',
     chartData: [
       { name: 'Base Energy', value: Math.round(energyCost), color: '#3b82f6' },
-      { name: 'Surcharges (FC/QTA/FPA)', value: Math.round(fcSurcharge + fpaEstimate + qta), color: '#f59e0b' },
-      { name: 'Govt Taxes & GST', value: Math.round(electricityDuty + gst + tvFee), color: '#ef4444' },
+      { name: 'Surcharges (FC/QTA/FPA)', value: Math.round(fcSurcharge + fpaCharges + qtaCharges), color: '#f59e0b' },
+      { name: 'Govt Taxes & GST', value: Math.round(electricityDuty + edOnFpa + gst + tvFee), color: '#ef4444' },
     ],
     notes: [
-      'Calculated as per NEPRA domestic tariff schedule for LESCO, IESCO, K-Electric, FESCO, MEPCO, GEPCO, etc.',
-      'Protected status applies to consumers consuming under 200 units continuously for 6 months.',
+      'Calculated as per NEPRA uniform domestic Schedule of Tariff, Calendar Year 2026 (effective 1 Jan 2026) — applies to LESCO, IESCO, K-Electric, FESCO, MEPCO, GEPCO, etc.',
+      'Fixed charges are billed per kW of sanctioned load (Feb 2026 regime); check the sanctioned load printed on your bill. Lifeline consumers (≤ 100 units) pay no fixed charge.',
+      'Protected status applies to consumers using under 200 units continuously for 6 months.',
+      'FPA and QTA change monthly/quarterly per NEPRA notifications — enter the latest values from your bill (0 = excluded).',
     ],
   };
 }
@@ -107,7 +151,8 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
  */
 export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOutput {
   const monthlyBill = safeNumber(inputs.monthlyBill, 45000);
-  const monthlyUnits = safeNumber(inputs.monthlyUnits, 800);
+  // Default 0 = auto-estimate monthly units from the bill (monthlyBill / Rs 48 average unit rate).
+  const monthlyUnits = safeNumber(inputs.monthlyUnits, 0);
   const panelWattage = safeNumber(inputs.panelWattage, 585); // 585W Tier 1 N-type TopCon panels
   const systemType = inputs.systemType || 'on-grid'; // on-grid, hybrid, off-grid
   const billingRegime = inputs.billingRegime || 'net-billing'; // 'net-billing' (New 2026 rules) vs 'grandfathered' (Pre-Feb 2026 1:1)
@@ -134,18 +179,21 @@ export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOut
 
   // Savings modeling:
   // Retail grid tariff ~Rs. 48/unit
-  // Net Billing buyback rate ~Rs. 10.00/unit (NEPRA Prosumer Regulations 2026)
+  // Net Billing buyback rate Rs. 10.20/unit (NEPRA Prosumer Regulations 2026)
   const retailTariff = 48;
   const exportBuybackRate = safeNumber(inputs.customBuybackRate, 10.20);
+  // Share of generation consumed directly during daytime (rest is exported at the buyback rate)
+  const selfConsumptionShare = Math.min(Math.max(safeNumber(inputs.selfConsumptionPct, 55), 0), 100) / 100;
 
   let monthlySavings = 0;
   if (billingRegime === 'grandfathered' || systemType === 'off-grid') {
     // 1:1 retail offset
     monthlySavings = expectedMonthlyGeneration * retailTariff;
   } else {
-    // 2026 Net Billing: ~55% daytime direct self-consumption (saving retail tariff Rs 48), ~45% exported surplus (sold at Rs 10.20)
-    const selfConsumedUnits = expectedMonthlyGeneration * 0.55;
-    const exportedUnits = expectedMonthlyGeneration * 0.45;
+    // 2026 Net Billing: daytime direct self-consumption saves the retail tariff (Rs 48),
+    // exported surplus is sold at Rs 10.20/unit
+    const selfConsumedUnits = expectedMonthlyGeneration * selfConsumptionShare;
+    const exportedUnits = expectedMonthlyGeneration * (1 - selfConsumptionShare);
     monthlySavings = (selfConsumedUnits * retailTariff) + (exportedUnits * exportBuybackRate);
   }
 

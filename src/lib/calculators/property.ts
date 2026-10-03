@@ -7,7 +7,7 @@ import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 export function calculateAreaConverter(inputs: Record<string, any>): CalculatorOutput {
   const value = safeNumber(inputs.value, 10);
   const fromUnit = inputs.fromUnit || 'marla';
-  const marlaStandard = inputs.marlaType === '225' ? 225 : 272.25; // standard Revenue Board vs Lahore LDA
+  const marlaStandard = String(inputs.marlaType) === '225' ? 225 : 272.25; // standard Revenue Board vs Lahore LDA
 
   // Convert everything to Square Feet first
   let sqFt = 0;
@@ -105,18 +105,24 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
   const totalFinishCost = coveredArea * finishRate;
   const totalCost = coveredArea * totalRatePerSqFt;
 
-  // Material Breakdown Estimations for Grey Structure (August 2026 rates):
-  // Bricks: ~26 bricks per sq ft covered area — Awwal grade Rs. 21,000 per 1000
+  // Material Breakdown Estimations for Grey Structure.
+  // Single source of truth for material rates: src/lib/db/dataProvider.ts (DEFAULT_MARKET_RATES).
+  // These fallbacks must match 'steel_grade60' and 'cement_bag' there.
+  const STEEL_RATE_PER_TON = 255000; // Pakistan Steel Re-rolling Mills Association
+  const CEMENT_RATE_PER_BAG = 1450; // All Pakistan Cement Manufacturers Association
+  const BRICK_RATE_PER_1000 = 21000; // Awwal grade
+
+  // Bricks: ~26 bricks per sq ft covered area
   const bricksCount = Math.round(coveredArea * 26);
-  const bricksCost = (bricksCount / 1000) * 21000;
+  const bricksCost = (bricksCount / 1000) * BRICK_RATE_PER_1000;
 
-  // Cement: ~0.46 bags per sq ft covered area — Rs. 1,480 per bag
+  // Cement: ~0.46 bags per sq ft covered area
   const cementBags = Math.round(coveredArea * 0.46);
-  const cementCost = cementBags * 1480;
+  const cementCost = cementBags * CEMENT_RATE_PER_BAG;
 
-  // Steel / Rebar: ~3.5 kg per sq ft covered area (Grade 60 deformed) — Rs. 268,000 per ton
+  // Steel / Rebar: ~3.5 kg per sq ft covered area (Grade 60 deformed)
   const steelTons = (coveredArea * 3.5) / 1000;
-  const steelCost = steelTons * 268000;
+  const steelCost = steelTons * STEEL_RATE_PER_TON;
 
   // Sand & Crush:
   const sandCost = coveredArea * 200;
@@ -143,9 +149,9 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
     ],
     breakdown: [
       { label: `Grey Structure (${coveredArea.toLocaleString()} sq ft × Rs. ${greyRate.toLocaleString()})`, amount: formatPKR(totalGreyCost) },
-      { label: `Bricks — ${bricksCount.toLocaleString()} Awwal (@ Rs. 21,000 per 1,000)`, amount: formatPKR(bricksCost) },
-      { label: `Cement — ${cementBags.toLocaleString()} Bags (@ Rs. 1,480 per bag)`, amount: formatPKR(cementCost) },
-      { label: `Steel Rebar Grade 60 — ${steelTons.toFixed(2)} Tons (@ Rs. 268,000/ton)`, amount: formatPKR(steelCost) },
+      { label: `Bricks — ${bricksCount.toLocaleString()} Awwal (@ Rs. ${BRICK_RATE_PER_1000.toLocaleString()} per 1,000)`, amount: formatPKR(bricksCost) },
+      { label: `Cement — ${cementBags.toLocaleString()} Bags (@ Rs. ${CEMENT_RATE_PER_BAG.toLocaleString()} per bag)`, amount: formatPKR(cementCost) },
+      { label: `Steel Rebar Grade 60 — ${steelTons.toFixed(2)} Tons (@ Rs. ${STEEL_RATE_PER_TON.toLocaleString()}/ton)`, amount: formatPKR(steelCost) },
       { label: `Sand (Ravi/Chenab) & Margalla Crush`, amount: formatPKR(sandCost + crushCost) },
       { label: `Labour Charges — Grey Structure`, amount: formatPKR(labourCost) },
       { label: `Complete Finishing (Tiles, Paint, Woodwork, Sanitary, Electricals)`, amount: formatPKR(totalFinishCost) },
@@ -157,8 +163,8 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
       { name: 'Finishing & Fittings', value: Math.round(totalFinishCost), color: '#16a34a' },
     ],
     notes: [
-      'Rates based on Pakistan construction market benchmarks for August 2026 (Grade-A quality).',
-      'Steel: Grade-60 deformed rebar @ Rs. 268,000/ton. Cement: OPC @ Rs. 1,480/bag. Bricks: Awwal-grade @ Rs. 21,000 per 1,000.',
+      'Rates based on Pakistan construction market benchmarks (Grade-A quality). Material fallback rates match the market-rate table in src/lib/db/dataProvider.ts.',
+      `Steel: Grade-60 deformed rebar @ Rs. ${STEEL_RATE_PER_TON.toLocaleString()}/ton. Cement: OPC @ Rs. ${CEMENT_RATE_PER_BAG.toLocaleString()}/bag. Bricks: Awwal-grade @ Rs. ${BRICK_RATE_PER_1000.toLocaleString()} per 1,000.`,
       'Finishing cost includes flooring tiles, sanitary ware, kitchen cabinets, internal doors, ceiling plaster, and paint.',
     ],
   };

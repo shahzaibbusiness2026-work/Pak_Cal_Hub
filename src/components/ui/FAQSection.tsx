@@ -23,9 +23,9 @@ export default function FAQSection({ faqs, title = 'Frequently Asked Questions' 
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+    <div className="card-surface p-6 space-y-4">
       <div className="flex items-center gap-2 mb-2">
-        <HelpCircle className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
+        <HelpCircle className="h-5 w-5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
         <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
           {title}
         </h2>
@@ -34,22 +34,32 @@ export default function FAQSection({ faqs, title = 'Frequently Asked Questions' 
       <div className="divide-y divide-slate-100 dark:divide-slate-800">
         {faqs.map((faq, idx) => {
           const isOpen = openIndex === idx;
+          const panelId = `faq-panel-${idx}`;
+          const buttonId = `faq-button-${idx}`;
           return (
             <div key={idx} className="py-3.5 first:pt-0 last:pb-0">
               <button
+                id={buttonId}
                 onClick={() => toggle(idx)}
-                className="flex w-full items-center justify-between gap-4 text-left font-bold text-slate-900 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 text-xs sm:text-sm"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="flex w-full items-center justify-between gap-4 text-left font-bold text-slate-900 dark:text-white hover:text-emerald-700 dark:hover:text-emerald-400 text-xs sm:text-sm min-h-[44px] touch-manipulation"
               >
                 <span>{faq.question}</span>
                 {isOpen ? (
-                  <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" />
+                  <ChevronUp className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
+                  <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                 )}
               </button>
 
               {isOpen && (
-                <div className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-1">
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-1"
+                >
                   {faq.answer}
                 </div>
               )}

@@ -13,16 +13,28 @@ export default function ChartView({ data, title = 'Visual Distribution' }: Chart
 
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
+  // Plain-language summary for screen readers
+  const ariaSummary = data
+    .map((item) => {
+      const pct = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0.0';
+      return `${item.name}: ${pct}%`;
+    })
+    .join(', ');
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+    <div className="card-surface p-5">
       <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">
         {title}
       </h3>
 
       {/* Distribution Progress Bars */}
-      <div className="space-y-3.5">
+      <div
+        className="space-y-3.5"
+        role="img"
+        aria-label={`${title}: ${ariaSummary}`}
+      >
         {/* Multi-segment stacked bar */}
-        <div className="flex h-4 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+        <div className="flex h-4 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800" aria-hidden="true">
           {data.map((item, idx) => {
             const pct = total > 0 ? (item.value / total) * 100 : 0;
             if (pct <= 0) return null;

@@ -96,13 +96,7 @@ export default function GovernmentSalaryCalculator2026Page() {
         <DynamicCalculator slug="bps-salary-calculator" />
 
         {/* Official Source & Verification Badge */}
-        <DataSource
-          sourceName="Finance Division (Regulations Wing) OM No. F.1(2)Imp/2026"
-          sourceUrl="https://finance.gov.pk"
-          notificationNo="F.1(2)Imp/2026-RBPS"
-          effectiveDate="1st July 2026"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="bps-salary-calculator" />
 
         {/* Social Sharing */}
         <ShareButtons title="Pakistan Government Salary Calculator 2026-27 (BPS 1-22)" />

@@ -16,6 +16,16 @@ import { getSalaryDataset } from '../data/salary';
 import { getPensionRules, getCommutationFactor } from '../data/pension';
 import { getTaxDataset } from '../data/tax';
 import { getGpfConfig } from '../data/allowances';
+import {
+  calculateFreelancerTax,
+  calculatePropertyTax,
+  calculateTokenTax,
+  calculateInheritance,
+  calculateZakat,
+  calculateCurrency,
+  calculateLoanEmi,
+  calculateFuelCost as calculateVehicleFuelCost,
+} from '../lib/calculators';
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -75,6 +85,8 @@ function runTests() {
   });
   assert(salFed17.primaryResult.id === 'netSalary', 'Federal BPS-17 primary result computed');
   assert(salFed17.breakdown!.length >= 7, 'Federal BPS-17 has comprehensive breakdown rows');
+  const salFed17Basic = salFed17.secondaryResults?.find((r) => r.id === 'basicPay');
+  assert(String(salFed17Basic?.value).includes('54,140'), `Federal BPS-17 stage-0 running basic pay is Rs. 54,140: ${salFed17Basic?.value}`);
 
   // Case B: Official Govt Accommodation (0 HRA + 5% Maintenance Deduction)
   const salGovtAccom = calculateSalary({
@@ -85,9 +97,9 @@ function runTests() {
     cityType: 'none',
   });
   const hraRow = salGovtAccom.breakdown?.find((r) => r.label.includes('House Rent Allowance'));
-  const hrdRow = salGovtAccom.breakdown?.find((r) => r.label.includes('5% Maintenance Deduction'));
+  const hrdRow = salGovtAccom.breakdown?.find((r) => r.label.includes('5% House-Rent Deduction'));
   assert(String(hraRow?.amount).includes('0'), 'Official accommodation sets HRA to Rs. 0');
-  assert(Boolean(hrdRow), 'Official accommodation deducts 5% HRD');
+  assert(Boolean(hrdRow), 'Official accommodation deducts 5% house-rent deduction');
 
   // Case C: Punjab 2026 BPS-16 with Special Allowance
   const salPunjab16 = calculateSalary({
@@ -111,6 +123,8 @@ function runTests() {
   // ==========================================
   console.log('\n--- 4. Testing Pension Calculations ---');
   // Case A: Pre-2024 Defined Benefit Scheme (Basic 100k, 30 yrs, Age 60, 35% comm)
+  // CSR commutation table is keyed on age at NEXT birthday, so age 60 uses the age-61 factor 8.16:
+  // 24,500 x 12 x 8.16 = Rs. 23,99,040
   const penPre2024 = calculatePension({
     government: 'federal',
     schemeType: 'pre2024',
@@ -121,9 +135,10 @@ function runTests() {
     bps: 17,
   });
   const lumpSum = penPre2024.secondaryResults?.find((r) => r.id === 'lumpSum');
-  assert(Boolean(String(lumpSum?.value).includes('24,93,120')), `Commutation lump sum correctly calculated: ${lumpSum?.value}`);
+  assert(Boolean(String(lumpSum?.value).includes('23,99,040')), `Commutation lump sum correctly calculated (age-next-birthday factor 8.16): ${lumpSum?.value}`);
 
-  // Case B: Minimum Pension Floor (Rs. 25,000)
+  // Case B: Minimum Pension Floor (Rs. 12,000 on GROSS pension, OM No.F.15(1)-Reg.6/2023)
+  // Basic 20k, 10 yrs: gross = 4,667 -> floor top-up 7,333 (non-commutable); commutation on pre-floor gross
   const penSmall = calculatePension({
     government: 'federal',
     schemeType: 'pre2024',
@@ -133,7 +148,35 @@ function runTests() {
     commutationPercent: 35,
     bps: 1,
   });
-  assert(String(penSmall.primaryResult.value).includes('25,000'), 'Minimum pension floor of Rs. 25,000 enforced');
+  assert(String(penSmall.primaryResult.value).includes('12,959'), `Minimum pension floor of Rs. 12,000 on gross enforced (total in-hand Rs. 12,959): ${penSmall.primaryResult.value}`);
+  const floorRow = penSmall.breakdown?.find((r) => r.label.includes('Minimum Pension Floor Top-Up'));
+  assert(Boolean(floorRow) && String(floorRow?.amount).includes('7,333'), 'Floor top-up of Rs. 7,333 shown as non-commutable');
+
+  // Case B2: Post-reform path (retirement 2026) uses average emoluments of last 24 months
+  const penReform = calculatePension({
+    government: 'federal',
+    schemeType: 'pre2024',
+    basicPay: 100000,
+    avgLast24MoPay: 95000,
+    retirementYear: 2026,
+    serviceYears: 30,
+    age: 60,
+    commutationPercent: 35,
+    bps: 17,
+  });
+  assert(String(penReform.breakdown?.[0]?.label).includes('Last 24 Months'), 'Post-Sept-2024 retirement uses 24-month average emoluments');
+  assert(String(penReform.breakdown?.[0]?.amount).includes('95,000'), 'Reform path uses avgLast24MoPay of Rs. 95,000');
+  const penPreReform = calculatePension({
+    government: 'federal',
+    schemeType: 'pre2024',
+    basicPay: 100000,
+    retirementYear: 2023,
+    serviceYears: 30,
+    age: 60,
+    commutationPercent: 35,
+    bps: 17,
+  });
+  assert(String(penPreReform.breakdown?.[0]?.label).includes('Last Drawn'), 'Pre-reform retirement keeps last-drawn basic pay');
 
   // Case C: Post-2024 FGDC Defined Contribution Scheme
   const penPost2024 = calculatePension({
@@ -179,17 +222,59 @@ function runTests() {
   const flTax = taxFreelancerPseb.secondaryResults?.find((r) => r.id === 'annualTax');
   assert(String(flTax?.value).includes('10,000'), 'Freelancer Section 154A PSEB tax is 0.25% (Rs. 10,000 on 4M)');
 
+  // Case D: Tax Year 2027 Salaried Rs. 5,000,000/yr → Rs. 802,000 (8-slab Finance Act 2026 table)
+  const tax5M = calculateTax({
+    taxYear: '2026-27',
+    incomeType: 'salaried',
+    incomePeriod: 'annual',
+    income: 5000000,
+  });
+  const tax5MAnnual = tax5M.secondaryResults?.find((r) => r.id === 'annualTax');
+  assert(String(tax5MAnnual?.value).includes('8,02,000'), 'TY2027 Rs. 5M salaried annual tax is Rs. 802,000');
+
+  // Case E: Tax Year 2026 Salaried Rs. 5,000,000/yr → Rs. 931,000 (Finance Act 2025 table)
+  const tax5M26 = calculateTax({
+    taxYear: '2025-26',
+    incomeType: 'salaried',
+    incomePeriod: 'annual',
+    income: 5000000,
+  });
+  const tax5M26Annual = tax5M26.secondaryResults?.find((r) => r.id === 'annualTax');
+  assert(String(tax5M26Annual?.value).includes('9,31,000'), 'TY2026 Rs. 5M salaried annual tax is Rs. 931,000');
+
+  // Case F: Tax Year 2026 Sec 4AB surcharge label interpolates the dataset rate (9%)
+  const tax11M = calculateTax({
+    taxYear: '2025-26',
+    incomeType: 'salaried',
+    incomePeriod: 'annual',
+    income: 11000000,
+  });
+  const surchargeRow = tax11M.breakdown?.find((r) => r.label.includes('Surcharge'));
+  assert(Boolean(surchargeRow?.label.includes('(9%')), 'TY2026 9% surcharge row interpolates dataset rate');
+
+  // Case G: Freelancer UI wiring — real UI fields (annualIncome / isPsebRegistered) are honored
+  const flUi = calculateFreelancerTax({ annualIncome: 4000000, isPsebRegistered: true });
+  const flUiTax = flUi.secondaryResults?.find((r) => r.id === 'annualTax');
+  assert(String(flUiTax?.value).includes('10,000'), 'Freelancer UI wiring: 4M PSEB income taxed at 0.25% (Rs. 10,000)');
+  const flUiNonPseb = calculateFreelancerTax({ annualIncome: 4000000, isPsebRegistered: false });
+  const flUiNonPsebTax = flUiNonPseb.secondaryResults?.find((r) => r.id === 'annualTax');
+  assert(String(flUiNonPsebTax?.value).includes('40,000'), 'Freelancer non-PSEB taxed at 1% Section 154A (Rs. 40,000)');
+
   // ==========================================
   // 6. GP FUND, LEAVE ENCASHMENT, PROMOTION
   // ==========================================
   console.log('\n--- 6. Testing Specialized Engines ---');
+  // GP Fund: FY2024-25 rate is 12.46% (Finance Division No.8(1)GS-I/2018, 31-07-2025).
+  // 1 year: interest = round((500,000 + 10,000 x 6.5) x 12.46%) = 70,399; balance = 6,90,399
   const gpfResult = calculateGPF({
-    year: '2026-27',
+    year: '2024-25',
     openingBalance: 500000,
     monthlySubscription: 10000,
-    years: 5,
+    years: 1,
   });
-  assert(Boolean(gpfResult.primaryResult.value), 'GP Fund compound interest calculated');
+  assert(String(gpfResult.primaryResult.value).includes('6,90,399'), `GP Fund 1-year balance at 12.46% is Rs. 6,90,399: ${gpfResult.primaryResult.value}`);
+  const gpfInterest = gpfResult.secondaryResults?.find((r) => r.id === 'totalInterest');
+  assert(String(gpfInterest?.value).includes('70,399'), `GP Fund yearly interest uses monthly-crediting (6.5-month average): ${gpfInterest?.value}`);
 
   const leaveResult = calculateLeaveEncashment({
     basicPay: 90000,
@@ -197,14 +282,17 @@ function runTests() {
   });
   assert(String(leaveResult.primaryResult.value).includes('10,95,000'), 'Leave encashment lump sum accurate (Rs. 10,95,000)');
 
+  // Family pension floor: 15k basic, 10y -> gross 3,500 -> 75% = 2,625 -> floored to Rs. 9,000;
+  // medical 25% of 9,000 = 2,250; total Rs. 11,250
   const familyPenResult = calculateFamilyPension({
     government: 'punjab',
-    lastBasicPay: 80000,
-    serviceYears: 30,
-    deceasedBps: 16,
+    lastBasicPay: 15000,
+    serviceYears: 10,
+    deceasedBps: 1,
   });
-  assert(Boolean(familyPenResult.primaryResult.value), 'Family pension calculated');
+  assert(String(familyPenResult.primaryResult.value).includes('11,250'), `Family pension floor of Rs. 9,000 enforced (total Rs. 11,250): ${familyPenResult.primaryResult.value}`);
 
+  // FR-22(a)(i): BPS-16 -> 17, basic 60,000 + premature increment, fixed at NEXT ABOVE stage
   const promoResult = calculatePromotion({
     government: 'federal',
     year: '2026-27',
@@ -212,7 +300,72 @@ function runTests() {
     promotedBps: 17,
     currentBasic: 60000,
   });
-  assert(Boolean(promoResult.primaryResult.value), 'FR-22 Promotion pay fixation calculated');
+  assert(String(promoResult.primaryResult.value).includes('66,440'), `FR-22 promotion fixation at next-above stage is Rs. 66,440: ${promoResult.primaryResult.value}`);
+  const promoGain = promoResult.secondaryResults?.find((r) => r.id === 'payGain');
+  assert(String(promoGain?.value).includes('6,440'), `Promotional monthly gain is Rs. 6,440: ${promoGain?.value}`);
+
+  // Federal DRA: 2021 = round(30,370 x 25%) = 7,593; 2022 = round(30,370 x 15%) = 4,556 on frozen BPS-2017 initial
+  const salDra = calculateSalary({ government: 'federal', year: '2026-27', bps: 17, stage: 0, cityType: 'big' });
+  const dra2021Row = salDra.breakdown?.find((r) => r.label.includes('Disparity Reduction Allowance 2021'));
+  const dra2022Row = salDra.breakdown?.find((r) => r.label.includes('Disparity Reduction Allowance 2022'));
+  assert(String(dra2021Row?.amount).includes('7,593'), `DRA-2021 is 25% of frozen BPS-2017 initial (Rs. 7,593): ${dra2021Row?.amount}`);
+  assert(String(dra2022Row?.amount).includes('4,556'), `DRA-2022 is 15% of frozen BPS-2017 initial (Rs. 4,556): ${dra2022Row?.amount}`);
+  const salBps20 = calculateSalary({ government: 'federal', year: '2026-27', bps: 20, stage: 0, cityType: 'big' });
+  assert(salBps20.breakdown?.filter((r) => r.label.includes('Disparity')).length === 0, 'DRA not applied to BPS-20 (scope is BPS 1-19)');
+
+  // ==========================================
+  // 7. UI-WIRED VEHICLE, PROPERTY, ISLAMIC, FX, FUEL, LOAN & ZAKAT ENGINES
+  // ==========================================
+  console.log('\n--- 7. Testing UI-Wired Vehicle, Property, Islamic, FX, Fuel, Loan & Zakat Engines ---');
+
+  // Token tax: Punjab 1300cc, Rs. 4M invoice → 0.3% token (12,000) + Sec 231B 1.5% (60,000)
+  const tt = calculateTokenTax({ province: 'punjab', engineCapacityCc: 1300, invoiceValue: 4000000, isFiler: true });
+  assert(String(tt.primaryResult.value).includes('72,000'), 'Punjab 1300cc token + 231B WHT totals Rs. 72,000');
+  assert(
+    String(tt.secondaryResults?.find((r) => r.id === 'fbrAdvanceTax')?.label).includes('1.50%'),
+    'Section 231B rate is 1.50% of value for the 1001–1300cc band'
+  );
+
+  // Property tax: TY2027 buyer filer, Rs. 10M → 236K 1.5% = 150,000; total 350,000
+  const pt = calculatePropertyTax({ propertyValue: 10000000, transactionType: 'buy', isFiler: true, taxYear: '2026-27' });
+  assert(
+    String(pt.secondaryResults?.find((r) => r.id === 'advanceTax')?.value).includes('1,50,000'),
+    'Property 236K buyer-filer advance tax is Rs. 150,000'
+  );
+  assert(String(pt.primaryResult.value).includes('3,50,000'), 'Property total transfer charges are Rs. 350,000');
+
+  // Inheritance no-children: wife 1/4, mother 1/3, father takes the residuary
+  const inh = calculateInheritance({
+    estateValue: 10000000,
+    debtsAndFuneral: 0,
+    hasSpouse: true,
+    spouseType: 'wife',
+    sons: 0,
+    daughters: 0,
+    hasFather: true,
+    hasMother: true,
+  });
+  const fatherRow = inh.breakdown?.find((r) => r.label.includes('Father'));
+  assert(String(fatherRow?.label).includes('Residuary'), 'No-children: father takes residuary (not a fixed 1/3)');
+  assert(String(fatherRow?.amount).includes('41,66,667'), 'No-children: father residuary share is Rs. 41,66,667');
+  const motherRow = inh.breakdown?.find((r) => r.label.includes('Mother'));
+  assert(String(motherRow?.label).includes('(1/3)'), 'No-children: mother label reflects the 1/3 fraction actually used');
+
+  // Currency: 100 USD open market → 280.50 × 1.0075 × 100 = Rs. 28,260
+  const cur = calculateCurrency({ amount: 100, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'openMarket' });
+  assert(String(cur.primaryResult.value).includes('28,260'), 'Currency open-market conversion applies the 0.75% retail spread');
+
+  // Fuel: 380 km @ 14.5 km/L @ Rs. 342.60/L → Rs. 8,978
+  const fuel = calculateVehicleFuelCost({ distanceKm: 380, fuelAverageKmPerLiter: 14.5, fuelPricePerLiter: 342.60 });
+  assert(String(fuel.primaryResult.value).includes('8,978'), 'Fuel trip cost computed at verified OGRA rate Rs. 342.60/L');
+
+  // Islamic financing disclosure states the reducing-balance equivalence
+  const isl = calculateLoanEmi({ loanAmount: 3000000, annualInterestRate: 13.5, tenureYears: 5, loanType: 'islamic' });
+  assert(String(isl.notes?.[0]).includes('reducing-balance'), 'Islamic note discloses reducing-balance mathematical equivalence');
+
+  // Zakat: silver nisab recomputed from live defaults (52.5 × Rs. 6,528 = Rs. 342,720)
+  const zk = calculateZakat({ cashInHand: 400000 });
+  assert(String(zk.primaryResult.value).includes('10,000'), 'Zakat 2.5% on Rs. 400,000 above silver nisab is Rs. 10,000');
 
   console.log('\n========================================');
   console.log('🎉 ALL TESTS PASSED SUCCESSFULLY (100% PRECISION)');

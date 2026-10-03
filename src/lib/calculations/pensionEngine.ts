@@ -6,12 +6,31 @@ import { formatPKR, safeNumber } from '../utils/formatters';
 export interface PensionEngineInputs {
   government?: GovernmentType;
   year?: BudgetYear;
-  schemeType?: 'pre2024' | 'post2024' | string;
+  schemeType?: 'pre2024' | 'postReform' | 'post2024' | string;
   basicPay?: number | string;
   serviceYears?: number | string;
   age?: number | string;
   commutationPercent?: number | string;
   bps?: number | string;
+  /** Average emoluments of the last 24 months (federal pension reform, retirements on/after 1 Sept 2024). */
+  avgLast24MoPay?: number | string;
+  /** Retirement year/month drive auto-selection of the post-reform (24-month average) path. */
+  retirementYear?: number | string;
+  retirementMonth?: number | string;
+}
+
+/**
+ * Federal pension reform: retirements on/after 1 September 2024 are computed on the
+ * average emoluments of the last 24 months instead of last-drawn basic pay.
+ * Ambiguous 2024 retirements (no month given) conservatively stay on the pre-reform path.
+ */
+function isPostReformRetirement(inputs: PensionEngineInputs): boolean {
+  const year = Math.floor(safeNumber(inputs.retirementYear, 0));
+  if (year > 2024) return true;
+  if (year === 2024) {
+    return Math.floor(safeNumber(inputs.retirementMonth, 0)) >= 9;
+  }
+  return false;
 }
 
 /**
@@ -82,47 +101,74 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
     };
   }
 
-  // 2. Pre-2024 Defined Benefit Pension Scheme (Official Statutory Formula)
-  const qualifyingYears = Math.min(serviceYears, 30);
-  const grossPensionUncapped = (basicPay * qualifyingYears * 7) / 300;
-  const maxAllowableGross = basicPay * 0.70;
-  const grossPension = Math.min(grossPensionUncapped, maxAllowableGross);
+  // 2. Defined Benefit Pension Scheme (Official Statutory Formula)
+  // Emoluments base: the federal pension reform uses the AVERAGE emoluments of the last
+  // 24 months for retirements on/after 1 Sept 2024; genuine pre-reform retirements keep
+  // last-drawn basic pay.
+  const avgLast24MoPay = Math.max(safeNumber(inputs.avgLast24MoPay, 0), 0);
+  const useReformAverage = schemeType === 'postReform' || isPostReformRetirement(inputs);
+  const emolumentsBase = useReformAverage && avgLast24MoPay > 0 ? avgLast24MoPay : basicPay;
 
-  const commutedMonthlyFraction = grossPension * (commPercent / 100);
-  const commutationFactor = getCommutationFactor(age);
+  const qualifyingYears = Math.min(serviceYears, 30);
+  const grossPensionUncapped = (emolumentsBase * qualifyingYears * 7) / 300;
+  const maxAllowableGross = emolumentsBase * 0.70;
+  const preFloorGrossPension = Math.min(grossPensionUncapped, maxAllowableGross);
+
+  // Minimum pension floor applies to GROSS pension (Finance Division OM No.F.15(1)-Reg.6/2023
+  // dated 05-07-2023: floor raised to Rs. 12,000/month w.e.f. 01-07-2023). The top-up is
+  // non-commutable: "Commutation of any part of the increase allowed vide this O.M. will
+  // not be admissible."
+  const floorTopUp = Math.max(0, rules.minimumPension - preFloorGrossPension);
+  const grossPension = preFloorGrossPension + floorTopUp;
+
+  // Commutation is computed on the PRE-FLOOR gross pension (floor top-up is non-commutable).
+  const commutedMonthlyFraction = preFloorGrossPension * (commPercent / 100);
+  // The `age` input is the age on the date commutation becomes absolute; the CSR commutation
+  // table is keyed on age at NEXT birthday, hence the +1.
+  const commutationFactor = getCommutationFactor(age + 1);
   const lumpSumGratuity = commutedMonthlyFraction * 12 * commutationFactor;
 
-  let netMonthlyPension = grossPension - commutedMonthlyFraction;
+  const netMonthlyPension = grossPension - commutedMonthlyFraction;
 
-  // Medical Allowance for Pensioners (25% for BPS 1-16, 20% for BPS 17-22 or min 4000)
-  const medicalAllowanceRate = bps <= 16 ? 0.25 : 0.20;
-  const medicalAllowance = Math.max(Math.round(netMonthlyPension * medicalAllowanceRate), 4000);
+  // Medical Allowance for Pensioners: 25% for BPS 1-15, 20% for BPS 16-22
+  // (Finance Division 2010 notification). No statutory minimum floor applies.
+  const medicalAllowanceRate = bps <= 15 ? 0.25 : 0.20;
+  const medicalAllowance = Math.round(netMonthlyPension * medicalAllowanceRate);
 
-  let totalMonthlyPensionPayable = netMonthlyPension + medicalAllowance;
-
-  // Minimum pension floor enforcement (Rs. 25,000 / month)
-  if (totalMonthlyPensionPayable < rules.minimumPension) {
-    totalMonthlyPensionPayable = rules.minimumPension;
-    netMonthlyPension = rules.minimumPension - medicalAllowance;
-  }
+  const totalMonthlyPensionPayable = netMonthlyPension + medicalAllowance;
 
   const restorationAge = age + Math.round(commutationFactor);
 
   const breakdown: BreakdownRow[] = [
-    { label: 'Last Drawn Running Basic Pay', amount: formatPKR(basicPay) },
+    {
+      label: useReformAverage
+        ? 'Average Emoluments of Last 24 Months (Federal Pension Reform, retirements on/after 1 Sept 2024)'
+        : 'Last Drawn Running Basic Pay',
+      amount: formatPKR(emolumentsBase),
+    },
     {
       label: `Qualifying Service Years (${qualifyingYears} / 30 years cap)`,
       amount: `${qualifyingYears} Years`,
     },
     {
-      label: 'Gross Pension Calculation Formula: (Pay × Service × 7) ÷ 300',
-      amount: formatPKR(grossPension),
-      detail: `Capped at 70% of last drawn basic pay (${((grossPension / basicPay) * 100).toFixed(1)}%)`,
+      label: 'Gross Pension Calculation Formula: (Emoluments × Service × 7) ÷ 300',
+      amount: formatPKR(preFloorGrossPension),
+      detail: `Capped at 70% of emoluments base (${((preFloorGrossPension / emolumentsBase) * 100).toFixed(1)}%)`,
     },
+  ];
+
+  if (floorTopUp > 0) {
+    breakdown.push({
+      label: `Minimum Pension Floor Top-Up to Rs. ${rules.minimumPension.toLocaleString()} (non-commutable, OM No.F.15(1)-Reg.6/2023)`,
+      amount: formatPKR(floorTopUp),
+    });
+  }
+
+  breakdown.push(
     {
-      label: `Commuted Portion Surrendered (${commPercent}% of Gross Pension)`,
+      label: `Commuted Portion Surrendered (${commPercent}% of Pre-Floor Gross Pension)`,
       amount: formatPKR(commutedMonthlyFraction),
-      detail: `Factor at Age ${age}: ${commutationFactor.toFixed(2)}`,
+      detail: `Factor for age ${age} (CSR table: age on next birthday): ${commutationFactor.toFixed(2)}`,
       isDeduction: true,
     },
     {
@@ -135,7 +181,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
       amount: formatPKR(netMonthlyPension),
     },
     {
-      label: `Pensioners Medical Allowance (${(medicalAllowanceRate * 100).toFixed(0)}% — Min Rs. 4,000)`,
+      label: `Pensioners Medical Allowance (${(medicalAllowanceRate * 100).toFixed(0)}% of net pension)`,
       amount: formatPKR(medicalAllowance),
     },
     {
@@ -146,12 +192,12 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
     {
       label: `Full Pension Restoration Age (after ${Math.round(commutationFactor)} years)`,
       amount: `Age ${restorationAge} (Gross: ${formatPKR(grossPension + medicalAllowance)}/mo)`,
-    },
-  ];
+    }
+  );
 
   const chartData: ChartDataPoint[] = [
     { name: 'Commutation Lump Sum (Immediate)', value: Math.round(lumpSumGratuity), color: '#16a34a' },
-    { name: 'Net Annual Monthly Pension', value: Math.round(totalMonthlyPensionPayable * 12), color: '#3b82f6' },
+    { name: 'Net Annual Pension', value: Math.round(totalMonthlyPensionPayable * 12), color: '#3b82f6' },
   ];
 
   return {
@@ -175,8 +221,13 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
     chartData,
     notes: [
       `Official Source: CSR (Civil Service Regulations) Art. 468-A & Finance Division Commutation Purchase Table.`,
-      `Commutation factor for Age ${age} is ${commutationFactor.toFixed(2)} years.`,
-      `Minimum monthly pension floor of Rs. ${rules.minimumPension.toLocaleString()} strictly enforced.`,
+      `Commutation factor ${commutationFactor.toFixed(2)} years (CSR table: age on next birthday).`,
+      `Minimum pension floor of Rs. ${rules.minimumPension.toLocaleString()}/month applies to gross pension (Finance Division OM No.F.15(1)-Reg.6/2023); the floor top-up is non-commutable.`,
+      ...(useReformAverage
+        ? [
+            'Retirement on/after 1 Sept 2024: pension is computed on average emoluments of the last 24 months per the federal pension reform. Pre-reform retirements use last-drawn basic pay.',
+          ]
+        : []),
       ...rules.notes,
     ],
   };

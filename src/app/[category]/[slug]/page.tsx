@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { getCalculatorBySlug, getCategoryById, ALL_CALCULATORS } from '../../../lib/data/categories';
 import DynamicCalculator from '../../../components/calculators/DynamicCalculator';
+import DataSource from '../../../components/ui/DataSource';
 import CalculatorCard from '../../../components/ui/CalculatorCard';
 import { ChevronRight, Home, ShieldCheck, Sparkles, BookOpen, HelpCircle, Calendar, FileText, CheckCircle2 } from 'lucide-react';
 
@@ -103,7 +104,7 @@ export default function CalculatorPage({ params }: CalculatorPageProps) {
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-xs font-medium text-slate-500">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium text-slate-500">
           <Link href="/" className="hover:text-emerald-800 flex items-center gap-1">
             <Home className="h-3.5 w-3.5" />
             <span>Home</span>
@@ -130,7 +131,7 @@ export default function CalculatorPage({ params }: CalculatorPageProps) {
             </span>
             <span className="flex items-center gap-1 text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
               <Calendar className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-              Updated: August 2026
+              Rates verified: October 2026
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white">
@@ -143,6 +144,9 @@ export default function CalculatorPage({ params }: CalculatorPageProps) {
 
         {/* Main Interactive Calculation Engine Workspace */}
         <DynamicCalculator slug={calculator.slug} />
+
+        {/* Official sources & rate verification for this calculator */}
+        <DataSource toolId={calculator.id} />
 
         {/* Context Guide & Methodological Transparency */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 pt-6">

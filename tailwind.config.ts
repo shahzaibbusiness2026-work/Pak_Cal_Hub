@@ -36,6 +36,11 @@ const config: Config = {
         mono: ["var(--font-mono)", "JetBrains Mono", "Fira Code", "Courier New", "monospace"],
         display: ["var(--font-sans)", "Plus Jakarta Sans", "sans-serif"],
       },
+      boxShadow: {
+        // Tailwind v4-style extra-small shadows used across the codebase (v3 has no shadow-xs/2xs)
+        "2xs": "0 1px rgb(0 0 0 / 0.05)",
+        xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      },
     },
   },
   plugins: [],

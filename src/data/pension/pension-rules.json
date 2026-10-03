@@ -2,7 +2,8 @@
   "federal": {
     "government": "federal",
     "governmentName": "Federal Government",
-    "minimumPension": 25000,
+    "minimumPension": 12000,
+    "minimumFamilyPension": 9000,
     "familyPensionRate": 0.75,
     "familyPensionLifetimeWidow": false,
     "familyPensionLifetimeUnmarriedDaughter": false,
@@ -19,14 +20,16 @@
     "notes": [
       "Federal Defined Benefit Pension (Pre-1 July 2024): Gross pension = (Last Basic Pay * Service Years * 7) / 300 (up to 70% max).",
       "Commutation capped at 35% of gross pension.",
-      "Minimum monthly pension is fixed at Rs. 25,000.",
+      "Minimum pension Rs. 12,000/month and minimum family pension Rs. 9,000/month w.e.f. 01-07-2023 per Finance Division OM No.F.15(1)-Reg.6/2023 dated 05-07-2023; the floor applies to gross pension and the top-up is non-commutable.",
+      "Provincial minimum floors follow the federal pattern - verify against the provincial finance department notification.",
       "Federal post-July 2024 hires are covered under FGDC Defined Contribution Scheme (10% employee + 12% government contribution)."
     ]
   },
   "punjab": {
     "government": "punjab",
     "governmentName": "Government of Punjab",
-    "minimumPension": 25000,
+    "minimumPension": 12000,
+    "minimumFamilyPension": 9000,
     "familyPensionRate": 0.75,
     "familyPensionLifetimeWidow": true,
     "familyPensionLifetimeUnmarriedDaughter": true,
@@ -48,7 +51,8 @@
   "sindh": {
     "government": "sindh",
     "governmentName": "Government of Sindh",
-    "minimumPension": 25000,
+    "minimumPension": 12000,
+    "minimumFamilyPension": 9000,
     "familyPensionRate": 0.75,
     "familyPensionLifetimeWidow": true,
     "familyPensionLifetimeUnmarriedDaughter": true,
@@ -69,7 +73,8 @@
   "kpk": {
     "government": "kpk",
     "governmentName": "Government of Khyber Pakhtunkhwa",
-    "minimumPension": 25000,
+    "minimumPension": 12000,
+    "minimumFamilyPension": 9000,
     "familyPensionRate": 0.75,
     "familyPensionLifetimeWidow": false,
     "familyPensionLifetimeUnmarriedDaughter": false,
@@ -90,7 +95,8 @@
   "balochistan": {
     "government": "balochistan",
     "governmentName": "Government of Balochistan",
-    "minimumPension": 25000,
+    "minimumPension": 12000,
+    "minimumFamilyPension": 9000,
     "familyPensionRate": 0.75,
     "familyPensionLifetimeWidow": true,
     "familyPensionLifetimeUnmarriedDaughter": true,

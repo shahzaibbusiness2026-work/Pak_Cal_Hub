@@ -93,12 +93,7 @@ export default function GoldRateCalculatorPakistanPage() {
 
         <DynamicCalculator slug="gold-rate-calculator" />
 
-        <DataSource
-          sourceName="All Pakistan Sarafa Gems and Jewellers Association (APSGJA) Official Bullion Benchmark"
-          sourceUrl="https://apsja.com.pk"
-          effectiveDate="August 2026"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="gold-price-calculator" />
 
         <ShareButtons title="Gold Rate & Jewelry Value Calculator Pakistan 2026" />
 

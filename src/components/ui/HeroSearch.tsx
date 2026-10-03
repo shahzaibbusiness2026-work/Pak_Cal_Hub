@@ -12,15 +12,22 @@ export default function HeroSearch() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click or Escape
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
     document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const results = useMemo(() => {
@@ -45,13 +52,21 @@ export default function HeroSearch() {
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto mt-8">
       {/* Prominent Search Input Box */}
       <div className="relative flex items-center rounded-2xl border-2 border-emerald-800/20 bg-white p-2 shadow-xl shadow-emerald-950/5 dark:border-slate-700 dark:bg-slate-900/90 dark:shadow-slate-950/50 transition-all focus-within:border-emerald-700 focus-within:ring-4 focus-within:ring-emerald-700/10 dark:focus-within:border-emerald-500">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">
+        <label htmlFor="hero-calculator-search" className="sr-only">
+          Search calculators
+        </label>
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400" aria-hidden="true">
           <Search className="h-5 w-5" />
         </div>
 
         <input
+          id="hero-calculator-search"
           type="text"
           value={query}
+          aria-expanded={isOpen && query.trim().length > 0}
+          aria-controls="hero-search-results"
+          role="combobox"
+          aria-autocomplete="list"
           onChange={(e) => {
             setQuery(e.target.value);
             setIsOpen(true);
@@ -74,8 +89,12 @@ export default function HeroSearch() {
 
       {/* Live Suggestion Dropdown */}
       {isOpen && query.trim().length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-          <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+        <div
+          id="hero-search-results"
+          role="listbox"
+          aria-label="Matching calculators"
+          className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+        >  <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
             Matching Tools ({results.length})
           </div>
 
@@ -91,8 +110,10 @@ export default function HeroSearch() {
                   <button
                     key={calc.id}
                     type="button"
+                    role="option"
+                    aria-selected="false"
                     onClick={() => handleSelect(calc)}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-slate-800 group"
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-emerald-50 dark:hover:bg-slate-800 group min-h-[44px]"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">

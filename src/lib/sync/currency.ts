@@ -1,13 +1,25 @@
 import { prisma, isDatabaseConnected } from '../db/prisma';
 import { SyncServiceResult, SyncItemChange, SyncOptions } from './types';
 
+/**
+ * Manually verified FX benchmarks.
+ *
+ * Honesty note: SBP publishes rates on its website but exposes no public
+ * machine-readable feed reachable server-side (its endpoints reject automated
+ * fetches). There is no live ingestion here — the cron "sync" publishes these
+ * manually verified constants to the DB. Update the values + FX_VERIFIED_ON
+ * below whenever new SBP closing rates are verified; the admin freshness
+ * report surfaces staleness.
+ */
+export const FX_VERIFIED_ON = '2026-10-04';
+
 export const LATEST_FEED_CURRENCY = [
-  { key: 'usd_pkr', label: 'US Dollar (USD / PKR)', value: 280.50, unit: 'PKR / USD', source: 'State Bank of Pakistan Interbank Closing', sourceUrl: 'https://sbp.org.pk' },
-  { key: 'aed_pkr', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'sar_pkr', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'gbp_pkr', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'eur_pkr', label: 'Euro (EUR / PKR)', value: 302.80, unit: 'PKR / EUR', source: 'State Bank of Pakistan Interbank Closing' },
-  { key: 'cad_pkr', label: 'Canadian Dollar (CAD / PKR)', value: 204.50, unit: 'PKR / CAD', source: 'State Bank of Pakistan Interbank Closing' },
+  { key: 'usd_pkr', label: 'US Dollar (USD / PKR)', value: 277.10, unit: 'PKR / USD', source: 'State Bank of Pakistan M2M Revaluation Rate (1 Oct 2026) — manually verified', sourceUrl: 'https://www.sbp.org.pk' },
+  { key: 'aed_pkr', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
+  { key: 'sar_pkr', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
+  { key: 'gbp_pkr', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
+  { key: 'eur_pkr', label: 'Euro (EUR / PKR)', value: 302.80, unit: 'PKR / EUR', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
+  { key: 'cad_pkr', label: 'Canadian Dollar (CAD / PKR)', value: 204.50, unit: 'PKR / CAD', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
 ];
 
 export async function syncCurrencyRates(options: SyncOptions = {}): Promise<SyncServiceResult> {
@@ -25,7 +37,9 @@ export async function syncCurrencyRates(options: SyncOptions = {}): Promise<Sync
         itemsProcessed: LATEST_FEED_CURRENCY.length,
         changesDetected: 0,
         changes: [],
-        message: 'Database in fallback mode: Currency sync completed in memory.',
+        message: 'Database in fallback mode: manually verified FX constants served from memory.',
+        syncMode: 'manual-verified',
+        verifiedOn: FX_VERIFIED_ON,
       };
     }
 
@@ -128,7 +142,9 @@ export async function syncCurrencyRates(options: SyncOptions = {}): Promise<Sync
       itemsProcessed: LATEST_FEED_CURRENCY.length,
       changesDetected,
       changes,
-      message: `Currency sync completed: ${changesDetected} rate changes detected.`,
+      message: `Currency publish completed (manual-verified constants, verified ${FX_VERIFIED_ON}): ${changesDetected} rate changes detected.`,
+      syncMode: 'manual-verified',
+      verifiedOn: FX_VERIFIED_ON,
     };
   } catch (err: any) {
     try {

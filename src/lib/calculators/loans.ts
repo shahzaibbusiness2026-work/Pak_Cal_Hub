@@ -81,7 +81,7 @@ export function calculateLoanEmi(inputs: Record<string, any>): CalculatorOutput 
     amortizationSchedule: schedule,
     notes: [
       isIslamic
-        ? 'Islamic Diminishing Musharakah financing involves gradual unit purchasing and rent payments.'
+        ? 'Islamic Diminishing Musharakah: the same reducing-balance mathematics as a conventional loan (identical monthly installment, principal/profit split, and total payable) — only the contract structure differs (bank purchases the asset, you gradually buy its units and pay rent on its share). Numbers shown are the financial-equivalent comparison.'
         : 'Based on reducing balance standard banking amortization schedules.',
     ],
   };

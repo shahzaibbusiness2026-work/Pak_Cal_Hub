@@ -5,6 +5,12 @@ export interface UniversityFormula {
   matricWeight: number; // percentage
   fscWeight: number;    // percentage
   testWeight: number;   // percentage
+  /**
+   * Which F.Sc marks the merit formula expects:
+   * 'full'  = full HSSC / Intermediate out of 1,100
+   * 'part1' = HSSC Part-I out of ~520/550
+   */
+  fscBasis: 'full' | 'part1';
   description: string;
 }
 
@@ -16,6 +22,7 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 10,
     fscWeight: 40,
     testWeight: 50,
+    fscBasis: 'full', // verified: PM&DC uses full HSSC Pre-Medical out of 1,100
     description: 'PM&DC Formula: Matric 10% + F.Sc Pre-Medical 40% + MDCAT 50%',
   },
   {
@@ -25,6 +32,8 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 10,
     fscWeight: 15,
     testWeight: 75,
+    // verify: NUST Part-I total may be 520 (pre-2010 scheme) or 550 (current scheme)
+    fscBasis: 'part1',
     description: 'NUST Entry Test: Matric 10% + F.Sc Part 1 15% + NET 75%',
   },
   {
@@ -34,6 +43,8 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 0,
     fscWeight: 15,
     testWeight: 85,
+    // verify: GIKI's 15% HSSC scope (full HSSC vs Part-I) unconfirmed against current policy
+    fscBasis: 'part1',
     description: 'GIKI Admission Merit: F.Sc / HSSC 15% + GIKI Admission Test 85%',
   },
   {
@@ -43,6 +54,8 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 10,
     fscWeight: 40,
     testWeight: 50,
+    // verify: UET F.Sc scope (full HSSC 1100 vs Part-I) unconfirmed against current prospectus
+    fscBasis: 'part1',
     description: 'UET Combined Entry Test: Matric 10% + F.Sc 40% + ECAT 50%',
   },
   {
@@ -52,6 +65,7 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 10,
     fscWeight: 40,
     testWeight: 50,
+    fscBasis: 'part1', // FAST uses HSSC Part-I per published policy
     description: 'FAST Engineering/CS: SSC 10% + HSSC Part 1 40% + NU Test 50%',
   },
   {
@@ -61,15 +75,19 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 10,
     fscWeight: 40,
     testWeight: 50,
+    // verify: COMSATS 40% HSSC scope (full vs Part-I) unconfirmed against current policy
+    fscBasis: 'part1',
     description: 'COMSATS Merit: SSC 10% + HSSC 40% + NTS NAT 50%',
   },
   {
     id: 'pu',
     name: 'University of the Punjab (PU)',
     shortName: 'Punjab University',
-    matricWeight: 25,
-    fscWeight: 75,
+    // Official PU basic merit = 1/4 Matric + F.Sc out of 275 + 1100 = 1375 -> 20% / 80%
+    matricWeight: 20,
+    fscWeight: 80,
     testWeight: 0,
+    fscBasis: 'full', // verified: PU uses total F.Sc marks out of 1,100
     description: 'PU Standard Basic Merit: 1/4 Matric + Total F.Sc Marks (or 75% HSSC + 25% PU Entry Test if applicable)',
   },
   {
@@ -79,6 +97,8 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     matricWeight: 20,
     fscWeight: 30,
     testWeight: 50,
+    // verify: KU 20/30/50 weightings and HSSC scope unconfirmed against current prospectus
+    fscBasis: 'part1',
     description: 'KU Entry Test Based Programs: Matric 20% + Intermediate 30% + Test 50%',
   },
 ];

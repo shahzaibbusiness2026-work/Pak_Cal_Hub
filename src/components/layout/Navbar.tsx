@@ -8,42 +8,11 @@ import {
   X,
   Calculator,
   ChevronDown,
-  Building2,
-  Receipt,
-  Zap,
-  Building,
-  GraduationCap,
-  Landmark,
-  Moon,
-  Briefcase,
-  Car,
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Compass,
-  ArrowRight,
-  Sparkles,
 } from 'lucide-react';
 import SearchModal from './SearchModal';
 import ThemeToggle from '../ui/ThemeToggle';
+import { CategoryIcon } from '../ui/categoryIcons';
 import { CATEGORIES_DATA, getCategoryById } from '../../lib/data/categories';
-
-// Category Icon Mapping helper
-const iconMap: Record<string, React.ReactNode> = {
-  Building2: <Building2 className="h-4 w-4" />,
-  Receipt: <Receipt className="h-4 w-4" />,
-  Zap: <Zap className="h-4 w-4" />,
-  Building: <Building className="h-4 w-4" />,
-  GraduationCap: <GraduationCap className="h-4 w-4" />,
-  Landmark: <Landmark className="h-4 w-4" />,
-  Moon: <Moon className="h-4 w-4" />,
-  Briefcase: <Briefcase className="h-4 w-4" />,
-  Car: <Car className="h-4 w-4" />,
-  DollarSign: <DollarSign className="h-4 w-4" />,
-  TrendingUp: <TrendingUp className="h-4 w-4" />,
-  Calendar: <Calendar className="h-4 w-4" />,
-  Compass: <Compass className="h-4 w-4" />,
-};
 
 interface NavDropdownItem {
   id: string;
@@ -94,6 +63,16 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // Close mobile menu on Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
+
   // Close dropdown on outside click
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
@@ -139,7 +118,7 @@ export default function Navbar() {
           </div>
 
           {/* Primary Navigation with Category Dropdowns */}
-          <nav className="hidden lg:flex items-center gap-1" ref={navContainerRef}>
+          <nav className="hidden lg:flex items-center gap-1" ref={navContainerRef} aria-label="Primary navigation">
             {PRIMARY_NAV_CATEGORIES.map((item) => {
               const category = getCategoryById(item.categorySlug);
               if (!category) return null;
@@ -155,6 +134,8 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setOpenDropdownId(isOpen ? null : item.id)}
+                    aria-expanded={isOpen}
+                    aria-haspopup="true"
                     className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all ${
                       isOpen
                         ? 'bg-emerald-50 text-emerald-800 dark:bg-slate-900 dark:text-emerald-400'
@@ -181,7 +162,7 @@ export default function Navbar() {
                         <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1.5">
                           <div className="flex items-center gap-1.5">
                             <span className="text-emerald-800 dark:text-emerald-400">
-                              {iconMap[category.icon] || <Calculator className="h-4 w-4" />}
+                              {<CategoryIcon icon={category.icon} className="h-4 w-4" />}
                             </span>
                             <span className="text-xs font-bold text-slate-900 dark:text-white">
                               {category.name}
@@ -234,6 +215,8 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setOpenDropdownId(openDropdownId === 'more' ? null : 'more')}
+                aria-expanded={openDropdownId === 'more'}
+                aria-haspopup="true"
                 className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all ${
                   openDropdownId === 'more'
                     ? 'bg-emerald-50 text-emerald-800 dark:bg-slate-900 dark:text-emerald-400'
@@ -267,7 +250,7 @@ export default function Navbar() {
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-emerald-800 dark:text-emerald-400">
-                              {iconMap[cat.icon] || <Calculator className="h-4 w-4" />}
+                              {<CategoryIcon icon={cat.icon} className="h-4 w-4" />}
                             </span>
                             <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-900 dark:text-slate-200 dark:group-hover:text-emerald-400">
                               {cat.name}
@@ -302,8 +285,10 @@ export default function Navbar() {
             {/* Mobile Menu Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden"
-              aria-label="Toggle menu"
+              className="btn-icon lg:hidden"
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav-menu"
             >
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -312,8 +297,8 @@ export default function Navbar() {
 
         {/* Mobile menu accordion drawer */}
         {mobileMenuOpen && (
-          <div className="border-b border-slate-200 bg-white px-3 sm:px-4 py-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden max-h-[80vh] overflow-y-auto overscroll-contain custom-scrollbar shadow-2xl pb-8">
-            <nav className="flex flex-col gap-2">
+          <div id="mobile-nav-menu" className="border-b border-slate-200 bg-white px-3 sm:px-4 py-4 dark:border-slate-800 dark:bg-slate-950 lg:hidden max-h-[80vh] overflow-y-auto overscroll-contain custom-scrollbar shadow-2xl pb-8">
+            <nav className="flex flex-col gap-2" aria-label="Mobile navigation">
               <div className="px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Most Popular Categories & Tools
               </div>
@@ -325,11 +310,12 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={() => setExpandedMobileCat(isExpanded ? null : cat.id)}
-                      className="flex w-full items-center justify-between p-3 text-left text-xs font-bold text-slate-900 dark:text-white bg-slate-50/70 dark:bg-slate-900/60"
+                      aria-expanded={isExpanded}
+                      className="flex w-full items-center justify-between p-3 text-left text-xs font-bold text-slate-900 dark:text-white bg-slate-50/70 dark:bg-slate-900/60 min-h-[44px] touch-manipulation"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-800 dark:text-emerald-400">
-                          {iconMap[cat.icon] || <Calculator className="h-4 w-4" />}
+                          {<CategoryIcon icon={cat.icon} className="h-4 w-4" />}
                         </span>
                         <span>{cat.name}</span>
                       </div>

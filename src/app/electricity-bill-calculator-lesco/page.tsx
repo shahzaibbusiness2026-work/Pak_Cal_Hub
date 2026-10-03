@@ -6,6 +6,25 @@ import DataSource from '../../components/ui/DataSource';
 import ShareButtons from '../../components/ui/ShareButtons';
 import FAQSection from '../../components/ui/FAQSection';
 import { BookOpen, ChevronRight, Home, Zap } from 'lucide-react';
+import { LIFELINE_SLABS, PROTECTED_SLABS, UNPROTECTED_SLABS } from '../../lib/data/electricity-data';
+
+// Slab comparison table rows rendered from the canonical NEPRA dataset (single source of truth).
+function buildSlabRows() {
+  const rows: Array<{ range: string; lifeline?: number; protected?: number; unprotected: number; hot?: boolean }> = [];
+  for (const s of LIFELINE_SLABS) {
+    rows.push({ range: `${s.min} – ${s.max} Units (Lifeline)`, lifeline: s.rate, unprotected: 0 });
+  }
+  for (const s of UNPROTECTED_SLABS) {
+    const p = PROTECTED_SLABS.find((ps) => ps.min === s.min && ps.max === s.max);
+    rows.push({
+      range: s.max === Infinity ? 'Above 700 Units' : `${s.min} – ${s.max} Units`,
+      protected: p?.rate,
+      unprotected: s.rate,
+      hot: s.min >= 301,
+    });
+  }
+  return rows;
+}
 
 export const metadata: Metadata = {
   title: 'LESCO Electricity Bill Calculator 2026 | NEPRA Unit Rates & Taxes',
@@ -93,13 +112,7 @@ export default function ElectricityBillCalculatorLescoPage() {
 
         <DynamicCalculator slug="electricity-bill-calculator" />
 
-        <DataSource
-          sourceName="National Electric Power Regulatory Authority (NEPRA) Domestic Tariff Schedule"
-          sourceUrl="https://nepra.org.pk"
-          notificationNo="NEPRA/TRF-100/2026"
-          effectiveDate="1st July 2026"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="electricity-bill-calculator" />
 
         <ShareButtons title="LESCO & Pakistan Electricity Bill Calculator 2026" />
 
@@ -117,44 +130,32 @@ export default function ElectricityBillCalculatorLescoPage() {
                   <thead className="border-b border-slate-100 bg-slate-50 text-[11px] font-bold uppercase text-slate-500 dark:border-slate-800 dark:bg-slate-800/40">
                     <tr>
                       <th className="py-2.5 px-3">Units Range</th>
+                      <th className="py-2.5 px-3">Lifeline Rate</th>
                       <th className="py-2.5 px-3">Protected Base Rate</th>
                       <th className="py-2.5 px-3">Unprotected Base Rate</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    <tr>
-                      <td className="py-2 px-3 font-semibold">1 – 50 Units</td>
-                      <td className="py-2 px-3 text-emerald-700 font-bold dark:text-emerald-400">Rs. 9.87 / unit</td>
-                      <td className="py-2 px-3">Rs. 23.59 / unit</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-semibold">51 – 100 Units</td>
-                      <td className="py-2 px-3 text-emerald-700 font-bold dark:text-emerald-400">Rs. 16.48 / unit</td>
-                      <td className="py-2 px-3">Rs. 23.59 / unit</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-semibold">101 – 200 Units</td>
-                      <td className="py-2 px-3 text-emerald-700 font-bold dark:text-emerald-400">Rs. 22.95 / unit</td>
-                      <td className="py-2 px-3">Rs. 30.07 / unit</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-semibold">201 – 300 Units</td>
-                      <td className="py-2 px-3 text-slate-400">—</td>
-                      <td className="py-2 px-3 font-bold text-amber-700 dark:text-amber-400">Rs. 34.26 / unit</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-semibold">301 – 400 Units</td>
-                      <td className="py-2 px-3 text-slate-400">—</td>
-                      <td className="py-2 px-3 font-bold text-amber-700 dark:text-amber-400">Rs. 39.15 / unit</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-semibold">Above 700 Units</td>
-                      <td className="py-2 px-3 text-slate-400">—</td>
-                      <td className="py-2 px-3 font-bold text-red-600 dark:text-red-400">Rs. 48.84 / unit</td>
-                    </tr>
+                    {buildSlabRows().map((row) => (
+                      <tr key={row.range}>
+                        <td className="py-2 px-3 font-semibold">{row.range}</td>
+                        <td className="py-2 px-3 text-emerald-700 font-bold dark:text-emerald-400">
+                          {row.lifeline !== undefined ? `Rs. ${row.lifeline.toFixed(2)} / unit` : <span className="text-slate-400 font-normal">—</span>}
+                        </td>
+                        <td className="py-2 px-3 text-emerald-700 font-bold dark:text-emerald-400">
+                          {row.protected !== undefined ? `Rs. ${row.protected.toFixed(2)} / unit` : <span className="text-slate-400 font-normal">—</span>}
+                        </td>
+                        <td className={`py-2 px-3 font-bold ${row.hot ? 'text-red-600 dark:text-red-400' : 'text-amber-700 dark:text-amber-400'}`}>
+                          {row.unprotected > 0 ? `Rs. ${row.unprotected.toFixed(2)} / unit` : <span className="text-slate-400 font-normal">—</span>}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                NEPRA uniform domestic tariff, Calendar Year 2026 (effective 1 Jan 2026; fixed charges per kW of sanctioned load since Feb 2026). Verify against the latest NEPRA notification.
+              </p>
             </div>
 
             <FAQSection faqs={ELECTRICITY_FAQS} />

@@ -1,12 +1,23 @@
 import { prisma, isDatabaseConnected } from '../db/prisma';
 import { SyncServiceResult, SyncItemChange, SyncOptions } from './types';
 
+/**
+ * Manually verified bullion benchmarks.
+ *
+ * Honesty note: the Sarafa Association publishes daily rates to the press, not
+ * a machine-readable feed. There is no live ingestion here — the cron "sync"
+ * publishes these manually verified constants to the DB. Update the values +
+ * GOLD_VERIFIED_ON below whenever new rates are verified; the admin
+ * freshness report surfaces staleness.
+ */
+export const GOLD_VERIFIED_ON = '2026-10-04';
+
 export const LATEST_FEED_GOLD = [
-  { key: 'gold_24k_tola', label: 'Gold 24K (per Tola)', value: 242000, unit: 'PKR / Tola (11.66g)', source: 'All Pakistan Sarafa Gems and Jewellers Association', sourceUrl: 'https://apsja.com.pk' },
-  { key: 'gold_22k_tola', label: 'Gold 22K (per Tola)', value: 221833, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark' },
-  { key: 'gold_21k_tola', label: 'Gold 21K (per Tola)', value: 211750, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark' },
-  { key: 'gold_18k_tola', label: 'Gold 18K (per Tola)', value: 181500, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark' },
-  { key: 'silver_tola', label: 'Silver (per Tola)', value: 2850, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark' },
+  { key: 'gold_24k_tola', label: 'Gold 24K (per Tola)', value: 440636, unit: 'PKR / Tola (11.66g)', source: 'All Pakistan Sarafa Gems and Jewellers Association — manually verified' },
+  { key: 'gold_22k_tola', label: 'Gold 22K (per Tola)', value: 403916, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
+  { key: 'gold_21k_tola', label: 'Gold 21K (per Tola)', value: 385557, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
+  { key: 'gold_18k_tola', label: 'Gold 18K (per Tola)', value: 330477, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
+  { key: 'silver_tola', label: 'Silver (per Tola)', value: 6528, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — manually verified' },
 ];
 
 export async function syncGoldRates(options: SyncOptions = {}): Promise<SyncServiceResult> {
@@ -24,7 +35,9 @@ export async function syncGoldRates(options: SyncOptions = {}): Promise<SyncServ
         itemsProcessed: LATEST_FEED_GOLD.length,
         changesDetected: 0,
         changes: [],
-        message: 'Database in fallback mode: Gold sync completed in memory.',
+        message: 'Database in fallback mode: manually verified gold constants served from memory.',
+        syncMode: 'manual-verified',
+        verifiedOn: GOLD_VERIFIED_ON,
       };
     }
 
@@ -51,7 +64,7 @@ export async function syncGoldRates(options: SyncOptions = {}): Promise<SyncServ
             category: 'gold',
             status: 'PUBLISHED',
             source: item.source,
-            sourceUrl: item.sourceUrl,
+            sourceUrl: (item as { sourceUrl?: string }).sourceUrl ?? undefined,
             verifiedAt: new Date(),
             updatedBy: options.adminUser || 'Automated Cron Service',
           },
@@ -63,7 +76,7 @@ export async function syncGoldRates(options: SyncOptions = {}): Promise<SyncServ
             category: 'gold',
             status: 'PUBLISHED',
             source: item.source,
-            sourceUrl: item.sourceUrl,
+            sourceUrl: (item as { sourceUrl?: string }).sourceUrl ?? undefined,
             verifiedAt: new Date(),
             updatedBy: options.adminUser || 'Automated Cron Service',
           },
@@ -127,7 +140,9 @@ export async function syncGoldRates(options: SyncOptions = {}): Promise<SyncServ
       itemsProcessed: LATEST_FEED_GOLD.length,
       changesDetected,
       changes,
-      message: `Gold sync completed: ${changesDetected} rate changes detected.`,
+      message: `Gold publish completed (manual-verified constants, verified ${GOLD_VERIFIED_ON}): ${changesDetected} rate changes detected.`,
+      syncMode: 'manual-verified',
+      verifiedOn: GOLD_VERIFIED_ON,
     };
   } catch (err: any) {
     try {

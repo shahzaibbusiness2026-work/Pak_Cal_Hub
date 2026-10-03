@@ -21,6 +21,16 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
     }
   }, [open]);
 
+  // Close on Escape (the footer hint promises this)
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
   const results = useMemo(() => {
     if (!query.trim()) {
       return ALL_CALCULATORS.filter((c) => c.featured || c.trending).slice(0, 8);
@@ -43,15 +53,25 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/60 p-4 pt-16 backdrop-blur-sm sm:p-6 sm:pt-20">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/60 p-4 pt-16 backdrop-blur-sm sm:p-6 sm:pt-20"
+      onClick={onClose}
+    >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search calculators"
         className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/10 transition-all dark:bg-slate-900 dark:ring-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
         <div className="relative flex items-center border-b border-slate-200 px-4 dark:border-slate-800">
-          <Search className="h-5 w-5 text-emerald-800 dark:text-emerald-400" />
+          <Search className="h-5 w-5 text-emerald-800 dark:text-emerald-400" aria-hidden="true" />
+          <label htmlFor="global-search-input" className="sr-only">
+            Search Pakistan calculators
+          </label>
           <input
+            id="global-search-input"
             type="text"
             className="h-14 w-full bg-transparent px-3 text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-white"
             placeholder="Search Pakistan calculators (e.g. BPS 17, FBR Tax, Solar, Marla, MDCAT, Zakat)..."
@@ -61,7 +81,8 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
           />
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+            aria-label="Close search"
+            className="rounded-lg p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 touch-manipulation"
           >
             <X className="h-5 w-5" />
           </button>

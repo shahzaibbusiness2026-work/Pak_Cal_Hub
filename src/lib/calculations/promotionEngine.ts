@@ -40,7 +40,8 @@ export function calculatePromotion(inputs: PromotionEngineInputs): CalculatorOut
   } else {
     for (let s = 0; s <= promotedScale.stages; s++) {
       const stagePay = promotedScale.minPay + s * promotedScale.increment;
-      if (stagePay >= payPlusPremature) {
+      // FR-22(a)(i): fixation is at the stage NEXT ABOVE the benchmark pay (strict >).
+      if (stagePay > payPlusPremature) {
         newBasic = stagePay;
         stageInNewScale = s;
         break;

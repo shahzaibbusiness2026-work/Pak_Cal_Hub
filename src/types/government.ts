@@ -60,6 +60,7 @@ export interface PensionRulesDataset {
   government: GovernmentType;
   governmentName: string;
   minimumPension: number;
+  minimumFamilyPension?: number; // e.g. 9000 for the minimum family pension floor
   familyPensionRate: number; // e.g. 0.75 for 75%
   familyPensionLifetimeWidow: boolean;
   familyPensionLifetimeUnmarriedDaughter: boolean;

@@ -93,13 +93,7 @@ export default function FuelCostCalculatorPakistanPage() {
 
         <DynamicCalculator slug="fuel-cost-calculator" />
 
-        <DataSource
-          sourceName="Ministry of Energy (Petroleum Division) & OGRA Petroleum Price Notification"
-          sourceUrl="https://ogra.org.pk"
-          notificationNo="Petroleum Division SRO Notification (28 August 2026)"
-          effectiveDate="28th August 2026"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="fuel-cost-calculator" />
 
         <ShareButtons title="Pakistan Fuel Cost & Trip Expense Calculator" />
 

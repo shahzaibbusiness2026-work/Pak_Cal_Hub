@@ -92,13 +92,7 @@ export default function PensionCalculatorPakistanPage() {
 
         <DynamicCalculator slug="pension-calculator" />
 
-        <DataSource
-          sourceName="Finance Division Pension Regulations (CSR Articles 468-474) & Appendix I Commutation Table"
-          sourceUrl="https://finance.gov.pk"
-          notificationNo="F.No.1(1)Imp/2024-Pension"
-          effectiveDate="1st July 2024 & RBPS-2026 Updates"
-          verifiedAt="28th August 2026"
-        />
+        <DataSource toolId="pension-calculator" />
 
         <ShareButtons title="Pakistan Pension & Commutation Calculator 2026" />
 
