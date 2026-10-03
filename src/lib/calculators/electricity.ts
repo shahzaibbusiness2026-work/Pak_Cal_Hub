@@ -14,14 +14,20 @@ import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 /**
  * Calculates Pakistan Electricity Bill (LESCO, IESCO, K-Electric, MEPCO, etc.)
  *
- * Billing order mirrors real DISCO bills:
- *  1. Base energy charges with slab benefit (each unit block billed at its own slab rate)
- *  2. Fixed charges = per-kW rate of the consumption tier × sanctioned load (Feb 2026 regime)
- *  3. FC surcharge (Rs 3.23/unit) + FPA + QTA (user-supplied, vary per NEPRA notification) + meter rent
- *  4. Electricity Duty = 1.5% of base energy charges only, plus 1.5% on the FPA amount
- *  5. GST 18% on (energy + fixed + FC + FPA + QTA + meter + ED) — matches the real bill's
- *     two-line presentation (main GST + 18% GST on FPA)
- *  6. PTV fee Rs 35; total rounded to whole rupees
+ * Billing order mirrors real DISCO bills (validated to the rupee against a
+ * MEPCO Sep-2026 bill: 412 units unprotected, and a LESCO Apr-2026 bill):
+ *  1. Base energy charges: unprotected consumers above 200 units are billed
+ *     ALL units at the single marginal slab rate (no slab benefit) — verified:
+ *     412 x Rs. 38.95 = Rs. 16,047.40 on the MEPCO bill. Protected, lifeline,
+ *     and unprotected <= 200 units use telescopic slab rollup.
+ *  2. Fixed charges = per-kW rate of the consumption tier x sanctioned load (Feb 2026 regime)
+ *  3. FC surcharge (Rs 3.23/unit) + QTA (user-supplied, may be negative) + meter rent
+ *  4. FPA block on fpaUnits (FPA is billed 2-3 months late on that month's units):
+ *     FPA energy + 1.5% ED on FPA + 18% GST on (FPA energy + FPA ED) + other FPA charges
+ *  5. Electricity Duty = 1.5% of (base energy charges + QTA) — verified on two real bills
+ *  6. Main GST 18% on (energy + fixed + FC + QTA + meter + ED) — FPA excluded from
+ *     the main base; FPA carries its own GST line (verified)
+ *  7. TV fee (input, default Rs. 0 — being phased out); total rounded to whole rupees
  */
 export function calculateElectricityBill(inputs: Record<string, any>): CalculatorOutput {
   const units = Math.max(0, Math.floor(safeNumber(inputs.units, 280)));
@@ -35,26 +41,43 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
 
   const slabs = isLifeline ? LIFELINE_SLABS : isProtected ? PROTECTED_SLABS : UNPROTECTED_SLABS;
 
+  // Unprotected consumers above 200 units lose slab benefit: the entire consumption
+  // is billed at the single marginal slab rate (NEPRA domestic tariff design).
+  const useFlatMarginalRate = category === 'unprotected' && units > 200;
+
   let energyCost = 0;
-  let remainingUnits = units;
+  let marginalRate = 0;
   let slabBreakdownDetails: Array<{ slab: string; unitsInSlab: number; rate: number; cost: number }> = [];
 
-  for (let i = 0; i < slabs.length; i++) {
-    const slab = slabs[i];
-    const prevMax = i === 0 ? 0 : slabs[i - 1].max;
-    const slabCapacity = slab.max === Infinity ? Infinity : slab.max - prevMax;
+  if (useFlatMarginalRate) {
+    const slab = slabs.find((s) => units >= s.min && units <= s.max) || slabs[slabs.length - 1];
+    marginalRate = slab.rate;
+    energyCost = units * marginalRate;
+    slabBreakdownDetails.push({
+      slab: `Unprotected above 200 units: single slab rate (no slab benefit)`,
+      unitsInSlab: units,
+      rate: marginalRate,
+      cost: energyCost,
+    });
+  } else {
+    let remainingUnits = units;
+    for (let i = 0; i < slabs.length; i++) {
+      const slab = slabs[i];
+      const prevMax = i === 0 ? 0 : slabs[i - 1].max;
+      const slabCapacity = slab.max === Infinity ? Infinity : slab.max - prevMax;
 
-    if (remainingUnits > 0) {
-      const unitsInThisSlab = Math.min(remainingUnits, slabCapacity);
-      const costForThisSlab = unitsInThisSlab * slab.rate;
-      energyCost += costForThisSlab;
-      slabBreakdownDetails.push({
-        slab: `${slab.min} - ${slab.max === Infinity ? 'Above' : slab.max} units`,
-        unitsInSlab: unitsInThisSlab,
-        rate: slab.rate,
-        cost: costForThisSlab,
-      });
-      remainingUnits -= unitsInThisSlab;
+      if (remainingUnits > 0) {
+        const unitsInThisSlab = Math.min(remainingUnits, slabCapacity);
+        const costForThisSlab = unitsInThisSlab * slab.rate;
+        energyCost += costForThisSlab;
+        slabBreakdownDetails.push({
+          slab: `${slab.min} - ${slab.max === Infinity ? 'Above' : slab.max} units`,
+          unitsInSlab: unitsInThisSlab,
+          rate: slab.rate,
+          cost: costForThisSlab,
+        });
+        remainingUnits -= unitsInThisSlab;
+      }
     }
   }
 
@@ -62,34 +85,47 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
   const sanctionedLoadKw = Math.max(0, safeNumber(inputs.sanctionedLoadKw, 2));
   const fixedCharges = getFixedCharges(units, category, sanctionedLoadKw);
 
-  // Surcharges and adjustments — user-supplied, because FPA/QTA vary monthly/quarterly per NEPRA
+  // Surcharges and adjustments — user-supplied, because FPA/QTA vary monthly/quarterly per NEPRA.
+  // QTA may be negative (downward quarterly adjustment) — do NOT clamp at zero.
   const fpaRate = Math.max(0, safeNumber(inputs.fpaRate, 0));
-  const qtaRate = Math.max(0, safeNumber(inputs.qtaRate, 0));
+  // fpaUnits <= 0 means "same as current-month units" (the common case when FPA is current).
+  const fpaUnitsRaw = Math.floor(safeNumber(inputs.fpaUnits, 0));
+  const fpaUnits = fpaUnitsRaw > 0 ? fpaUnitsRaw : units;
+  const fpaOther = Math.max(0, safeNumber(inputs.fpaOther, 0));
+  const qtaRate = safeNumber(inputs.qtaRate, 0);
   const meterRent = Math.max(0, safeNumber(inputs.meterRent, ELECTRICITY_CONSTANTS.meterRentDefault));
+  const tvFeeInput = Math.max(0, safeNumber(inputs.tvFee, 0));
   const fcSurcharge = units * ELECTRICITY_CONSTANTS.fcSurchargePerUnit;
-  const fpaCharges = units * fpaRate;
+  const fpaEnergy = fpaUnits * fpaRate;
   const qtaCharges = units * qtaRate;
 
   // Taxes
   let electricityDuty = 0;
   let edOnFpa = 0;
   let gst = 0;
+  let gstOnFpa = 0;
   let tvFee = 0;
 
   if (includeTaxes) {
-    electricityDuty = energyCost * ELECTRICITY_CONSTANTS.electricityDutyPct;
-    edOnFpa = fpaCharges * ELECTRICITY_CONSTANTS.electricityDutyPct;
-    tvFee = ELECTRICITY_CONSTANTS.tvFee;
+    // Verified on real bills: ED = 1.5% x (variable energy charges + QTA); FC surcharge excluded.
+    electricityDuty = (energyCost + qtaCharges) * ELECTRICITY_CONSTANTS.electricityDutyPct;
+    edOnFpa = fpaEnergy * ELECTRICITY_CONSTANTS.electricityDutyPct;
+    tvFee = tvFeeInput;
     if (!isTaxExempt) {
-      const gstBase =
-        energyCost + fixedCharges + fcSurcharge + fpaCharges + qtaCharges + meterRent + electricityDuty + edOnFpa;
+      // Main GST base excludes FPA (FPA carries its own GST line) — verified on real bills.
+      const gstBase = energyCost + fixedCharges + fcSurcharge + qtaCharges + meterRent + electricityDuty;
       gst = gstBase * ELECTRICITY_CONSTANTS.generalSalesTaxPct;
+      gstOnFpa = (fpaEnergy + edOnFpa) * ELECTRICITY_CONSTANTS.generalSalesTaxPct;
     }
   }
 
-  const totalBill = Math.round(
-    energyCost + fixedCharges + fcSurcharge + fpaCharges + qtaCharges + meterRent + electricityDuty + edOnFpa + gst + tvFee
-  );
+  const totalFpa = fpaEnergy + edOnFpa + gstOnFpa + fpaOther;
+  // Real DISCO bills round the two subtotals (current bill and total FPA) to whole
+  // rupees before adding them — verified on the MEPCO Sep-2026 bill:
+  // round(21,628.43) + round(3,090.71) = 21,628 + 3,091 = 24,719.
+  const currentBillExFpa =
+    energyCost + fixedCharges + fcSurcharge + qtaCharges + meterRent + electricityDuty + gst + tvFee;
+  const totalBill = Math.round(currentBillExFpa) + Math.round(totalFpa);
   const effectiveCostPerUnit = units > 0 ? totalBill / units : 0;
   const categoryLabel = isLifeline ? 'Lifeline' : isProtected ? 'Protected' : 'Unprotected';
 
@@ -103,13 +139,19 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
       ? [{ label: `Fixed Charges (${sanctionedLoadKw} kW sanctioned load)`, amount: formatPKR(fixedCharges) }]
       : []),
     { label: 'Financing Cost (FC) Surcharge @ Rs. 3.23/unit', amount: formatPKR(fcSurcharge) },
-    ...(fpaCharges > 0 ? [{ label: `Fuel Price Adjustment (FPA @ Rs. ${fpaRate.toFixed(2)}/unit)`, amount: formatPKR(fpaCharges) }] : []),
-    ...(qtaCharges > 0 ? [{ label: `Quarterly Tariff Adjustment (QTA @ Rs. ${qtaRate.toFixed(2)}/unit)`, amount: formatPKR(qtaCharges) }] : []),
+    ...(qtaCharges !== 0 ? [{ label: `Quarterly Tariff Adjustment (QTA @ Rs. ${qtaRate.toFixed(2)}/unit)`, amount: formatPKR(qtaCharges) }] : []),
+    ...(fpaEnergy > 0 || fpaOther > 0
+      ? [
+          { label: `Fuel Price Adjustment — energy (${fpaUnits} units @ Rs. ${fpaRate.toFixed(2)}/unit)`, amount: formatPKR(fpaEnergy) },
+          ...(edOnFpa > 0 ? [{ label: 'Electricity Duty on FPA (1.5%)', amount: formatPKR(edOnFpa) }] : []),
+          ...(gstOnFpa > 0 ? [{ label: 'GST on FPA (18%)', amount: formatPKR(gstOnFpa) }] : []),
+          ...(fpaOther > 0 ? [{ label: 'Other FPA charges (e.g. income tax on FPA, as per bill)', amount: formatPKR(fpaOther) }] : []),
+        ]
+      : []),
     { label: 'Meter Rent', amount: formatPKR(meterRent) },
-    { label: 'Electricity Duty (1.5% of base energy)', amount: formatPKR(electricityDuty) },
-    ...(edOnFpa > 0 ? [{ label: 'Electricity Duty on FPA (1.5%)', amount: formatPKR(edOnFpa) }] : []),
+    { label: 'Electricity Duty (1.5% of energy + QTA)', amount: formatPKR(electricityDuty) },
     ...(gst > 0 ? [{ label: 'General Sales Tax (GST 18%)', amount: formatPKR(gst) }] : []),
-    { label: 'PTV License Fee', amount: formatPKR(tvFee) },
+    ...(tvFee > 0 ? [{ label: 'PTV License Fee', amount: formatPKR(tvFee) }] : []),
     { label: 'Total Estimated Electricity Bill', amount: formatPKR(totalBill), isTotal: true },
   ];
 
@@ -133,14 +175,15 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
     chartType: 'pie',
     chartData: [
       { name: 'Base Energy', value: Math.round(energyCost), color: '#3b82f6' },
-      { name: 'Surcharges (FC/QTA/FPA)', value: Math.round(fcSurcharge + fpaCharges + qtaCharges), color: '#f59e0b' },
-      { name: 'Govt Taxes & GST', value: Math.round(electricityDuty + edOnFpa + gst + tvFee), color: '#ef4444' },
+      { name: 'Surcharges (FC/QTA/FPA)', value: Math.round(fcSurcharge + qtaCharges + totalFpa), color: '#f59e0b' },
+      { name: 'Govt Taxes & GST', value: Math.round(electricityDuty + gst + tvFee), color: '#ef4444' },
     ],
     notes: [
       'Calculated as per NEPRA uniform domestic Schedule of Tariff, Calendar Year 2026 (effective 1 Jan 2026) — applies to LESCO, IESCO, K-Electric, FESCO, MEPCO, GEPCO, etc.',
+      'Unprotected consumers above 200 units are billed all units at the single marginal slab rate (no slab benefit) — this is why bills jump sharply past 200 units.',
       'Fixed charges are billed per kW of sanctioned load (Feb 2026 regime); check the sanctioned load printed on your bill. Lifeline consumers (≤ 100 units) pay no fixed charge.',
       'Protected status applies to consumers using under 200 units continuously for 6 months.',
-      'FPA and QTA change monthly/quarterly per NEPRA notifications — enter the latest values from your bill (0 = excluded).',
+      'FPA is billed 2–3 months late on that month\u2019s units — enter the FPA units and rate from your bill (0 = excluded). QTA can be negative.',
     ],
   };
 }
