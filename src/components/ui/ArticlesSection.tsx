@@ -27,8 +27,9 @@ export default function ArticlesSection() {
       {/* Articles Grid */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {ARTICLES_DATA.map((article) => (
-          <article
+          <Link
             key={article.id}
+            href={`/blog/${article.slug}`}
             className="group flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:border-emerald-600/40 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
           >
             <div>
@@ -67,7 +68,7 @@ export default function ArticlesSection() {
                 </span>
               </div>
             </div>
-          </article>
+          </Link>
         ))}
       </div>
     </section>

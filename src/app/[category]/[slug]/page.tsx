@@ -1,8 +1,9 @@
+import { SITE_URL, canonicalUrl } from '../../../lib/site';
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { getCalculatorBySlug, getCategoryById, ALL_CALCULATORS } from '../../../lib/data/categories';
+import { getCalculatorBySlug, getCategoryById, ALL_CALCULATORS } from '../../../lib/data/categories-meta';
 import DynamicCalculator from '../../../components/calculators/DynamicCalculator';
 import DataSource from '../../../components/ui/DataSource';
 import CalculatorCard from '../../../components/ui/CalculatorCard';
@@ -34,10 +35,10 @@ export async function generateMetadata({ params }: CalculatorPageProps): Promise
       title: `${calculator.title} | Pak Calc Hub`,
       description: calculator.description,
       type: 'website',
-      url: `https://pakcalchub.com/${calculator.category}/${calculator.slug}`,
+      url: `${SITE_URL}/${calculator.category}/${calculator.slug}`,
     },
     alternates: {
-      canonical: `https://pakcalchub.com/${calculator.category}/${calculator.slug}`,
+      canonical: `${SITE_URL}/${calculator.category}/${calculator.slug}`,
     },
   };
 }
@@ -59,7 +60,7 @@ export default function CalculatorPage({ params }: CalculatorPageProps) {
     '@type': 'WebApplication',
     name: calculator.title,
     description: calculator.description,
-    url: `https://pakcalchub.com/${calculator.category}/${calculator.slug}`,
+    url: `${SITE_URL}/${calculator.category}/${calculator.slug}`,
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'All',
     offers: {
@@ -71,7 +72,7 @@ export default function CalculatorPage({ params }: CalculatorPageProps) {
     publisher: {
       '@type': 'Organization',
       name: 'Pak Calc Hub',
-      url: 'https://pakcalchub.com',
+      url: SITE_URL,
     },
   };
 

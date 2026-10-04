@@ -1,3 +1,4 @@
+import { SITE_URL, canonicalUrl } from '../../lib/site';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
     'Sindh Differential Allowance',
   ],
   alternates: {
-    canonical: 'https://pakcalchub.com/sindh-government-salary-calculator',
+    canonical: '${SITE_URL}/sindh-government-salary-calculator',
   },
 };
 
@@ -40,7 +41,7 @@ export default function SindhGovernmentSalaryCalculatorPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Sindh Government Salary Calculator',
-    url: 'https://pakcalchub.com/sindh-government-salary-calculator',
+    url: '${SITE_URL}/sindh-government-salary-calculator',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' },

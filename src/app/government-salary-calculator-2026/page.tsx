@@ -1,3 +1,4 @@
+import { SITE_URL, canonicalUrl } from '../../lib/site';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     'BPS Salary Slip Calculator',
   ],
   alternates: {
-    canonical: 'https://pakcalchub.com/government-salary-calculator-2026',
+    canonical: '${SITE_URL}/government-salary-calculator-2026',
   },
 };
 
@@ -46,7 +47,7 @@ export default function GovernmentSalaryCalculator2026Page() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Pakistan Government Salary Calculator 2026',
-    url: 'https://pakcalchub.com/government-salary-calculator-2026',
+    url: '${SITE_URL}/government-salary-calculator-2026',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' },
@@ -136,6 +137,20 @@ export default function GovernmentSalaryCalculator2026Page() {
 
             {/* FAQs */}
             <FAQSection faqs={SALARY_FAQS} />
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: JSON.stringify({
+                  '@context': 'https://schema.org',
+                  '@type': 'FAQPage',
+                  mainEntity: SALARY_FAQS.map((f) => ({
+                    '@type': 'Question',
+                    name: f.question,
+                    acceptedAnswer: { '@type': 'Answer', text: f.answer },
+                  })),
+                }),
+              }}
+            />
           </div>
 
           {/* Sidebar Reference */}

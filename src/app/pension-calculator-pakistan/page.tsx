@@ -1,3 +1,4 @@
+import { SITE_URL, canonicalUrl } from '../../lib/site';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     'Monthly Pension Slip Pakistan',
   ],
   alternates: {
-    canonical: 'https://pakcalchub.com/pension-calculator-pakistan',
+    canonical: '${SITE_URL}/pension-calculator-pakistan',
   },
 };
 
@@ -46,7 +47,7 @@ export default function PensionCalculatorPakistanPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Pakistan Pension Calculator',
-    url: 'https://pakcalchub.com/pension-calculator-pakistan',
+    url: '${SITE_URL}/pension-calculator-pakistan',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' },

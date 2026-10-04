@@ -1,3 +1,4 @@
+import { SITE_URL, canonicalUrl } from '../../lib/site';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     'Tola to Gram Gold Converter',
   ],
   alternates: {
-    canonical: 'https://pakcalchub.com/gold-rate-calculator-pakistan',
+    canonical: '${SITE_URL}/gold-rate-calculator-pakistan',
   },
 };
 
@@ -46,7 +47,7 @@ export default function GoldRateCalculatorPakistanPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Gold Rate Calculator Pakistan',
-    url: 'https://pakcalchub.com/gold-rate-calculator-pakistan',
+    url: '${SITE_URL}/gold-rate-calculator-pakistan',
     applicationCategory: 'FinanceApplication',
     operatingSystem: 'All',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' },

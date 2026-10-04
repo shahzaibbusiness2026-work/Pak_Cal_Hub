@@ -13,14 +13,20 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Never index admin pages (login included): emit X-Robots-Tag on every /admin response.
+  const noIndex = (res: NextResponse) => {
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return res;
+  };
+
   if (!pathname.startsWith('/admin') || pathname === '/admin/login') {
-    return NextResponse.next();
+    return noIndex(NextResponse.next());
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) {
-    return NextResponse.next();
+    return noIndex(NextResponse.next());
   }
 
   let response = NextResponse.next({ request: { headers: request.headers } });
@@ -47,10 +53,10 @@ export async function middleware(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/admin/login';
     loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+    return noIndex(NextResponse.redirect(loginUrl));
   }
 
-  return response;
+  return noIndex(response);
 }
 
 export const config = {

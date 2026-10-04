@@ -58,7 +58,7 @@ export default function FAQSection({ faqs, title = 'Frequently Asked Questions' 
                   id={panelId}
                   role="region"
                   aria-labelledby={buttonId}
-                  className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed pl-1"
+                  className="mt-2 text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-1"
                 >
                   {faq.answer}
                 </div>

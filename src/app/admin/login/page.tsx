@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { KeyRound, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import { loadSupabaseBrowser, cmsErrorMessage } from '../../../components/admin/cms';
 
-export default function AdminLoginPage() {
+function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -28,7 +29,8 @@ export default function AdminLoginPage() {
       }
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
-      router.push('/admin');
+      const next = searchParams.get('next');
+      router.push(next && next.startsWith('/admin') ? next : '/admin');
       router.refresh();
     } catch (err) {
       setError(cmsErrorMessage(err));
@@ -116,5 +118,13 @@ export default function AdminLoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-md py-16 text-center text-sm text-slate-500">Loading…</div>}>
+      <AdminLoginForm />
+    </Suspense>
   );
 }

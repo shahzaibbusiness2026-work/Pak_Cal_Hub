@@ -1,13 +1,10 @@
 import type { MetadataRoute } from 'next';
-import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories';
+import { SITE_URL } from '../lib/site';
+import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories-meta';
 import { listPosts } from '../lib/cms/posts';
 
-function siteUrl(): string {
-  return (process.env.NEXT_PUBLIC_APP_URL || 'https://pakcalchub.com').replace(/\/$/, '');
-}
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = siteUrl();
+  const base = SITE_URL;
   const now = new Date();
 
   const staticPages: MetadataRoute.Sitemap = [

@@ -2,10 +2,11 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { getCategoryById, CATEGORIES_DATA } from '../../lib/data/categories';
+import { getCategoryById, CATEGORIES_DATA } from '../../lib/data/categories-meta';
 import CalculatorCard from '../../components/ui/CalculatorCard';
 import DataSource from '../../components/ui/DataSource';
 import { ChevronRight, Home, Sparkles, ShieldCheck } from 'lucide-react';
+import { canonicalUrl, SITE_NAME } from '../../lib/site';
 
 interface CategoryPageProps {
   params: {
@@ -23,9 +24,22 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const category = getCategoryById(params.category);
   if (!category) return { title: 'Category Not Found' };
 
+  const url = canonicalUrl(`/${category.slug}`);
   return {
-    title: `${category.name} Calculators | Pak Calc Hub`,
+    title: `${category.name} Calculators | ${SITE_NAME}`,
     description: category.description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'website',
+      url,
+      title: `${category.name} Calculators | ${SITE_NAME}`,
+      description: category.description,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${category.name} Calculators | ${SITE_NAME}`,
+      description: category.description,
+    },
   };
 }
 

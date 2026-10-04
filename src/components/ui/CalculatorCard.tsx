@@ -18,11 +18,11 @@ import {
   ShieldCheck,
   Award,
 } from 'lucide-react';
-import { CalculatorDefinition } from '../../types/calculator';
-import { CATEGORIES_DATA } from '../../lib/data/categories';
+import type { CalculatorMeta } from '../../lib/data/categories-meta';
+import { CATEGORIES_DATA } from '../../lib/data/categories-meta';
 
 interface CalculatorCardProps {
-  calc: CalculatorDefinition;
+  calc: CalculatorMeta;
 }
 
 // Category Icon & Color Mapping

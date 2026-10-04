@@ -1,3 +1,4 @@
+import { SITE_URL, canonicalUrl } from '../../lib/site';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -8,7 +9,7 @@ import FAQSection from '../../components/ui/FAQSection';
 import { BookOpen, ChevronRight, Home, Fuel } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Pakistan Fuel Cost Calculator 2026 | Petrol Rs. 342.60 & Diesel Rs. 371.61',
+  title: 'Pakistan Fuel Cost Calculator 2026 | Petrol & Diesel Trip Cost',
   description:
     'Calculate car and bike trip fuel expense, distance cost per kilometer, and daily/monthly commute budgets in Pakistan based on official Petroleum Division and OGRA petrol (Rs. 342.60) and diesel (Rs. 371.61) prices.',
   keywords: [
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     'Car Fuel Average Calculator',
   ],
   alternates: {
-    canonical: 'https://pakcalchub.com/fuel-cost-calculator-pakistan',
+    canonical: '${SITE_URL}/fuel-cost-calculator-pakistan',
   },
 };
 
@@ -46,7 +47,7 @@ export default function FuelCostCalculatorPakistanPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Pakistan Fuel Cost Calculator',
-    url: 'https://pakcalchub.com/fuel-cost-calculator-pakistan',
+    url: '${SITE_URL}/fuel-cost-calculator-pakistan',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'All',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' },

@@ -12,7 +12,7 @@ import {
 import SearchModal from './SearchModal';
 import ThemeToggle from '../ui/ThemeToggle';
 import { CategoryIcon } from '../ui/categoryIcons';
-import { CATEGORIES_DATA, getCategoryById } from '../../lib/data/categories';
+import { CATEGORIES_DATA, getCategoryById } from '../../lib/data/categories-meta';
 
 interface NavDropdownItem {
   id: string;

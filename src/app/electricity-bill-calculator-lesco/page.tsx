@@ -1,3 +1,4 @@
+import { SITE_URL, canonicalUrl } from '../../lib/site';
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     'IESCO MEPCO Bill Estimator',
   ],
   alternates: {
-    canonical: 'https://pakcalchub.com/electricity-bill-calculator-lesco',
+    canonical: '${SITE_URL}/electricity-bill-calculator-lesco',
   },
 };
 
@@ -65,7 +66,7 @@ export default function ElectricityBillCalculatorLescoPage() {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'LESCO Electricity Bill Calculator',
-    url: 'https://pakcalchub.com/electricity-bill-calculator-lesco',
+    url: '${SITE_URL}/electricity-bill-calculator-lesco',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'All',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'PKR' },

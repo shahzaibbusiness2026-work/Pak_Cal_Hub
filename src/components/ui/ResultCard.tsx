@@ -18,7 +18,7 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
             {primary.label}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-bold text-emerald-300 backdrop-blur-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-bold text-emerald-300 backdrop-blur-sm">
             <Sparkles className="h-3 w-3 text-emerald-400" />
             Verified Calculation
           </span>
@@ -43,7 +43,7 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
           {secondaries.map((item) => (
             <div
               key={item.id}
-              className="rounded-xl bg-white/5 p-3 sm:p-3.5 backdrop-blur-xs ring-1 ring-white/10 flex flex-col justify-between"
+              className="rounded-xl bg-white/5 p-3 sm:p-3.5 backdrop-blur-sm ring-1 ring-white/10 flex flex-col justify-between"
             >
               <div className="text-[11px] sm:text-xs font-semibold text-emerald-200/80 leading-tight">
                 {item.label}

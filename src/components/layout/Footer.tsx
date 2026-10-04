@@ -34,7 +34,7 @@ export default function Footer() {
 
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <Clock className="h-3.5 w-3.5 shrink-0" />
-              <span>Rates &amp; formulas last verified: <strong className="text-slate-700 dark:text-slate-300">28 August 2026</strong></span>
+              <span>Rates &amp; formulas last verified: <strong className="text-slate-700 dark:text-slate-300">4 October 2026</strong></span>
             </div>
           </div>
 
@@ -73,7 +73,7 @@ export default function Footer() {
                 { label: 'Marla · Kanal · Sq Ft', href: '/property/property-area-converter' },
                 { label: 'House Construction Cost', href: '/property/construction-cost-calculator' },
                 { label: 'Cement Bags Required', href: '/property/cement-calculator' },
-                { label: 'EV Charging Cost', href: '/vehicles/ev-charging-calculator' },
+                { label: 'EV Charging Cost', href: '/vehicles/ev-charging-cost-calculator' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors">

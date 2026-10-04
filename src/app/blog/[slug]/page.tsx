@@ -1,4 +1,6 @@
+import { SITE_URL, canonicalUrl } from '../../../lib/site';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { getPostBySlug, listPosts, incrementViews } from '../../../lib/cms/posts';
@@ -9,7 +11,7 @@ import type { Metadata } from 'next';
 export const revalidate = 300;
 
 function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || 'https://pakcalchub.com';
+  return process.env.NEXT_PUBLIC_APP_URL || SITE_URL;
 }
 
 export async function generateStaticParams() {
@@ -78,12 +80,16 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         ) : null}
 
         {post.cover_image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={post.cover_image_url}
-            alt={post.title}
-            className="mt-8 w-full rounded-2xl border border-slate-200 object-cover dark:border-slate-800"
-          />
+          <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800">
+            <Image
+              src={post.cover_image_url}
+              alt={post.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="object-cover"
+              priority
+            />
+          </div>
         ) : null}
 
         <div className="prose prose-slate mt-8 max-w-none dark:prose-invert prose-headings:font-bold prose-a:text-emerald-700 dark:prose-a:text-emerald-400">

@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import {
   Sparkles,
   TrendingUp,
@@ -21,12 +22,33 @@ import {
   Briefcase,
   Calendar,
 } from 'lucide-react';
-import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories';
+import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories-meta';
 import CalculatorCard from '../components/ui/CalculatorCard';
 import HeroSearch from '../components/ui/HeroSearch';
 import ArticlesSection from '../components/ui/ArticlesSection';
 import NewsletterSection from '../components/ui/NewsletterSection';
 import { CategoryIcon } from '../components/ui/categoryIcons';
+import { SITE_URL, SITE_NAME, SITE_FULL_NAME, canonicalUrl } from '../lib/site';
+
+export const metadata: Metadata = {
+  title: `${SITE_FULL_NAME} (${SITE_NAME}) | 100+ Free Pakistan Calculators 2026`,
+  description:
+    'Pakistan\'s free calculator hub: RBPS-2026 Government Salary, FBR Income Tax 2026-27, Electricity Bills, Pension, GP Fund, Zakat, Solar, Gold Rates & more. Accurate, official-source linked, updated October 2026.',
+  alternates: { canonical: canonicalUrl('/') },
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: SITE_FULL_NAME,
+    title: `${SITE_FULL_NAME} | 100+ Free Pakistan Calculators 2026`,
+    description:
+      'Free Pakistan calculators: Government Salary (RBPS-2026), FBR Tax, Electricity Bills, Pension, GP Fund, Zakat, Solar & more.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_FULL_NAME} | 100+ Free Pakistan Calculators`,
+    description: 'RBPS-2026 Salary, FBR Tax, Electricity Bills, Pension, Zakat & 100+ free Pakistan calculators.',
+  },
+};
 
 export default function HomePage() {
   const DAILY_DEMAND_IDS = [
@@ -69,9 +91,9 @@ export default function HomePage() {
         {/* Hero Content */}
         <div className="relative z-10 mx-auto max-w-5xl text-center">
           {/* Official Trust Badge */}
-          <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-600/20 bg-emerald-100/80 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-emerald-800 backdrop-blur-xs dark:border-emerald-500/30 dark:bg-emerald-950/80 dark:text-emerald-300 max-w-full">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-600/20 bg-emerald-100/80 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-emerald-800 backdrop-blur-sm dark:border-emerald-500/30 dark:bg-emerald-950/80 dark:text-emerald-300 max-w-full">
             <Sparkles className="h-3.5 w-3.5 text-emerald-800 dark:text-emerald-400 shrink-0" />
-            <span className="truncate">Updated August 2026: RBPS-2026 Pay Scales, FBR TY2027 &amp; NEPRA Tariffs</span>
+            <span className="truncate">Updated October 2026: RBPS-2026 Pay Scales, FBR TY2027 &amp; NEPRA Tariffs</span>
           </div>
 
           {/* Main Hero Heading */}
@@ -126,7 +148,7 @@ export default function HomePage() {
                 <Link
                   key={item.title}
                   href={item.href}
-                  className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white/90 p-3 shadow-2xs backdrop-blur-xs transition-all hover:-translate-y-0.5 hover:border-emerald-600/40 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90"
+                  className="group flex flex-col justify-between rounded-xl border border-slate-200/80 bg-white/90 p-3 shadow-2xs backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:border-emerald-600/40 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/90"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-1">
@@ -443,7 +465,7 @@ export default function HomePage() {
         <div className="mt-5 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
 
           {/* Card 1: Salaried Income Tax */}
-          <Link href="/tax/income-tax-calculator"
+          <Link href="/tax/freelancer-tax-calculator"
             className="group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:-translate-y-0.5 hover:border-rose-500/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-rose-700/50"
           >
             <div className="flex items-start justify-between">
@@ -455,7 +477,7 @@ export default function HomePage() {
               </span>
             </div>
             <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-rose-700 dark:text-white dark:group-hover:text-rose-400 transition-colors">
-              Salaried Income Tax
+              Freelancer & Business Tax
             </h3>
             <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
               Tax Year 2027 slabs (0% up to 600k, 1% up to 1.2M). Monthly TDS and marginal rate calculator.

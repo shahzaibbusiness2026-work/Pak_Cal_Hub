@@ -3,8 +3,8 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Calculator, ArrowRight, Sparkles } from 'lucide-react';
-import { ALL_CALCULATORS, CATEGORIES_DATA } from '../../lib/data/categories';
-import { CalculatorDefinition } from '../../types/calculator';
+import { ALL_CALCULATORS, CATEGORIES_DATA } from '../../lib/data/categories-meta';
+import type { CalculatorMeta } from '../../lib/data/categories-meta';
 
 export default function HeroSearch() {
   const [query, setQuery] = useState('');
@@ -42,7 +42,7 @@ export default function HeroSearch() {
     }).slice(0, 6);
   }, [query]);
 
-  const handleSelect = (calc: CalculatorDefinition) => {
+  const handleSelect = (calc: CalculatorMeta) => {
     setIsOpen(false);
     setQuery('');
     router.push(`/${calc.category}/${calc.slug}`);

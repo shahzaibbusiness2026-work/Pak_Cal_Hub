@@ -67,6 +67,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => setDrawerOpen(false), [pathname]);
 
+  // Locked-out visitors go straight to the login card — never render the
+  // dashboard shell first. The login page itself is excluded to avoid a loop.
+  const isLoginPage = pathname === '/admin/login';
+  useEffect(() => {
+    if (authState === 'locked' && !isLoginPage) {
+      router.replace(`/admin/login?next=${encodeURIComponent(pathname)}`);
+    }
+  }, [authState, isLoginPage, pathname, router]);
+
   const handleSignOut = async () => {
     const supabase = await loadSupabaseBrowser();
     try {
@@ -76,7 +85,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const crumbs = pathname.split('/').filter(Boolean);
-  const isLoginPage = pathname === '/admin/login';
 
   const sidebar = (
     <div className="flex h-full flex-col bg-slate-950 text-slate-300">

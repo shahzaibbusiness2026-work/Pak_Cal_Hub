@@ -3,8 +3,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Calculator, ArrowRight, X, Sparkles } from 'lucide-react';
-import { ALL_CALCULATORS, CATEGORIES_DATA } from '../../lib/data/categories';
-import { CalculatorDefinition } from '../../types/calculator';
+import { ALL_CALCULATORS, CATEGORIES_DATA } from '../../lib/data/categories-meta';
+import type { CalculatorMeta } from '../../lib/data/categories-meta';
 
 interface SearchModalProps {
   open: boolean;
@@ -47,7 +47,7 @@ export default function SearchModal({ open, onClose }: SearchModalProps) {
 
   if (!open) return null;
 
-  const handleSelect = (calc: CalculatorDefinition) => {
+  const handleSelect = (calc: CalculatorMeta) => {
     onClose();
     router.push(`/${calc.category}/${calc.slug}`);
   };

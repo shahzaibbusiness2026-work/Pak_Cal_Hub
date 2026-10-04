@@ -2,18 +2,19 @@
 
 import React, { useState } from 'react';
 import { Share2, Check, Copy, MessageCircle, Twitter, Facebook, Linkedin } from 'lucide-react';
+import { SITE_URL, SITE_FULL_NAME, SITE_NAME } from '../../lib/site';
 
 interface ShareButtonsProps {
   title?: string;
   url?: string;
 }
 
-export default function ShareButtons({ title = 'Pakistan Calculation Hub', url }: ShareButtonsProps) {
+export default function ShareButtons({ title = SITE_FULL_NAME, url }: ShareButtonsProps) {
   const [copied, setCopied] = useState(false);
 
-  const currentUrl = typeof window !== 'undefined' ? (url || window.location.href) : 'https://pakcalchub.com';
+  const currentUrl = typeof window !== 'undefined' ? (url || window.location.href) : SITE_URL;
   const encodedUrl = encodeURIComponent(currentUrl);
-  const encodedTitle = encodeURIComponent(`${title} — Calculate accurately on Pak Calc Hub`);
+  const encodedTitle = encodeURIComponent(`${title} — Calculate accurately on ${SITE_NAME}`);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentUrl);
