@@ -1,5 +1,5 @@
 import { getSupabaseAdmin, isSupabaseConfigured } from '../supabase/admin';
-import { getSupabaseServer } from '../supabase/server';
+import { getSupabasePublic } from '../supabase/server';
 import type { Post } from '../supabase/types';
 import { slugify, estimateReadingMinutes } from './seo';
 
@@ -53,7 +53,7 @@ export async function listPosts(
 
   try {
     const supabase =
-      status === 'published' ? getSupabaseServer() : getSupabaseAdmin();
+      status === 'published' ? getSupabasePublic() : getSupabaseAdmin();
 
     let query = supabase
       .from('posts')
@@ -87,7 +87,7 @@ export async function listPosts(
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   if (!isSupabaseConfigured()) return null;
   try {
-    const supabase = getSupabaseServer();
+    const supabase = getSupabasePublic();
     const { data, error } = await supabase
       .from('posts')
       .select('*')

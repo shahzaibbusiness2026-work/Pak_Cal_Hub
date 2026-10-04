@@ -1,14 +1,15 @@
 import { getSupabaseAdmin, isSupabaseConfigured } from '../supabase/admin';
-import { getSupabaseServer } from '../supabase/server';
+import { getSupabasePublic } from '../supabase/server';
 
 /**
  * All site settings as a plain key/value record (public read via RLS).
+ * Uses the cookie-free public client so it is safe during static rendering.
  * Returns {} when Supabase is unconfigured — callers merge over defaults.
  */
 export async function getSiteSettings(): Promise<Record<string, any>> {
   if (!isSupabaseConfigured()) return {};
   try {
-    const supabase = getSupabaseServer();
+    const supabase = getSupabasePublic();
     const { data, error } = await supabase.from('site_settings').select('key,value');
     if (error || !data) return {};
     const out: Record<string, any> = {};
