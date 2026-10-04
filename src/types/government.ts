@@ -33,6 +33,8 @@ export interface SpecialAllowanceConfig {
   name: string;
   rate?: number; // e.g. 0.25 for 25% DRA / Executive allowance
   fixedAmount?: number;
+  /** Per-BPS fixed monthly amounts, e.g. Sindh Personal Allowance 2026. Keys are BPS numbers as strings. */
+  bpsAmounts?: Record<string, number>;
   applicableBps?: number[];
   appliesTo?: 'initial2017' | 'initial2022' | 'runningBasic';
 }

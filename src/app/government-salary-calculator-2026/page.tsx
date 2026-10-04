@@ -27,7 +27,7 @@ const SALARY_FAQS = [
   {
     question: 'How is the 2026-27 Government Salary calculated in Pakistan?',
     answer:
-      'The 2026-27 salary is calculated by taking the Revised Basic Pay Stage (RBPS-2026) plus station-specific House Rent Allowance (45% or 30% of 2008/2011 frozen ceilings), Conveyance Allowance, Medical Allowance, and the latest Ad-hoc Relief Allowances (7% ARA-2026, 25% ARA-2024), minus GP Fund, Benevolent Fund, and Group Insurance.',
+      'The 2026-27 salary uses the Revised Basic Pay Scales 2026 (RBPS-2026, notified 21-07-2026, effective 01-07-2026 — with 15% ARA-2022 and 10% ARA-2025 merged into basic pay), plus station-specific frozen House Rent Allowance, Conveyance Allowance (revised +50%), Medical Allowance (15% of basic for officers), 7% Ad-hoc Relief Allowance 2026 and 15% Disparity Reduction Allowance 2026, minus GP Fund slab subscription, Benevolent Fund (max Rs. 155) and Group Insurance.',
   },
   {
     question: 'What is the difference between Big City and Other Station House Rent?',
@@ -37,7 +37,7 @@ const SALARY_FAQS = [
   {
     question: 'How much GP Fund is deducted from BPS employees?',
     answer:
-      'For BPS 1 to 15, the standard GP Fund subscription rate is approx. 5% of monthly basic pay. For Gazetted Officers (BPS 16 to 22), the deduction rate is approx. 8% of running basic pay.',
+      'GP Fund is a fixed monthly slab by BPS (Finance Division OM dated 18-08-2005) — not a percentage. For example, BPS-17 subscribes Rs. 1,000/month and BPS-22 Rs. 2,410/month. These are minimum rates; subscribers may elect a higher subscription.',
   },
 ];
 
@@ -80,8 +80,8 @@ export default function GovernmentSalaryCalculator2026Page() {
             <span className="rounded-md bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
               Federal & Provincial Civil Service
             </span>
-            <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-              RBPS-2026 Notification Validated
+            <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 px-2 py-0.5 rounded-md">
+              2026-27 Figures Provisional — Verify Against Finance Division Notification
             </span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
@@ -125,11 +125,11 @@ export default function GovernmentSalaryCalculator2026Page() {
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-1">
                   <div className="font-bold text-slate-900 dark:text-white">3. Ad-hoc Relief Allowances</div>
-                  <div>Includes 7% ARA-2026, 25% ARA-2024 (BPS 1-16) / 20% (BPS 17-22), and provincial Special Allowances.</div>
+                  <div>Includes 7% ARA-2026 on running basic and 15% DRA-2026 on frozen 2022 basic (BPS 1-22), plus provincial Special Allowances. Earlier ARAs (2022, 2025) are merged into the RBPS-2026 basic pay.</div>
                 </div>
                 <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-1">
                   <div className="font-bold text-slate-900 dark:text-white">4. Statutory Deductions</div>
-                  <div>Mandatory deductions for General Provident Fund (GPF), Benevolent Fund (2%), and Group Insurance.</div>
+                  <div>Fixed-slab deductions: GP Fund subscription (BPS-wise slab), Benevolent Fund (2%, max Rs. 155) and Group Insurance (pay-slab, max Rs. 182).</div>
                 </div>
               </div>
             </div>

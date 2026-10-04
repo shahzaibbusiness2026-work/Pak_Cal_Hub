@@ -10,9 +10,9 @@
  *   OM No.14(1)R-3/2021-324 (08-07-2021) and OM F.No.14(1)R-3/2021-69 (23-02-2022):
  *   "@ 25% / 15% of the basic pay of Basic Pay Scales 2017", BPS 1–19, frozen.
  * - BPS_2022_MINIMUM: initial of Revised Basic Pay Scales 2022.
- *   Sourced from this repo's federal-2024.json (verified against the Finance
- *   Division BPS-2022 notification). Reserved for entries with
- *   appliesTo: 'initial2022' (none active yet).
+ *   Verified against the official BPS-2022 chart reproduced in the Finance Division
+ *   notification "Revision of Basic Pay Scales-2026" dated 21-07-2026.
+ *   Used by: federal DRA-2026 (15% of basic pay as on 30-06-2022) — OM No. 14(2)R-3/2025.
  */
 export const BPS_2017_MINIMUM: Record<number, number> = {
   1: 9130,
@@ -41,26 +41,26 @@ export const BPS_2017_MINIMUM: Record<number, number> = {
 
 export const BPS_2022_MINIMUM: Record<number, number> = {
   1: 13550,
-  2: 13960,
-  3: 14590,
-  4: 15200,
-  5: 15880,
-  6: 16540,
-  7: 17220,
-  8: 18060,
-  9: 18950,
-  10: 19820,
-  11: 20900,
-  12: 22530,
-  13: 24740,
-  14: 26920,
-  15: 29100,
-  16: 33650,
+  2: 13820,
+  3: 14260,
+  4: 14690,
+  5: 15230,
+  6: 15760,
+  7: 16310,
+  8: 16890,
+  9: 17470,
+  10: 18050,
+  11: 18650,
+  12: 19770,
+  13: 21160,
+  14: 22530,
+  15: 23920,
+  16: 28070,
   17: 45070,
-  18: 57540,
-  19: 86900,
-  20: 105820,
-  21: 115240,
+  18: 56880,
+  19: 87840,
+  20: 102470,
+  21: 113790,
   22: 122190,
 };
 

@@ -2,7 +2,7 @@ import { GovernmentType, BudgetYear } from '../../types/government';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
 import { getSalaryDataset } from '../../data/salary';
 import { BPS_2017_MINIMUM, BPS_2022_MINIMUM } from '../../data/salary/initial-pay-tables';
-import { getGpfConfig } from '../../data/allowances';
+import { getGpFundSlab, getGroupInsurance, getBenevolentFund } from '../../data/allowances/deduction-schedules';
 import { formatPKR, safeNumber } from '../utils/formatters';
 
 export interface SalaryEngineInputs {
@@ -33,15 +33,16 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   const qualPay = Math.max(safeNumber(inputs.qualificationPay, 0), 0);
   const userSpecialAllowance = Math.max(safeNumber(inputs.specialAllowance, 0), 0);
   const includeAdhoc = inputs.includeAdhoc !== false;
-  // DRA toggle: the federal DRA-2021 (25%) + DRA-2022 (15%) package is near-universal for BPS 1-19,
-  // so it defaults ON there; other governments keep the previous opt-in default. An explicit
-  // includeDRA value from the caller always wins.
+  // DRA toggle: the federal DRA-2026 (15% of basic pay as on 30-06-2022, OM No. 14(2)R-3/2025)
+  // is admissible to BPS 1-22, so it defaults ON there; other governments keep the
+  // previous opt-in default. An explicit includeDRA value from the caller always wins.
+  // NOTE: this toggle only gates DRA entries — other special allowances (e.g. Sindh
+  // Personal Allowance) are statutory and always applied.
   const includeDRA =
-    inputs.includeDRA !== undefined ? Boolean(inputs.includeDRA) : govType === 'federal' && bps <= 19;
+    inputs.includeDRA !== undefined ? Boolean(inputs.includeDRA) : govType === 'federal';
 
   const dataset = getSalaryDataset(govType, budgetYear);
   const scale = dataset.scales[bps] || dataset.scales[17];
-  const gpfConfig = getGpfConfig(budgetYear);
 
   const effectiveStage = Math.min(stage, scale.stages);
   const customBasic = safeNumber(inputs.customBasic, 0);
@@ -63,12 +64,16 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   // 2. Conveyance Allowance (OM Flat schedule)
   const conveyanceAllowance = scale.conveyanceAllowance;
 
-  // 3. Medical Allowance (flat schedule from the dataset: Rs. 1,500 for BPS 1-15 in 2024-25/2025-26).
-  // NOTE: verify the officer medical-allowance rule against the official notification before
-  // replacing this with a percentage formula - the Finance Division compilation shows BPS-16 to 22
-  // at 15% of BPS-2008 pay frozen at 30-06-2011 level, which does NOT corroborate a
-  // "25% of running basic, capped at Rs. 4,500" rule.
-  const medicalAllowance = scale.medicalAllowance;
+  // 3. Medical Allowance (Finance Division; frozen).
+  // Verified rule: Rs. 1,500/month flat for BPS 1-15; 15% of running basic pay
+  // for BPS 16-22 (Finance Division 2012 anomaly clarification). Provincial
+  // datasets retain their file values until verified against provincial notifications.
+  const medicalAllowance =
+    govType === 'federal'
+      ? bps <= 15
+        ? 1500
+        : Math.round(basicPay * 0.15)
+      : scale.medicalAllowance;
 
   // 4. Ad-hoc Relief Allowances (from dynamic dataset)
   const adhocDetails: { name: string; amount: number }[] = [];
@@ -94,11 +99,14 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   }
 
   // 5. Special / Disparity Allowances
+  // Statutory special allowances always apply; DRA entries honor the includeDRA toggle.
   let provincialDRA = 0;
   const specialAllowanceDetails: { name: string; amount: number }[] = [];
-  if (includeDRA && dataset.specialAllowances && dataset.specialAllowances.length > 0) {
+  if (dataset.specialAllowances && dataset.specialAllowances.length > 0) {
     dataset.specialAllowances.forEach((sa) => {
-      // Honor the BPS scope (e.g. federal DRA-2021/2022 is admissible to BPS 1-19 only).
+      const isDraEntry = sa.id.toLowerCase().includes('dra');
+      if (isDraEntry && !includeDRA) return;
+      // Honor the BPS scope (e.g. federal DRA-2026 is admissible to BPS 1-22 only).
       if (sa.applicableBps && sa.applicableBps.length > 0 && !sa.applicableBps.includes(bps)) {
         return;
       }
@@ -114,6 +122,11 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
           rateBase = BPS_2022_MINIMUM[bps] ?? basicPay;
         }
         amount = Math.round(rateBase * sa.rate);
+      } else if (sa.bpsAmounts) {
+        // Per-BPS fixed monthly amounts, e.g. Sindh Personal Allowance 2026
+        // (BPS-01: Rs. 401, BPS-02: Rs. 80).
+        const key = String(bps);
+        amount = Math.round(Number((sa.bpsAmounts as Record<string, number>)[key] ?? 0));
       } else if (sa.fixedAmount) {
         amount = sa.fixedAmount;
       }
@@ -133,11 +146,13 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
 
   const grossSalary = basicPay + totalAllowances;
 
-  // 6. Deductions
-  const gpFundPct = bps <= 15 ? gpfConfig.mandatoryDeductions.bps1To15Rate : gpfConfig.mandatoryDeductions.bps16To22Rate;
-  const gpFundDeduction = Math.round(basicPay * gpFundPct);
-  const benevolentFund = Math.round(Math.min(basicPay * gpfConfig.benevolentFundRate, gpfConfig.benevolentFundMax));
-  const groupInsurance = bps <= 15 ? gpfConfig.groupInsurance.bps1To15 : gpfConfig.groupInsurance.bps16To22;
+  // 6. Deductions — verified statutory schedules (see src/data/allowances/deduction-schedules.ts).
+  // GP Fund: fixed monthly slab by BPS (OM F.1(5)-Reg.7/87(Vol.1)-485/05, 18-08-2005), NOT a % of pay.
+  // Benevolent Fund: 2% of basic, capped at Rs. 155/month (FEBF & GI Act, 3rd Schedule, 01-12-2003).
+  // Group Insurance: pay-band slab, max Rs. 182/month (FEBF & GI Rules, 3rd Schedule, 01-01-1996).
+  const gpFundDeduction = getGpFundSlab(bps);
+  const benevolentFund = getBenevolentFund(basicPay);
+  const groupInsurance = Math.round(getGroupInsurance(basicPay));
   const houseRentDeduction = isNoHra ? Math.round(basicPay * 0.05) : 0; // 5% HRD for Estate Office residence
 
   const totalDeductions = gpFundDeduction + benevolentFund + groupInsurance + houseRentDeduction;
@@ -187,9 +202,9 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   }
 
   breakdown.push(
-    { label: `GP Fund Deduction (${(gpFundPct * 100).toFixed(0)}% — ${bps <= 15 ? 'BPS 1–15' : 'BPS 16–22 Officer'})`, amount: formatPKR(gpFundDeduction), isDeduction: true },
-    { label: 'Benevolent Fund (2%, Max Rs. 2,500)', amount: formatPKR(benevolentFund), isDeduction: true },
-    { label: `Group Insurance (${bps <= 15 ? 'Rs. 350' : 'Rs. 700'})`, amount: formatPKR(groupInsurance), isDeduction: true }
+    { label: `GP Fund Subscription — BPS-${bps} Slab (Rs. ${gpFundDeduction.toLocaleString()}/month, OM 18-08-2005)`, amount: formatPKR(gpFundDeduction), isDeduction: true },
+    { label: 'Benevolent Fund (2% of Basic, Max Rs. 155/month)', amount: formatPKR(benevolentFund), isDeduction: true },
+    { label: `Group Insurance (Pay-Slab: Rs. ${groupInsurance}/month)`, amount: formatPKR(groupInsurance), isDeduction: true }
   );
 
   if (houseRentDeduction > 0) {
@@ -238,7 +253,7 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
     notes: [
       `Official Source: ${dataset.notificationNumber} (${dataset.effectiveDate}).`,
       `Governed by ${dataset.governmentName} Budget (${dataset.year}).`,
-      `GP Fund Deduction rate: ${(gpFundPct * 100).toFixed(0)}% per Finance Division Schedule II.`,
+      `GP Fund: Rs. ${gpFundDeduction.toLocaleString()}/month slab (Finance Division OM F.1(5)-Reg.7/87(Vol.1)-485/05, 18-08-2005).`,
       ...dataset.notes,
     ],
   };

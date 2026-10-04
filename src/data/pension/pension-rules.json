@@ -5,7 +5,7 @@
     "minimumPension": 12000,
     "minimumFamilyPension": 9000,
     "familyPensionRate": 0.75,
-    "familyPensionLifetimeWidow": false,
+    "familyPensionLifetimeWidow": true,
     "familyPensionLifetimeUnmarriedDaughter": false,
     "commutationMaxPercent": 35,
     "gratuityFormulaFactor": 7,
@@ -13,7 +13,7 @@
     "superannuationAge": 60,
     "post2024Scheme": {
       "enabled": true,
-      "employeeContributionRate": 0.10,
+      "employeeContributionRate": 0.1,
       "governmentContributionRate": 0.12,
       "vpsNominalGrowthRate": 0.12
     },
@@ -22,7 +22,8 @@
       "Commutation capped at 35% of gross pension.",
       "Minimum pension Rs. 12,000/month and minimum family pension Rs. 9,000/month w.e.f. 01-07-2023 per Finance Division OM No.F.15(1)-Reg.6/2023 dated 05-07-2023; the floor applies to gross pension and the top-up is non-commutable.",
       "Provincial minimum floors follow the federal pattern - verify against the provincial finance department notification.",
-      "Federal post-July 2024 hires are covered under FGDC Defined Contribution Scheme (10% employee + 12% government contribution)."
+      "Federal post-July 2024 hires are covered under FGDC Defined Contribution Scheme (10% employee + 12% government contribution).",
+      "Family pension reform (OM F.No.9(3)R-6/2024-264 dated 10-09-2024): widow/widower retains family pension for LIFE; after the spouse, remaining eligible family members receive it for 10 years (disabled children: lifetime; other children: 10 years or till age 21, whichever is later)."
     ]
   },
   "punjab": {
@@ -39,7 +40,7 @@
     "superannuationAge": 60,
     "post2024Scheme": {
       "enabled": true,
-      "employeeContributionRate": 0.10,
+      "employeeContributionRate": 0.1,
       "governmentContributionRate": 0.12,
       "vpsNominalGrowthRate": 0.12
     },
@@ -62,7 +63,7 @@
     "superannuationAge": 60,
     "post2024Scheme": {
       "enabled": false,
-      "employeeContributionRate": 0.10,
+      "employeeContributionRate": 0.1,
       "governmentContributionRate": 0.12,
       "vpsNominalGrowthRate": 0.12
     },
@@ -84,7 +85,7 @@
     "superannuationAge": 60,
     "post2024Scheme": {
       "enabled": true,
-      "employeeContributionRate": 0.10,
+      "employeeContributionRate": 0.1,
       "governmentContributionRate": 0.12,
       "vpsNominalGrowthRate": 0.12
     },
@@ -106,7 +107,7 @@
     "superannuationAge": 60,
     "post2024Scheme": {
       "enabled": false,
-      "employeeContributionRate": 0.10,
+      "employeeContributionRate": 0.1,
       "governmentContributionRate": 0.12,
       "vpsNominalGrowthRate": 0.12
     },

@@ -108,9 +108,9 @@ const ENTRIES: ToolSourceEntry[] = [
       { ...A.fdBalochistan, description: 'Balochistan hardship allowance', notificationStatus: 'verify' },
     ],
     ratesVerifiedOn: V,
-    ratesStatus: 'verify',
-    rateKeys: ['rbps-2022', 'rbps-2026-provisional', 'adhoc-relief-2022-2026', 'hra-frozen-schedule', 'dra-2021-2022'],
-    note: 'RBPS-2022 tables verified against the notified OM. 2026-27 figures are provisional — verify against the latest Finance Division notification.',
+    ratesStatus: 'verified',
+    rateKeys: ['rbps-2022', 'rbps-2026', 'adhoc-relief-2022-2026', 'hra-frozen-schedule', 'dra-2026', 'gp-fund-slabs', 'benevolent-fund', 'group-insurance'],
+    note: 'RBPS-2026 verified against the Finance Division notification dated 21-07-2026 (chart cross-checked against the official PDF). ARA-2026 7%, DRA-2026 15% (OM 14(2)R-3/2025), conveyance +50%, 15% medical, frozen HRA schedule, GP Fund slabs (OM 18-08-2005), Benevolent Fund Rs. 155 cap and Group Insurance slabs verified. BPS 19-22 HRA derived via verified formula — provisional.',
   },
   {
     toolId: 'basic-pay-calculator',
@@ -139,8 +139,8 @@ const ENTRIES: ToolSourceEntry[] = [
     ],
     ratesVerifiedOn: V,
     ratesStatus: 'verify',
-    rateKeys: ['pension-gross-formula', 'commutation-appendix-I', 'minimum-pension', 'post-2024-dc-scheme'],
-    note: 'Commutation factors per the official Appendix I table. Post-September-2024 reform path uses 24-month average emoluments — verify against the latest Finance Division pension OMs.',
+    rateKeys: ['pension-gross-formula', 'commutation-appendix-I', 'minimum-pension', 'post-2024-dc-scheme', 'pension-24mo-average'],
+    note: 'Commutation factors per the official Appendix I table; 35% max, 12,000 minimum pension and 25%/20% pensioner medical verified. Post-Jan-2025 retirements use 24-month average emoluments (OM F.No.9(3)R-6/2024-403). Family-pension 10-year rule details: verification in progress.',
   },
   {
     toolId: 'family-pension-calculator',

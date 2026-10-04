@@ -20,15 +20,16 @@ export interface PensionEngineInputs {
 }
 
 /**
- * Federal pension reform: retirements on/after 1 September 2024 are computed on the
- * average emoluments of the last 24 months instead of last-drawn basic pay.
- * Ambiguous 2024 retirements (no month given) conservatively stay on the pre-reform path.
+ * Federal pension reform: retirements on/after 1 January 2025 are computed on the
+ * average emoluments of the last 24 months instead of last-drawn basic pay
+ * (Finance Division clarification OM F.No.9(3)R-6/2024-403).
+ * Pre-2025 retirements keep last-drawn basic pay as the emoluments base.
  */
 function isPostReformRetirement(inputs: PensionEngineInputs): boolean {
   const year = Math.floor(safeNumber(inputs.retirementYear, 0));
-  if (year > 2024) return true;
-  if (year === 2024) {
-    return Math.floor(safeNumber(inputs.retirementMonth, 0)) >= 9;
+  if (year > 2025) return true;
+  if (year === 2025) {
+    return Math.floor(safeNumber(inputs.retirementMonth, 0)) >= 1;
   }
   return false;
 }
@@ -103,8 +104,8 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
 
   // 2. Defined Benefit Pension Scheme (Official Statutory Formula)
   // Emoluments base: the federal pension reform uses the AVERAGE emoluments of the last
-  // 24 months for retirements on/after 1 Sept 2024; genuine pre-reform retirements keep
-  // last-drawn basic pay.
+  // 24 months for retirements on/after 1 January 2025 (Finance Division clarification
+  // OM F.No.9(3)R-6/2024-403); pre-2025 retirements keep last-drawn basic pay.
   const avgLast24MoPay = Math.max(safeNumber(inputs.avgLast24MoPay, 0), 0);
   const useReformAverage = schemeType === 'postReform' || isPostReformRetirement(inputs);
   const emolumentsBase = useReformAverage && avgLast24MoPay > 0 ? avgLast24MoPay : basicPay;
@@ -142,7 +143,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
   const breakdown: BreakdownRow[] = [
     {
       label: useReformAverage
-        ? 'Average Emoluments of Last 24 Months (Federal Pension Reform, retirements on/after 1 Sept 2024)'
+        ? 'Average Emoluments of Last 24 Months (Federal Pension Reform, retirements on/after 1 Jan 2025 — OM F.No.9(3)R-6/2024-403)'
         : 'Last Drawn Running Basic Pay',
       amount: formatPKR(emolumentsBase),
     },
@@ -225,7 +226,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
       `Minimum pension floor of Rs. ${rules.minimumPension.toLocaleString()}/month applies to gross pension (Finance Division OM No.F.15(1)-Reg.6/2023); the floor top-up is non-commutable.`,
       ...(useReformAverage
         ? [
-            'Retirement on/after 1 Sept 2024: pension is computed on average emoluments of the last 24 months per the federal pension reform. Pre-reform retirements use last-drawn basic pay.',
+            'Retirement on/after 1 Jan 2025: pension is computed on average emoluments of the last 24 months per the federal pension reform (OM F.No.9(3)R-6/2024-403). Pre-2025 retirements use last-drawn basic pay.',
           ]
         : []),
       ...rules.notes,

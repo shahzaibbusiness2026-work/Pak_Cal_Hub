@@ -292,6 +292,41 @@ function runTests() {
   });
   assert(String(familyPenResult.primaryResult.value).includes('11,250'), `Family pension floor of Rs. 9,000 enforced (total Rs. 11,250): ${familyPenResult.primaryResult.value}`);
 
+  // ==========================================
+  // 6b. Verified 2026-27 federal figures (Finance Division notifications, Oct 2026 review)
+  // ==========================================
+  console.log('\n--- 6b. Verified 2026-27 Federal Figures ---');
+  // RBPS-2026: BPS-17 min 54,140 / increment 4,110 / max 136,340 (notified 21-07-2026, w.e.f. 01-07-2026)
+  const sal17 = calculateSalary({ government: 'federal', year: '2026-27', bps: 17, stage: 3, cityType: 'big' });
+  const basicRow = sal17.breakdown?.find((r) => r.label.includes('Basic Pay (Revised'));
+  assert(String(basicRow?.amount).includes('66,470'), `RBPS-2026 BPS-17 stage 3 basic = 54,140 + 3x4,110 = Rs. 66,470: ${basicRow?.amount}`);
+  // Medical: 15% of running basic for BPS 16-22 (verified rule)
+  const medRow = sal17.breakdown?.find((r) => r.label === 'Medical Allowance');
+  assert(String(medRow?.amount).includes('9,971'), `Medical = 15% of 66,470 = Rs. 9,971: ${medRow?.amount}`);
+  // Conveyance: BPS 16-22 = Rs. 7,500 after 50% increase w.e.f. 01-07-2026
+  const convRow = sal17.breakdown?.find((r) => r.label === 'Conveyance Allowance');
+  assert(String(convRow?.amount).includes('7,500'), `Conveyance BPS-17 = Rs. 7,500: ${convRow?.amount}`);
+  const sal5 = calculateSalary({ government: 'federal', year: '2026-27', bps: 5, stage: 0, cityType: 'big' });
+  const convRow5 = sal5.breakdown?.find((r) => r.label === 'Conveyance Allowance');
+  assert(String(convRow5?.amount).includes('2,898'), `Conveyance BPS-5 (band 5-10) = Rs. 2,898: ${convRow5?.amount}`);
+  // Medical: Rs. 1,500 flat for BPS 1-15
+  const medRow5 = sal5.breakdown?.find((r) => r.label === 'Medical Allowance');
+  assert(String(medRow5?.amount).includes('1,500'), `Medical BPS-5 = Rs. 1,500 flat: ${medRow5?.amount}`);
+  // Deductions: verified statutory schedules (OM 18-08-2005 / SRO 21(1)/96 / FEBF Act 3rd Schedule)
+  const gpfRow = sal17.breakdown?.find((r) => r.label.includes('GP Fund Subscription'));
+  assert(String(gpfRow?.amount).includes('1,000'), `GP Fund BPS-17 slab = Rs. 1,000/month: ${gpfRow?.amount}`);
+  const bfRow = sal17.breakdown?.find((r) => r.label.includes('Benevolent Fund'));
+  assert(String(bfRow?.amount).includes('155'), `Benevolent Fund capped at Rs. 155/month: ${bfRow?.amount}`);
+  const giRow = sal17.breakdown?.find((r) => r.label.includes('Group Insurance'));
+  assert(String(giRow?.amount).includes('182'), `Group Insurance (pay > 16,000) = Rs. 182/month: ${giRow?.amount}`);
+  // HRA: verified frozen schedule (BPS-17: 4,433 / 6,650)
+  const hraRow17 = sal17.breakdown?.find((r) => r.label.includes('House Rent Allowance'));
+  assert(String(hraRow17?.amount).includes('6,650'), `HRA BPS-17 big city = Rs. 6,650: ${hraRow17?.amount}`);
+  // Sindh Personal Allowance 2026: BPS-01 Rs. 401, BPS-02 Rs. 80
+  const salSindh1 = calculateSalary({ government: 'sindh', year: '2026-27', bps: 1, stage: 0, cityType: 'big' });
+  const paRow = salSindh1.breakdown?.find((r) => r.label.includes('Personal Allowance'));
+  assert(String(paRow?.amount).includes('401'), `Sindh Personal Allowance BPS-01 = Rs. 401: ${paRow?.amount}`);
+
   // FR-22(a)(i): BPS-16 -> 17, basic 60,000 + premature increment, fixed at NEXT ABOVE stage
   const promoResult = calculatePromotion({
     government: 'federal',
@@ -300,18 +335,20 @@ function runTests() {
     promotedBps: 17,
     currentBasic: 60000,
   });
-  assert(String(promoResult.primaryResult.value).includes('66,440'), `FR-22 promotion fixation at next-above stage is Rs. 66,440: ${promoResult.primaryResult.value}`);
+  // FR-22(a)(i): BPS-16 -> 17, basic 60,000 + premature increment (BPS-16: Rs. 2,610),
+  // fixed at NEXT ABOVE stage in BPS-17 (min 54,140 + 3 x 4,110 = Rs. 66,470).
+  // Verified against RBPS-2026 (Finance Division notification dated 21-07-2026).
+  assert(String(promoResult.primaryResult.value).includes('66,470'), `FR-22 promotion fixation at next-above stage is Rs. 66,470: ${promoResult.primaryResult.value}`);
   const promoGain = promoResult.secondaryResults?.find((r) => r.id === 'payGain');
-  assert(String(promoGain?.value).includes('6,440'), `Promotional monthly gain is Rs. 6,440: ${promoGain?.value}`);
+  assert(String(promoGain?.value).includes('6,470'), `Promotional monthly gain is Rs. 6,470: ${promoGain?.value}`);
 
-  // Federal DRA: 2021 = round(30,370 x 25%) = 7,593; 2022 = round(30,370 x 15%) = 4,556 on frozen BPS-2017 initial
+  // Federal DRA-2026: round(45,070 x 15%) = 6,761 on frozen BPS-2022 initial (basic pay as on
+  // 30-06-2022), BPS 1-22, w.e.f. 01-07-2026 — OM No. 14(2)R-3/2025 dated 21-07-2026.
   const salDra = calculateSalary({ government: 'federal', year: '2026-27', bps: 17, stage: 0, cityType: 'big' });
-  const dra2021Row = salDra.breakdown?.find((r) => r.label.includes('Disparity Reduction Allowance 2021'));
-  const dra2022Row = salDra.breakdown?.find((r) => r.label.includes('Disparity Reduction Allowance 2022'));
-  assert(String(dra2021Row?.amount).includes('7,593'), `DRA-2021 is 25% of frozen BPS-2017 initial (Rs. 7,593): ${dra2021Row?.amount}`);
-  assert(String(dra2022Row?.amount).includes('4,556'), `DRA-2022 is 15% of frozen BPS-2017 initial (Rs. 4,556): ${dra2022Row?.amount}`);
+  const dra2026Row = salDra.breakdown?.find((r) => r.label.includes('Disparity Reduction Allowance 2026'));
+  assert(String(dra2026Row?.amount).includes('6,761'), `DRA-2026 is 15% of frozen BPS-2022 initial (Rs. 6,761): ${dra2026Row?.amount}`);
   const salBps20 = calculateSalary({ government: 'federal', year: '2026-27', bps: 20, stage: 0, cityType: 'big' });
-  assert(salBps20.breakdown?.filter((r) => r.label.includes('Disparity')).length === 0, 'DRA not applied to BPS-20 (scope is BPS 1-19)');
+  assert(salBps20.breakdown?.filter((r) => r.label.includes('Disparity Reduction Allowance 2026')).length === 1, 'DRA-2026 applies to BPS-20 (scope is BPS 1-22)');
 
   // ==========================================
   // 7. UI-WIRED VEHICLE, PROPERTY, ISLAMIC, FX, FUEL, LOAN & ZAKAT ENGINES
