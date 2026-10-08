@@ -9,6 +9,14 @@ import { syncAllServices } from '../../../../lib/sync';
 
 export async function GET(req: NextRequest) {
   try {
+    // Operational logs/drafts are admin-only: require the server secret via header.
+    const expectedSecret = process.env.ADMIN_SECRET_KEY;
+    if (!expectedSecret) {
+      return NextResponse.json({ success: false, error: 'ADMIN_SECRET_KEY is not configured on the server.' }, { status: 503 });
+    }
+    if (req.headers.get('x-admin-secret') !== expectedSecret) {
+      return NextResponse.json({ success: false, error: 'Unauthorized: Invalid Admin Secret Key' }, { status: 401 });
+    }
     const connected = await isDatabaseConnected();
     if (!connected) {
       return NextResponse.json({
@@ -71,7 +79,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action, service, draftId, secretKey, adminUser } = body;
 
-    const expectedSecret = process.env.ADMIN_SECRET_KEY || 'pakcalc2026';
+    const expectedSecret = process.env.ADMIN_SECRET_KEY;
     if (secretKey !== expectedSecret) {
       return NextResponse.json({ success: false, error: 'Unauthorized: Invalid Admin Secret Key' }, { status: 401 });
     }

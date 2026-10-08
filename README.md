@@ -11,7 +11,7 @@ An enterprise-grade, high-performance financial and utility calculation platform
 - **Pay Scale Fixation**: BPS 1 to 22 running basic pay with up to 30 increment stages.
 - **Station-Specific HRA**: Specified Big Cities (45% ceiling) vs Other Stations (30% ceiling), or Official Govt Accommodation (0 HRA + 5% Maintenance Deduction).
 - **Provincial Allowances**: Punjab Special Allowance 2021/2022 (DRA 25%/15%), Sindh Differential Allowance, KPK Executive Allowance, Balochistan Hardship Allowance.
-- **Pension & Commutation**: Pre-2024 Defined Benefit (35% commutation + official **Appendix I Age 45–65 Purchase Factor Table** + Rs. 25,000 statutory minimum floor) and Post-2024 FGDC Defined Contribution VPS fund.
+- **Pension & Commutation**: Pre-2024 Defined Benefit (35% commutation + official **Appendix I Age 45–65 Purchase Factor Table** + Rs. 12,000 statutory minimum floor (Finance Division OM No.F.15(1)-Reg.6/2023)) and Post-2024 FGDC Defined Contribution VPS fund.
 - **Specialized Pay Tools**: Leave Encashment (LPR up to 365 days), Family Pension (75% entitlement + Punjab lifetime restoration), FR-22(a)(i) Promotion Pay Fixation, and GP Fund compound markup engine.
 
 ### 💼 2. FBR Income Tax Module
@@ -88,12 +88,12 @@ npm install
 ### 3. Environment Configuration
 Create a `.env` file in the root directory:
 ```env
-# Supabase Project ID: pwurutzomtjwaansduup
-DATABASE_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+# Supabase Project ID: [your-project-ref]
+DATABASE_URL="postgresql://postgres.[your-project-ref]:[YOUR-PASSWORD]@[your-region].pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[your-project-ref]:[YOUR-PASSWORD]@[your-region].pooler.supabase.com:5432/postgres"
 
-ADMIN_SECRET_KEY="pakcalc2026"
-CRON_SECRET="pakcalc_cron_secret_2026"
+ADMIN_SECRET_KEY="[set-a-strong-secret-in-vercel]"
+CRON_SECRET="[set-a-strong-secret-in-vercel]"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
 ```
@@ -125,7 +125,7 @@ npm test
 ## 🛠️ Admin Dashboard Guide (`/admin`)
 
 Access the Admin Dashboard at `http://localhost:3000/admin` (or `https://yourdomain.com/admin`):
-- **Unlock Password**: Enter `ADMIN_SECRET_KEY` (default: `pakcalc2026`).
+- **Unlock Password**: Enter the `ADMIN_SECRET_KEY` you set in your environment (there is no default).
 - **Update Fuel & Gold Prices**: Click **"Edit Rate"**, enter new value, and click **"Save"**. Changes update live in PostgreSQL and reflect across all calculators immediately.
 - **One-Click Database Seed**: Populate or reset all 9 master tables with one click.
 - **Database Connection Monitor**: Real-time status indicator showing live PostgreSQL connection or hybrid fallback status.
@@ -142,7 +142,7 @@ npm test
 Test coverage includes:
 - ✅ Federal & Provincial BPS 1–22 Salary Computations (2024–2027)
 - ✅ Pre-2024 Defined Benefit Pension & Age 45–65 Commutation Table
-- ✅ Statutory Minimum Pension Floor (Rs. 25,000)
+- ✅ Statutory Minimum Pension Floor (Rs. 12,000)
 - ✅ FBR Income Tax Slabs (TY 2027, 2026, 2025) & Freelancer Section 154A
 - ✅ LESCO, IESCO, and K-Electric Domestic Electricity Billing & Taxes
 - ✅ Fuel Mileage, Trip Costs, and Commute Expenses

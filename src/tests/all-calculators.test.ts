@@ -140,7 +140,7 @@ async function runAllTests() {
   // 10. LIVE DATA SYNC PIPELINES
   console.log('\n--- 10. Live Data Synchronization Pipelines ---');
   const fuelSync = await syncFuelPrices({ forceUpdate: true });
-  assert(fuelSync.success, 'Fuel sync service completed successfully with Rs. 342.60 petrol rate');
+  assert(fuelSync.success, 'Fuel sync service completed successfully with Rs. 392.76 petrol rate');
 
   const goldSync = await syncGoldRates();
   assert(goldSync.success, 'Gold sync service completed successfully');

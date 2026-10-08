@@ -166,13 +166,13 @@ export default function ElectricityBillCalculatorLescoPage() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Related Energy Tools</h3>
               <div className="space-y-2">
-                <Link href="/electricity/solar-panel-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+                <Link href="/electricity/solar-system-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
                   Solar Panel System Sizing Calculator
                 </Link>
-                <Link href="/electricity/appliance-wattage-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+                <Link href="/electricity/appliance-electricity-cost-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
                   AC & Refrigerator Power Calculator
                 </Link>
-                <Link href="/electricity/ups-battery-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+                <Link href="/electricity/solar-system-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
                   UPS Backup Time & Battery Sizing
                 </Link>
               </div>

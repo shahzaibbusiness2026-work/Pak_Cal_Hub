@@ -9,7 +9,7 @@ export const SITE_URL = (
 
 export const SITE_NAME = 'Pak Calc Hub';
 export const SITE_FULL_NAME = 'Pakistan Calculator Hub';
-export const SITE_TAGLINE = '100+ Free Pakistan Calculators';
+export const SITE_TAGLINE = '40+ Free Pakistan Calculators';
 
 /** Build an absolute canonical URL from a site-relative path. */
 export function canonicalUrl(path: string): string {

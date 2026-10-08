@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { key, value, label, unit, category, secretKey, adminUser } = body;
 
-    const expectedSecret = process.env.ADMIN_SECRET_KEY || 'pakcalc2026';
+    const expectedSecret = process.env.ADMIN_SECRET_KEY;
     if (secretKey !== expectedSecret) {
       return NextResponse.json({ success: false, error: 'Unauthorized: Invalid Admin Secret Key' }, { status: 401 });
     }

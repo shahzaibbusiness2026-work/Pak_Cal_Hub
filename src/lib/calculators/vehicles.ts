@@ -140,25 +140,26 @@ export function calculateTokenTax(inputs: Record<string, any>): CalculatorOutput
 
   return {
     primaryResult: {
-      id: 'totalTokenTax',
-      label: 'Token Tax + FBR 231B Advance Tax',
-      value: formatPKR(totalPayable),
+      id: 'annualTokenTax',
+      label: province === 'punjab' && engineCapacityCc <= 1000 || province === 'ict' && engineCapacityCc <= 1000 ? 'Provincial Token Tax (one-time for this slab)' : 'Annual Provincial Token Tax — pay every year',
+      value: formatPKR(annualTokenTax),
       type: 'currency',
       highlight: true,
       color: 'warning',
-      subtext: `${engineCapacityCc}cc ${provinceName} (${isFiler ? 'Active Filer' : 'Non-Filer'})`,
+      subtext: `${engineCapacityCc}cc ${provinceName} (${isFiler ? 'Active Filer' : 'Non-Filer'}) — this is your recurring token, not including one-time registration tax`,
     },
     secondaryResults: [
-      { id: 'tokenTax', label: 'Provincial Motor Vehicle Tax', value: formatPKR(annualTokenTax), type: 'currency' },
-      { id: 'fbrAdvanceTax', label: `FBR Section 231B WHT (${(effectiveWhtRate * 100).toFixed(2)}% of value)`, value: formatPKR(advanceTax231B), type: 'currency' },
+      { id: 'tokenTax', label: 'Provincial Motor Vehicle Tax (above)', value: formatPKR(annualTokenTax), type: 'currency' },
+      { id: 'fbrAdvanceTax', label: `One-time FBR 231B at registration only (${(effectiveWhtRate * 100).toFixed(2)}% of value)`, value: formatPKR(advanceTax231B), type: 'currency' },
+      { id: 'firstYearTotal', label: 'Only if registering a new vehicle this year: token + one-time 231B', value: formatPKR(totalPayable), type: 'currency' },
       { id: 'status', label: 'Taxpayer Status', value: isFiler ? 'Filer' : 'Non-Filer', type: 'badge' },
     ],
     breakdown: [
       { label: `Engine Capacity (${engineCapacityCc} CC)`, amount: `${engineCapacityCc} cc` },
       { label: `Vehicle Invoice / Market Value`, amount: formatPKR(invoiceValue) },
       { label: tokenTaxLabel, amount: formatPKR(annualTokenTax) },
-      { label: `FBR Section 231B Withholding Tax (${(effectiveWhtRate * 100).toFixed(2)}% of Rs. ${invoiceValue.toLocaleString()} — one-time at registration, adjustable)`, amount: formatPKR(advanceTax231B) },
-      { label: 'Total Excise Challan Payable', amount: formatPKR(totalPayable), isTotal: true },
+      { label: 'ANNUAL AMOUNT YOU PAY (token only)', amount: formatPKR(annualTokenTax), isTotal: true },
+      { label: `Separate one-time FBR Section 231B at registration/purchase only (${(effectiveWhtRate * 100).toFixed(2)}% of Rs. ${invoiceValue.toLocaleString()}, adjustable under Section 168 — do NOT add this to your yearly token)`, amount: formatPKR(advanceTax231B) },
     ],
     notes: [
       'Provincial token tax is paid to the Excise & Taxation Department (e.g., Punjab rates from the Punjab Finance Bill 2026; ICT rates from Finance Act 2026 effective 1 July 2026). Punjab offers a 10% rebate if the full year is paid by 31 August — verify the current-year window.',

@@ -162,10 +162,10 @@ export default function GoldRateCalculatorPakistanPage() {
                 <Link href="/islamic/zakat-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
                   Zakat on Gold & Wealth Calculator
                 </Link>
-                <Link href="/currency/usd-to-pkr" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+                <Link href="/currency/pkr-currency-converter" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
                   USD to PKR Currency Converter
                 </Link>
-                <Link href="/investment/compound-profit-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+                <Link href="/investment/compound-interest-calculator" className="block p-2.5 rounded-xl border border-slate-100 hover:border-emerald-600/40 hover:bg-slate-50 text-xs font-bold text-slate-900 dark:border-slate-800 dark:text-white">
                   Gold & Mutual Fund Return Calculator
                 </Link>
               </div>

@@ -96,7 +96,7 @@ export default function Footer() {
                 { label: 'MDCAT / ECAT Aggregate', href: '/education/university-merit-calculator' },
                 { label: 'GPA & CGPA Calculator', href: '/education/gpa-calculator' },
                 { label: 'Loan EMI (Islamic/Conv.)', href: '/loans/loan-emi-calculator' },
-                { label: 'PKR Currency Converter', href: '/currency/currency-converter' },
+                { label: 'PKR Currency Converter', href: '/currency/pkr-currency-converter' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href} className="hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors">
@@ -107,6 +107,14 @@ export default function Footer() {
             </ul>
           </div>
         </div>
+
+        {/* Legal pages */}
+        <nav aria-label="Legal" className="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <Link href="/about" className="hover:text-emerald-800 dark:hover:text-emerald-400">About</Link>
+          <Link href="/contact" className="hover:text-emerald-800 dark:hover:text-emerald-400">Contact</Link>
+          <Link href="/privacy-policy" className="hover:text-emerald-800 dark:hover:text-emerald-400">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-emerald-800 dark:hover:text-emerald-400">Terms of Use</Link>
+        </nav>
 
         {/* Legal Disclaimer */}
         <div className="mt-10 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5 dark:border-amber-800/40 dark:bg-amber-950/30">

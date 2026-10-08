@@ -93,7 +93,7 @@ interface SystemNotification {
  * Rendered by /admin/rates (defaultTab="rates") and /admin/sync (defaultTab="automation").
  */
 export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 'rates' | 'automation' | 'salary' | 'tax' | 'status' }) {
-  const [secretKey] = useState('pakcalc2026');
+  const [secretKey, setSecretKey] = useState('');
   const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
   const [rates, setRates] = useState<MarketRate[]>([]);
   const [loading, setLoading] = useState(false);
@@ -122,7 +122,7 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
       const [healthRes, ratesRes, autoRes] = await Promise.all([
         fetch('/api/admin/health'),
         fetch('/api/admin/rates'),
-        fetch('/api/admin/automation'),
+        fetch('/api/admin/automation', { headers: secretKey ? { 'x-admin-secret': secretKey } : undefined }),
       ]);
 
       if (healthRes.ok) {
@@ -345,6 +345,13 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
             <span>1-Click Database Seed</span>
           </button>
         </div>
+      </div>
+
+      {/* Admin secret (kept in memory only, never stored or shipped in code) */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 flex flex-col sm:flex-row sm:items-center gap-3">
+        <label htmlFor="admin-secret" className="text-xs font-bold text-slate-700 dark:text-slate-200 shrink-0">Admin Secret Key (ADMIN_SECRET_KEY)</label>
+        <input id="admin-secret" type="password" value={secretKey} onChange={(e) => setSecretKey(e.target.value)} placeholder="Enter the secret set in your server environment..." className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+        <span className="text-[11px] text-slate-500">Required for seed, rate updates and sync actions. There is no default password.</span>
       </div>
 
       {/* Database Quick-Connect Banner (If not yet connected) */}

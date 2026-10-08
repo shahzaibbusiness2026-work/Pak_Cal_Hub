@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const authHeader = req.headers.get('authorization');
     const url = new URL(req.url);
     const querySecret = url.searchParams.get('secret');
-    const cronSecret = process.env.CRON_SECRET || 'pakcalc_cron_secret_2026';
+    const cronSecret = process.env.CRON_SECRET;
 
     const isAuthorized =
       authHeader === `Bearer ${cronSecret}` ||

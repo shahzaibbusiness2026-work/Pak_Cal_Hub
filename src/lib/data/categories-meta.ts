@@ -835,7 +835,7 @@ export const CATEGORIES_DATA: CategoryMeta[] = [
         inputs: [
           { id: 'distanceKm', label: 'Trip Distance (Kilometers)', type: 'number', defaultValue: 380 },
           { id: 'fuelAverageKmPerLiter', label: 'Vehicle Fuel Average (km / Litre)', type: 'number', defaultValue: 14.0, step: 0.1, helpText: 'Your car’s real-world average — e.g. 12-15 km/L for a 1300cc car.' },
-          { id: 'fuelPricePerLiter', label: 'Current Fuel Price (PKR / Litre)', type: 'currency', defaultValue: 342.60, helpText: 'OGRA-notified price for the current fortnight — check the latest notification.' },
+          { id: 'fuelPricePerLiter', label: 'Current Fuel Price (PKR / Litre)', type: 'currency', defaultValue: 392.76, helpText: 'OGRA-notified price for the current fortnight — check the latest notification.' },
           { id: 'roundTrip', label: 'Round Trip (Both Ways)?', type: 'toggle', defaultValue: false },
         ],
       },
