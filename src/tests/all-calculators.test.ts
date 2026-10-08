@@ -31,6 +31,23 @@ import { calculateFuelCost as calculateVehicleFuelCost } from '../lib/calculator
 import { calculateCurrency } from '../lib/calculators/currency';
 import { calculateLoanEmi } from '../lib/calculators/loans';
 import {
+  calculatePassportFee,
+  calculateDrivingLicenceFee,
+  calculateDuplicateBillChecker,
+  calculateVehicleVerification,
+  calculatePropertyTransferCost,
+  calculatePtaMobileTax,
+  calculateNadraFeeGuide,
+  calculateSalarySlip,
+  calculateCssAgeEligibility,
+  calculatePakistanIban,
+} from '../lib/calculators/pakistan-services';
+import { calculatePension as calculatePensionUi, calculateBasicPay } from '../lib/calculators/salary';
+import { calculateBreakEven } from '../lib/calculators/business';
+import { calculatePropertyTax as calculatePropertyTaxUi, calculateFreelancerTax as calculateFreelancerTaxUi } from '../lib/calculators/tax';
+import { calculateTokenTax } from '../lib/calculators/vehicles';
+
+import {
   syncFuelPrices,
   syncGoldRates,
   syncCurrencyRates,
@@ -216,6 +233,74 @@ async function runAllTests() {
   assert(String(acre.secondaryResults?.find((r) => r.id === 'sqftResult')?.value).includes('43,560'), '1 acre = 43,560 sq ft');
   const ldaMarla = calculateAreaConverter({ value: 1, fromUnit: 'marla', marlaType: 225 });
   assert(String(ldaMarla.secondaryResults?.find((r) => r.id === 'sqftResult')?.value).startsWith('225'), 'Numeric marlaType 225 coerced correctly (LDA marla)');
+
+  // 12. NEW PAKISTAN SERVICES + AUDIT-FIX REGRESSION TESTS (9 Oct 2026)
+  console.log('\n--- 12. Pakistan Services & Audit Fixes ---');
+
+  const passport = calculatePassportFee({ passportType: 'mrp', pages: '36', validity: '10', service: 'normal', lostStatus: 'none' });
+  assert(String(passport.primaryResult.value).includes('6,700'), 'Passport MRP 36p/10y Normal = Rs 6,700 (DGIP)');
+  const passportLost = calculatePassportFee({ passportType: 'mrp', pages: '36', validity: '5', service: 'normal', lostStatus: 'first-lost' });
+  assert(String(passportLost.primaryResult.value).includes('9,000'), 'First lost passport doubles DGIP fee to Rs 9,000');
+  const epassFast = calculatePassportFee({ passportType: 'e-passport', pages: '36', validity: '5', service: 'fast-track', lostStatus: 'none' });
+  assert(String(epassFast.primaryResult.value) === 'Not available', 'e-Passport Fast Track is honestly shown as not offered');
+
+  const licence = calculateDrivingLicenceFee({ serviceType: 'new', category: 'car', years: 1, includeTest: true, latePeriod: 'none' });
+  assert(String(licence.primaryResult.value).includes('1,980'), 'Punjab car licence new 1y incl test+courier = Rs 1,980 (DLIMS)');
+  const licenceLate = calculateDrivingLicenceFee({ serviceType: 'renewal', category: 'car', years: 1, includeTest: false, latePeriod: '1-3-months' });
+  assert(String(licenceLate.primaryResult.value).includes('2,505'), 'Punjab car renewal 1-3 months late = Rs 2,505 (DLIMS)');
+
+  const bill = calculateDuplicateBillChecker({ disco: 'lesco', referenceNumber: '12345678901234' });
+  assert(String(bill.primaryResult.value).includes('Ready'), 'LESCO 14-digit reference passes duplicate-bill check');
+  const keBill = calculateDuplicateBillChecker({ disco: 'k-electric', referenceNumber: '1234567890123' });
+  assert(String(keBill.primaryResult.subtext).includes('ke.com.pk'), 'K-Electric uses its own portal, not PITC');
+
+  const balochistan = calculateVehicleVerification({ province: 'balochistan', registrationNumber: '' });
+  assert((balochistan.notes || []).some((n) => /under process/i.test(n)), 'Balochistan vehicle verification warns it is under process');
+
+  const transfer = calculatePropertyTransferCost({ propertyValue: 18000000, locationType: 'urban', filerStatus: 'filer', role: 'buyer' });
+  assert(String(transfer.primaryResult.value).includes('5,86,000'), 'Punjab transfer buyer 18m urban filer = stamp 360,000 + deed 1,000 + 236K 225,000');
+  const transferSeller = calculatePropertyTransferCost({ propertyValue: 18000000, locationType: 'urban', filerStatus: 'filer', role: 'seller' });
+  assert(String(transferSeller.primaryResult.value).includes('4,95,000'), 'Punjab transfer seller 18m filer 236C 2.75% = Rs 495,000');
+
+  const pta = calculatePtaMobileTax({ registrationRoute: 'passport', deviceValueUsd: 800 });
+  assert(String(pta.primaryResult.value).includes('DIRBS'), 'PTA tool gives exact tax only via DIRBS PSID (no unverified table)');
+  const nadra = calculateNadraFeeGuide({ serviceType: 'cnic', priority: 'normal' });
+  assert(String(nadra.primaryResult.value).includes('Pak-ID'), 'NADRA tool routes exact fee to Pak-ID (no unverified table)');
+
+  const slip = calculateSalarySlip({ employeeName: 'Test', companyName: 'ABC', payMonth: 'Sep 2026', basicSalary: 85000, houseRentAllowance: 38250, conveyanceAllowance: 8000, medicalAllowance: 5000, otherAllowances: 5000, bonusOvertime: 0, incomeTax: 6500, eobi: 0, providentFund: 0, otherDeductions: 0 });
+  assert(String(slip.primaryResult.value).includes('1,34,750'), 'Salary slip net = gross 141,250 - tax 6,500 = Rs 134,750');
+
+  const css = calculateCssAgeEligibility({ mode: 'css', birthDate: '1998-08-14', cssExamYear: 2027, cssCategory: 'general' });
+  assert(String(css.primaryResult.value).includes('Eligible'), 'CSS 2027 age 28 at 31 Dec 2026 is eligible');
+  const cssRelax = calculateCssAgeEligibility({ mode: 'css', birthDate: '1995-01-01', cssExamYear: 2027, cssCategory: 'relaxation' });
+  assert(String(cssRelax.primaryResult.value).includes('Eligible'), 'CSS +2 relaxation makes age 31 eligible (ceiling 32)');
+  const federal = calculateCssAgeEligibility({ mode: 'federal', birthDate: '1990-01-01', closingDate: '2026-12-31', baseMaxAge: 30, federalCategory: 'govt-servant', armedForcesYears: 0 });
+  assert(String(federal.primaryResult.value).includes('Eligible'), 'Federal govt-servant relaxation: max 45 makes age 36 eligible');
+
+  const iban = calculatePakistanIban({ iban: 'PK36SCBL0000001123456702' });
+  assert(String(iban.primaryResult.value).includes('Valid'), 'SWIFT registry PK IBAN example passes MOD-97');
+  const ibanBad = calculatePakistanIban({ iban: 'PK36SCBL0000001123456703' });
+  assert(String(ibanBad.primaryResult.value).includes('Not a valid'), 'Changed IBAN digit fails MOD-97');
+
+  const pensionPost = calculatePensionUi({ government: 'federal', hireScheme: 'post-2024', lastBasicPay: 95000, serviceYears: 30, ageAtRetirement: 60, commutationPercent: 35, bps: 17 });
+  assert(pensionPost.primaryResult.id === 'annuity', 'Pension post-2024 UI route reaches FGDC path (hyphen bug fixed)');
+  assert((pensionPost.notes || []).some((n) => /Illustrative projection/i.test(n)), 'FGDC pension is labelled an illustrative projection');
+
+  const basicPay = calculateBasicPay({ government: 'federal', year: '2026-27', bps: 17, stage: 2, cityType: 'big' });
+  assert(String(basicPay.primaryResult.value).includes('62,360'), 'Basic-pay tool headline is running basic pay (BPS-17 stage 2 = Rs 62,360)');
+
+  const breakEvenBad = calculateBreakEven({ fixedCosts: 250000, unitPrice: 900, variableCost: 900 });
+  assert(String(breakEvenBad.primaryResult.value).includes('No break-even'), 'Break-even warns when price equals variable cost');
+
+  const propertyTax = calculatePropertyTaxUi({ propertyValue: 18000000, isFiler: true, transactionType: 'buy', taxYear: '2026-27' });
+  assert(String(propertyTax.secondaryResults?.find((r) => r.id === 'advanceTax')?.value).includes('2,25,000'), 'Property 236K filer TY2027 = 1.25% (Rs 225,000 on 18m)');
+
+  const token = calculateTokenTax({ province: 'punjab', engineCapacityCc: 1300, invoiceValue: 4000000, isFiler: true });
+  assert(String(token.primaryResult.value).includes('12,000') && /Annual Provincial Token Tax/i.test(String(token.primaryResult.label)), 'Token headline is annual token only (Rs 12,000), not mixed with 231B');
+
+  const freelancerOther = calculateFreelancerTaxUi({ annualIncome: 4200000, isPsebRegistered: true, remittanceChannel: 'other' });
+  assert((freelancerOther.notes || []).some((n) => /non-banking inflow/i.test(n)), 'Freelancer non-banking channel triggers 154A eligibility warning');
+
 
   console.log('\n======================================================');
   console.log('🎉 ALL CALCULATION ENGINES & SYNC PIPELINES VERIFIED (100% SUCCESS)');

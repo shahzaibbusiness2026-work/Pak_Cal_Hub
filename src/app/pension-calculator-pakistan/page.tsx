@@ -107,7 +107,7 @@ export default function PensionCalculatorPakistanPage() {
                 </h2>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                The commutation factor is determined strictly by the retiree's age on the next birthday following the date of retirement:
+                The commutation factor is determined strictly by the retiree&apos;s age on the next birthday following the date of retirement:
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs text-slate-600 dark:text-slate-300 pt-1">
                 <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-center font-mono">

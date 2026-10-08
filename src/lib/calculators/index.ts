@@ -12,3 +12,4 @@ export * from './investment';
 export * from './date-time';
 export * from './data-tools';
 export * from './specialized-engines';
+export * from './pakistan-services';

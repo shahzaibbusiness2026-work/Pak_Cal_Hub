@@ -31,7 +31,7 @@ import { CategoryIcon } from '../components/ui/categoryIcons';
 import { SITE_URL, SITE_NAME, SITE_FULL_NAME, canonicalUrl } from '../lib/site';
 
 export const metadata: Metadata = {
-  title: `${SITE_FULL_NAME} (${SITE_NAME}) | 40+ Free Pakistan Calculators 2026`,
+  title: `${SITE_FULL_NAME} (${SITE_NAME}) | 49 Free Pakistan Calculators 2026`,
   description:
     'Pakistan\'s free calculator hub: RBPS-2026 Government Salary, FBR Income Tax 2026-27, Electricity Bills, Pension, GP Fund, Zakat, Solar, Gold Rates & more. Accurate, official-source linked, updated October 2026.',
   alternates: { canonical: canonicalUrl('/') },
@@ -39,14 +39,14 @@ export const metadata: Metadata = {
     type: 'website',
     url: SITE_URL,
     siteName: SITE_FULL_NAME,
-    title: `${SITE_FULL_NAME} | 40+ Free Pakistan Calculators 2026`,
+    title: `${SITE_FULL_NAME} | 49 Free Pakistan Calculators 2026`,
     description:
       'Free Pakistan calculators: Government Salary (RBPS-2026), FBR Tax, Electricity Bills, Pension, GP Fund, Zakat, Solar & more.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_FULL_NAME} | 40+ Free Pakistan Calculators`,
-    description: 'RBPS-2026 Salary, FBR Tax, Electricity Bills, Pension, Zakat & 40+ free Pakistan calculators.',
+    title: `${SITE_FULL_NAME} | 49 Free Pakistan Calculators`,
+    description: 'RBPS-2026 Salary, FBR Tax, Electricity Bills, Pension, Zakat & 49 free Pakistan calculators.',
   },
 };
 
@@ -764,7 +764,7 @@ export default function HomePage() {
             Explore All 13 Categories
           </h2>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            40+ precision calculation engines across government, tax, property, and finance
+            49 precision calculation engines across government, tax, property, and finance
           </p>
         </div>
 

@@ -367,7 +367,7 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
                   Connect Supabase PostgreSQL Database
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                  Host: <code className="font-mono font-bold text-amber-900 dark:text-amber-300">aws-0-ap-northeast-2.pooler.supabase.com</code> (Project ID: <code>pwurutzomtjwaansduup</code>)
+                  Host: <code className="font-mono font-bold text-amber-900 dark:text-amber-300">aws-0-ap-northeast-2.pooler.supabase.com</code> (Project ID: <code>[your-project-ref]</code>)
                 </p>
                 {dbStatus?.reason && (
                   <p className="text-xs text-amber-800 dark:text-amber-400 font-semibold mt-1">
@@ -579,7 +579,7 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
                   <Fuel className="h-4 w-4 text-emerald-700" />
                   <span>Live Commodity &amp; Market Rates Manager</span>
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">Click "Edit Rate" on any item to update prices across all website calculators immediately.</p>
+                <p className="text-xs text-slate-500 mt-0.5">Click &quot;Edit Rate&quot; on any item to update prices across all website calculators immediately.</p>
               </div>
             </div>
 
@@ -896,27 +896,27 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
                 <Database className="h-5 w-5 text-emerald-700" />
                 <span>Supabase PostgreSQL Integration Guide</span>
               </h2>
-              <p className="text-xs text-slate-500 mt-1">Your Supabase Project ID: <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-emerald-700 font-bold">pwurutzomtjwaansduup</code> (Region: <code>ap-northeast-2</code>)</p>
+              <p className="text-xs text-slate-500 mt-1">Your Supabase Project ID: <code className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-emerald-700 font-bold">[your-project-ref]</code> (Region: <code>ap-northeast-2</code>)</p>
             </div>
 
             <div className="space-y-4 text-xs text-slate-600 dark:text-slate-300">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">Option A: Quick Connect in Dashboard</h3>
-                <p>Scroll to the top of this page, paste your Supabase password into the connection box, and click <strong>"Connect &amp; Test Database"</strong>.</p>
+                <p>Scroll to the top of this page, paste your Supabase password into the connection box, and click <strong>&quot;Connect &amp; Test Database&quot;</strong>.</p>
               </div>
 
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">Option B: Manual .env Configuration</h3>
                 <p>Open <code>.env</code> in your project root and paste your database password in place of <code>[YOUR-PASSWORD]</code>:</p>
                 <pre className="p-3 rounded-lg bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto">
-DATABASE_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.pwurutzomtjwaansduup:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres"
+{`DATABASE_URL="postgresql://postgres.[your-project-ref]:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[your-project-ref]:[YOUR-PASSWORD]@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres"`}
                 </pre>
               </div>
 
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 space-y-2">
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">Create Tables &amp; Seed</h3>
-                <p>After saving the password, click the <strong>"1-Click Database Seed"</strong> button at the top to populate all tables!</p>
+                <p>After saving the password, click the <strong>&quot;1-Click Database Seed&quot;</strong> button at the top to populate all tables!</p>
               </div>
             </div>
           </div>

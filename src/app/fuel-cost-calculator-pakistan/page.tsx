@@ -88,7 +88,7 @@ export default function FuelCostCalculatorPakistanPage() {
             Pakistan Fuel Cost &amp; Trip Expense Calculator
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
-            Calculate your journey fuel expense, running cost per kilometer, and daily commute budget based on distance, your vehicle's mileage, and latest official fuel rates.
+            Calculate your journey fuel expense, running cost per kilometer, and daily commute budget based on distance, your vehicle&apos;s mileage, and latest official fuel rates.
           </p>
         </div>
 

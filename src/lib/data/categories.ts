@@ -41,6 +41,16 @@ import {
   calculateTokenTax,
   calculateUniversityAggregate,
   calculateZakat,
+  calculatePassportFee,
+  calculateDrivingLicenceFee,
+  calculateDuplicateBillChecker,
+  calculateVehicleVerification,
+  calculatePropertyTransferCost,
+  calculatePtaMobileTax,
+  calculateNadraFeeGuide,
+  calculateSalarySlip,
+  calculateCssAgeEligibility,
+  calculatePakistanIban,
 } from '../calculators';
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
@@ -83,6 +93,16 @@ const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorO
   'inflation-calculator': calculateInflation,
   'age-calculator': calculateAge,
   'gold-price-calculator': calculateGoldPrice,
+  'pta-mobile-tax-calculator': calculatePtaMobileTax,
+  'passport-fee-calculator': calculatePassportFee,
+  'driving-licence-fee-calculator': calculateDrivingLicenceFee,
+  'duplicate-electricity-bill-checker': calculateDuplicateBillChecker,
+  'vehicle-verification-checker': calculateVehicleVerification,
+  'property-transfer-cost-calculator': calculatePropertyTransferCost,
+  'nadra-fee-calculator': calculateNadraFeeGuide,
+  'salary-slip-generator': calculateSalarySlip,
+  'css-age-eligibility-calculator': calculateCssAgeEligibility,
+  'pakistan-iban-checker': calculatePakistanIban,
 };
 
 /**

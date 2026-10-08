@@ -4,7 +4,7 @@ import { SITE_NAME } from '../lib/site';
 
 export const metadata = {
   title: `Page Not Found | ${SITE_NAME}`,
-  description: 'The page you are looking for does not exist. Browse 40+ free Pakistan calculators.',
+  description: 'The page you are looking for does not exist. Browse 49 free Pakistan calculators.',
   robots: { index: false, follow: true },
 };
 

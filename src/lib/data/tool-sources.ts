@@ -631,6 +631,78 @@ const ENTRIES: ToolSourceEntry[] = [
     rateKeys: [],
     note: 'Uses the inflation rate you enter — official CPI is published by the Pakistan Bureau of Statistics.',
   },
+
+  // ── Pakistan services & official checkers (added 9 Oct 2026) ─────────────
+  {
+    toolId: 'passport-fee-calculator',
+    sources: [{ name: 'Directorate General of Immigration & Passports (DGIP)', url: 'https://dgip.gov.pk/passport/ordinary-passport.php', description: 'Ordinary MRP and e-Passport fees; MRP effective 07-03-2024, Fast Track 08-05-2024', effectiveDate: '7th March 2024' }],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verified', rateKeys: ['dgip-mrp-fees-2024', 'dgip-e-passport-fees-2024'],
+  },
+  {
+    toolId: 'driving-licence-fee-calculator',
+    sources: [{ name: 'DLIMS 2.0 — Punjab Police / PITB', url: 'https://dlims.punjab.gov.pk/fee_structure', description: 'Punjab permanent licence, renewal and late-fine fee structure (learner fee excluded pending confirmation)' }],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verified', rateKeys: ['dlims-punjab-fee-structure'],
+  },
+  {
+    toolId: 'duplicate-electricity-bill-checker',
+    sources: [
+      { name: 'PITC — Power Information Technology Company', url: 'https://bill.pitc.com.pk', description: 'Official duplicate-bill portals for LESCO, IESCO, MEPCO, FESCO, GEPCO, PESCO, SEPCO, HESCO and QESCO (14-digit reference number)' },
+      { name: 'K-Electric', url: 'https://ke.com.pk/ke-live/', description: 'K-Electric duplicate bill by 13-digit account number (KE is not on PITC)' },
+    ],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verified', rateKeys: ['pitc-disco-portals', 'ke-duplicate-bill'],
+  },
+  {
+    toolId: 'vehicle-verification-checker',
+    sources: [
+      { name: 'Punjab Excise — MTMIS', url: 'https://mtmis.excise.punjab.gov.pk', description: 'Punjab vehicle verification' },
+      { name: 'Islamabad Excise', url: 'https://islamabadexcise.gov.pk', description: 'ICT vehicle verification' },
+      { name: 'Sindh Excise', url: 'http://www.excise.gos.pk/vehicle/vehicle_search', description: 'Sindh vehicle search' },
+    ],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verify', rateKeys: ['mtmis-punjab', 'ict-excise', 'sindh-excise', 'kp-excise', 'balochistan-excise'],
+    note: 'KP online form reported unreliable and Balochistan verification is under process — the tool warns on those provinces instead of presenting a working check.',
+  },
+  {
+    toolId: 'property-transfer-cost-calculator',
+    sources: [
+      { name: 'Federal Board of Revenue (FBR) — Finance Act 2026', url: 'https://fbr.gov.pk', description: 'Sections 236K/236C advance tax from 1 July 2026 (Gazette text checked)', effectiveDate: '1st July 2026' },
+      { name: 'Punjab Land Records Authority / Board of Revenue Punjab', description: 'Stamp duty 2% urban / 1% other; Punjab CVT merged into stamp duty since 2017; registration/mutation is calculated in PLRA e-Registration', notificationStatus: 'verify' },
+    ],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verify', rateKeys: ['236k-236c-ty2027', 'punjab-stamp-duty-2026'],
+    note: 'Late-filer TY2027 rates and the PLRA system fee are not quoted — see the tool notes.',
+  },
+  {
+    toolId: 'pta-mobile-tax-calculator',
+    sources: [
+      { name: 'PTA DIRBS', url: 'https://dirbs.pta.gov.pk/drs', description: 'Official device registration system that generates the exact PSID tax' },
+      { name: 'Federal Board of Revenue (FBR) — DIRBS', url: 'https://www.fbr.gov.pk/mobile-devices-regularization-dirbs/51149/131261', description: 'FBR imposes/collects mobile registration taxes; PTA directs travellers to FBR' },
+    ],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verify', rateKeys: ['dirbs-psid'],
+    note: 'Current 2026-27 FBR rate SROs could not be verified from fbr.gov.pk, so no unofficial tax table is quoted. Your DIRBS PSID is the exact figure.',
+  },
+  {
+    toolId: 'nadra-fee-calculator',
+    sources: [{ name: 'NADRA — Fee Structure', url: 'https://www.nadra.gov.pk/feeStructure', description: 'Official NADRA fee page; exact fee is generated in Pak-ID for your application type', notificationStatus: 'verify' }],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verify', rateKeys: ['nadra-fee-structure', 'pak-id'],
+    note: 'The official fee page could not be independently loaded on 9 Oct 2026 and third-party tables conflict, so this checker routes you to NADRA/Pak-ID instead of quoting an unverified fee.',
+  },
+  {
+    toolId: 'salary-slip-generator', sources: [], ratesVerifiedOn: '2026-10-09', ratesStatus: 'verified', rateKeys: [],
+    note: 'Generated only from figures you enter — a planning sample, not proof of employment or income.',
+  },
+  {
+    toolId: 'css-age-eligibility-calculator',
+    sources: [
+      { name: 'Establishment Division — CSS Competitive Examination Rules 2019', url: 'https://establishment.gov.pk/SiteImage/Misc/files/CSS%20Competitive%20Examination%20Rules%2C%202019.pdf', description: 'CSS age 21–30 at 31 Dec before exam; +2 listed-category relaxation (ceiling 32)' },
+      { name: 'Establishment Division — Age Relaxation Rules 1993', url: 'https://www.establishment.gov.pk/SiteImage/Misc/files/Initial%20Appointment%20to%20Civil%20Posts%20(Relaxation%20of%20Upper%20Age%20Limit)%20Rules%201993%20updated.pdf', description: 'Federal jobs: +5 general relaxation plus at most one category relaxation' },
+    ],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verified', rateKeys: ['css-rules-2019', 'age-relaxation-rules-1993'],
+  },
+  {
+    toolId: 'pakistan-iban-checker',
+    sources: [{ name: 'SWIFT IBAN Registry (Release 102)', url: 'https://www.swift.com/resource/iban-registry-pdf', description: 'Pakistan IBAN: 24 characters, PK + 2 check digits + 4-letter bank code + 16-character account portion; MOD-97 validation' }],
+    ratesVerifiedOn: '2026-10-09', ratesStatus: 'verified', rateKeys: ['swift-iban-registry-pk'],
+    note: 'No official SBP bank-code list was verified, so the tool shows the bank code as printed and never guesses a bank name.',
+  },
 ];
 
 const BY_ID: Record<string, ToolSourceEntry> = Object.fromEntries(

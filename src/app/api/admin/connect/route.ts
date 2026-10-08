@@ -22,8 +22,13 @@ export async function POST(req: NextRequest) {
     // Encode special characters in password for URI safety
     const encodedPass = encodeURIComponent(cleanPass);
 
-    const targetPoolerUrl = `postgresql://postgres.pwurutzomtjwaansduup:${encodedPass}@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres?pgbouncer=true`;
-    const targetDirectUrl = `postgresql://postgres.pwurutzomtjwaansduup:${encodedPass}@aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres`;
+    const projectRef = process.env.SUPABASE_PROJECT_REF;
+    const region = process.env.SUPABASE_REGION || 'aws-0-ap-northeast-2';
+    if (!projectRef) {
+      return NextResponse.json({ success: false, error: 'SUPABASE_PROJECT_REF is not configured on the server.' }, { status: 503 });
+    }
+    const targetPoolerUrl = `postgresql://postgres.${projectRef}:${encodedPass}@${region}.pooler.supabase.com:6543/postgres?pgbouncer=true`;
+    const targetDirectUrl = `postgresql://postgres.${projectRef}:${encodedPass}@${region}.pooler.supabase.com:5432/postgres`;
 
     // 1. Test connection with temporary PrismaClient
     const tempPrisma = new PrismaClient({

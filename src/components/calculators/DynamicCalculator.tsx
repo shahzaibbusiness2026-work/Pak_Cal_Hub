@@ -83,10 +83,6 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
     };
   }, [calculator]);
 
-  if (!calculator) {
-    return <div className="p-4 text-center text-slate-500">Calculator not found</div>;
-  }
-
   const handleFieldChange = (id: string, value: any) => {
     setInputs((prev) => ({ ...prev, [id]: value }));
 
@@ -107,6 +103,9 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
 
   // Reactive calculation execution
   const results: CalculatorOutput = useMemo(() => {
+    if (!calculator) {
+      return { primaryResult: { id: 'not-found', label: 'Calculator not found', value: '', type: 'text' as const } };
+    }
     try {
       return calculator.calculate(inputs);
     } catch (err) {
@@ -116,6 +115,10 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       };
     }
   }, [calculator, inputs]);
+
+  if (!calculator) {
+    return <div className="p-4 text-center text-slate-500">Calculator not found</div>;
+  }
 
   const resultSummaryString = `${results.primaryResult.label}: ${results.primaryResult.value}${
     results.secondaryResults
