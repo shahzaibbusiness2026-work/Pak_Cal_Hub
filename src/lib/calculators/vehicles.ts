@@ -164,6 +164,7 @@ export function calculateTokenTax(inputs: Record<string, any>): CalculatorOutput
     notes: [
       'Provincial token tax is paid to the Excise & Taxation Department (e.g., Punjab rates from the Punjab Finance Bill 2026; ICT rates from Finance Act 2026 effective 1 July 2026). Punjab offers a 10% rebate if the full year is paid by 31 August — verify the current-year window.',
       'Section 231B withholding tax is collected once at vehicle registration / purchase of a new vehicle and is adjustable against final income tax liability under Section 168 — it is not a recurring annual tax.',
+      'Non-filer (non-ATL) 231B: this tool applies the flat 4% treatment reported in FBR orders. On high-value cars this can appear lower than the filer band rate — confirm the exact rate printed on your Excise/FBR challan before paying, as ATL status at the time of registration decides it.',
       'Provincial schedules change with each budget — verify your exact amount on e-Pay Punjab / the ICT PAK App / your provincial excise portal before paying.',
     ],
   };

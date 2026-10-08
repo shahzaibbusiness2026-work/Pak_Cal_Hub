@@ -44,6 +44,7 @@ import {
 } from '../lib/calculators/pakistan-services';
 import { calculatePension as calculatePensionUi, calculateBasicPay } from '../lib/calculators/salary';
 import { calculateBreakEven } from '../lib/calculators/business';
+import { calculateLoanAffordability } from '../lib/calculators/loans';
 import { calculatePropertyTax as calculatePropertyTaxUi, calculateFreelancerTax as calculateFreelancerTaxUi } from '../lib/calculators/tax';
 import { calculateTokenTax } from '../lib/calculators/vehicles';
 
@@ -297,6 +298,9 @@ async function runAllTests() {
 
   const token = calculateTokenTax({ province: 'punjab', engineCapacityCc: 1300, invoiceValue: 4000000, isFiler: true });
   assert(String(token.primaryResult.value).includes('12,000') && /Annual Provincial Token Tax/i.test(String(token.primaryResult.label)), 'Token headline is annual token only (Rs 12,000), not mixed with 231B');
+
+  const affordabilityFull = calculateLoanAffordability({ monthlyIncome: 100000, existingEmis: 40000, loanCategory: 'general' });
+  assert(String(affordabilityFull.secondaryResults?.find((r) => r.id === 'status')?.value) === 'No EMI capacity left', 'Loan affordability never badges Eligible with zero capacity');
 
   const freelancerOther = calculateFreelancerTaxUi({ annualIncome: 4200000, isPsebRegistered: true, remittanceChannel: 'other' });
   assert((freelancerOther.notes || []).some((n) => /non-banking inflow/i.test(n)), 'Freelancer non-banking channel triggers 154A eligibility warning');

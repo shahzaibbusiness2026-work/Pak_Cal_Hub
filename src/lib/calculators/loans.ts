@@ -96,7 +96,7 @@ export function calculateLoanAffordability(inputs: Record<string, any>): Calcula
   const existingEmis = safeNumber(inputs.existingEmis, 35000);
   const loanCategory = inputs.loanCategory || 'general'; // 'general' (Personal/Auto) or 'housing' (Home Loan)
   
-  // SBP Prudential Regulations: 40% DBR for Consumer/Auto, 65% for Housing Finance (Aug 2026 SBP Circular)
+  // DBR planning assumptions: 40% consumer cap (SBP BPRD Circular 29); 65% housing is an optimistic scenario assumption, labelled as such in the result notes
   const defaultDbr = loanCategory === 'housing' ? 65 : 40;
   const maxDtiLimit = safeNumber(inputs.maxDtiLimit, defaultDbr);
 
@@ -106,7 +106,7 @@ export function calculateLoanAffordability(inputs: Record<string, any>): Calcula
 
   // Rate & Tenor parameters
   const annualRate = loanCategory === 'housing' ? 0.14 : 0.165; // ~14% home loan vs ~16.5% auto/personal
-  const tenureYears = loanCategory === 'housing' ? 20 : 5; // Up to 30 yrs for housing, 5 yrs for general
+  const tenureYears = loanCategory === 'housing' ? 20 : 5; // 20 yrs housing, 5 yrs general
   const months = tenureYears * 12;
   const monthlyRate = annualRate / 12;
 
@@ -127,7 +127,7 @@ export function calculateLoanAffordability(inputs: Record<string, any>): Calcula
     secondaryResults: [
       { id: 'dti', label: 'Current Debt Burden (DTI)', value: formatPercent(currentDti), type: 'percentage' },
       { id: 'maxCapacity', label: `Max SBP Capacity (${maxDtiLimit}%)`, value: formatPKR(maxAllowedMonthlyEmi), type: 'currency' },
-      { id: 'status', label: 'SBP Compliance', value: currentDti <= maxDtiLimit ? 'Eligible' : `Exceeds ${maxDtiLimit}% Ceiling`, type: 'badge' },
+      { id: 'status', label: 'SBP Compliance', value: availableEmiCapacity > 0 ? (currentDti <= maxDtiLimit ? 'Eligible' : `Exceeds ${maxDtiLimit}% Ceiling`) : 'No EMI capacity left', type: 'badge' },
     ],
     breakdown: [
       { label: 'Verified Monthly Take-Home Income', amount: formatPKR(monthlyIncome) },
@@ -137,7 +137,7 @@ export function calculateLoanAffordability(inputs: Record<string, any>): Calcula
     ],
     notes: [
       loanCategory === 'housing'
-        ? 'Under SBP Housing Finance Circular (August 2026), the Debt Burden Ratio (DBR) ceiling is set to 65% with tenors up to 30 years.'
+        ? 'Planning assumption: this tool uses a 65% DBR ceiling and a 20-year tenor for housing as an optimistic scenario (some housing-finance schemes permit a higher DBR than the standard 40% consumer cap). Your bank’s SBP-approved policy decides the real ceiling — treat this figure as an upper bound, not an approval.'
         : 'Under SBP Consumer Financing Regulations (BPRD Circular 29), total Debt Burden Ratio (DBR) for personal, auto, and credit card loans is capped at 40%.',
     ],
   };
