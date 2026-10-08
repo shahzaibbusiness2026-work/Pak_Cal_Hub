@@ -31,6 +31,7 @@ export function calculateFreelancerTax(inputs: Record<string, any>): CalculatorO
     incomePeriod: inputs.period || 'annual',
     income: inputs.annualIncome || inputs.foreignIncome || inputs.income,
     isPsebRegistered: isPseb,
+    remittanceChannel: inputs.remittanceChannel,
   });
 }
 
@@ -46,10 +47,11 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
   // Rates come from the selected tax year's dataset (Sections 236C & 236K)
   const dataset = getTaxDataset(taxYear);
   const pt = dataset.propertyTax;
+  const nonFilerBuyerRate = taxYear === '2026-27' ? (propertyValue <= 50000000 ? 0.105 : propertyValue <= 100000000 ? 0.145 : 0.185) : pt.buyerNonFilerRate;
 
   let advanceTaxRate = 0;
   if (isBuying) {
-    advanceTaxRate = isFiler ? pt.buyerFilerRate : pt.buyerNonFilerRate; // Section 236K
+    advanceTaxRate = isFiler ? pt.buyerFilerRate : nonFilerBuyerRate; // Section 236K (TY2027 non-filer is value-banded)
   } else {
     advanceTaxRate = isFiler ? pt.sellerFilerRate : pt.sellerNonFilerRate; // Section 236C
   }
@@ -65,7 +67,7 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
   return {
     primaryResult: {
       id: 'totalTax',
-      label: 'Total Government Taxes & Fees',
+      label: 'Estimated Government Taxes & Fees (advance tax + estimated local fees)',
       value: formatPKR(totalGovtCharges),
       type: 'currency',
       highlight: true,
@@ -83,11 +85,12 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
       { label: `FBR Advance Tax (${isBuying ? 'Section 236K Purchase' : 'Section 236C Sale'})`, detail: `${(advanceTaxRate * 100).toFixed(2)}% for ${isFiler ? 'Filer' : 'Non-Filer'}`, amount: formatPKR(advanceTax) },
       { label: 'Provincial Stamp Duty (e-Stamping 1%)', amount: formatPKR(stampDuty) },
       { label: 'Local Government / TMA Transfer Fee (1%)', amount: formatPKR(tmaFee) },
-      { label: 'Total Government Transfer Charges', amount: formatPKR(totalGovtCharges), isTotal: true },
+      { label: 'Estimated Total Transfer Charges (excludes seller capital-gains tax under Section 37)', amount: formatPKR(totalGovtCharges), isTotal: true },
     ],
     notes: [
       `Advance tax rates read from the ${dataset.assessmentYear} dataset: Section 236K (Buyer) ${(pt.buyerFilerRate * 100).toFixed(2)}% filer / ${(pt.buyerNonFilerRate * 100).toFixed(2)}% non-filer; Section 236C (Seller) ${(pt.sellerFilerRate * 100).toFixed(2)}% filer / ${(pt.sellerNonFilerRate * 100).toFixed(2)}% non-filer.`,
       'Stamp duty (1%) and TMA / transfer fee (1%) are estimates — verify against your provincial Excise & Taxation / LDA / development-authority schedule before paying.',
+      'This tool covers advance withholding tax (236C/236K) plus estimated local charges only. A seller\'s capital-gains tax under Section 37 is separate and is not included; late-filer rates are not yet published in the repo\'s verified TY2027 source, so this tool offers filer and non-filer only.',
     ],
   };
 }

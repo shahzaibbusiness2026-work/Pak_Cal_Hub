@@ -10,6 +10,7 @@ export interface TaxEngineInputs {
   income?: number | string;
   isSenior?: boolean;
   isPsebRegistered?: boolean;
+  remittanceChannel?: string;
 }
 
 /**
@@ -22,6 +23,8 @@ export function calculateTax(inputs: TaxEngineInputs): CalculatorOutput {
   const rawIncome = Math.max(safeNumber(inputs.income, 120000), 0);
   const isSenior = Boolean(inputs.isSenior);
   const isPsebRegistered = inputs.isPsebRegistered !== false;
+  const remittanceChannel = inputs.remittanceChannel || 'banking';
+  const isBankingChannel = remittanceChannel === 'banking';
 
   const dataset = getTaxDataset(taxYear);
 
@@ -47,6 +50,7 @@ export function calculateTax(inputs: TaxEngineInputs): CalculatorOutput {
         isDeduction: true,
       },
       { label: 'Monthly Tax Deduction (TDS)', amount: formatPKR(monthlyTax), isDeduction: true },
+      { label: 'Remittance Channel Supplied', amount: isBankingChannel ? 'Official banking channel / PRC' : 'Other / non-banking inflow — 154A eligibility warning applies' },
       { label: 'Net Annual Foreign Remittance Retained', amount: formatPKR(netAnnual), isTotal: true },
     ];
 
@@ -76,6 +80,7 @@ export function calculateTax(inputs: TaxEngineInputs): CalculatorOutput {
       notes: [
         `Applicable under ${dataset.freelancerExportTax.section}.`,
         `PSEB registered IT exporters enjoy a 0.25% concessionary final withholding tax regime.`,
+        ...(isBankingChannel ? [] : ['Warning: the Section 154A concession is tied to export proceeds realised through the official banking channel with a PRC. A non-banking inflow may fall under the normal income-tax regime instead — treat this 154A figure as not applicable until your bank/FBR confirms the channel qualifies.']),
       ],
     };
   }

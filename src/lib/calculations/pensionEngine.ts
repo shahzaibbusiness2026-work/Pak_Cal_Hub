@@ -98,6 +98,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
         `Covered under FGDC Defined Contribution Scheme (effective for new entrants from 1 July 2024).`,
         `Employee contributes 10%, Government provides matching 12% into SECP-registered pension fund.`,
         `Assumes long-term nominal compound return of 12.0% per annum.`,
+        'Illustrative projection only: it holds today\'s basic pay and contributions constant and does not predict market returns, pay increases, fund charges, or the annuity rate available at retirement. Your actual VPS pension will differ.',
       ],
     };
   }

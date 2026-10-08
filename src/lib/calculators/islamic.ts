@@ -84,7 +84,8 @@ export function calculateZakat(inputs: Record<string, any>): CalculatorOutput {
     chartData: chartData.length > 0 ? chartData : undefined,
     notes: [
       'Zakat is 2.5% (1/40th) on net zakatable wealth held for one full lunar year (Hawl).',
-      `The Silver Nisab standard (52.5 Tola = ${formatPKR(silverNisabValuePKR)}) is the preferred standard by the majority of contemporary scholars for cash, commercial goods, and combined wealth to maximize benefit for the poor.`,
+      `Nisab basis used: ${nisabStandard === 'gold' ? `Gold — 7.5 Tola × ${formatPKR(goldPricePerTola)} = ${formatPKR(goldNisabValuePKR)}` : `Silver — 52.5 Tola × ${formatPKR(silverPricePerTola)} = ${formatPKR(silverNisabValuePKR)}`}. The other standard would be ${nisabStandard === 'gold' ? formatPKR(silverNisabValuePKR) : formatPKR(goldNisabValuePKR)} — scholars differ, so confirm your standard if your wealth falls between them.`,
+      `Prices used: gold ${formatPKR(goldPricePerTola)}/tola and silver ${formatPKR(silverPricePerTola)}/tola (edit them to the Sarafa rates on your Zakat date).`,
     ],
   };
 }
@@ -205,6 +206,8 @@ export function calculateInheritance(inputs: Record<string, any>): CalculatorOut
     notes: [
       'Calculated strictly under Islamic Faraid jurisprudence based on Surah An-Nisa (4:11-12).',
       'All debts, funeral expenses, and valid bequests (up to 1/3rd to non-heirs) must be settled before inheritance distribution.',
+      'Simplified tool: it covers only one spouse, sons, daughters, father and mother. It does NOT model siblings, grandparents, multiple wives, daughters-only fixed shares with Radd, Awl (fixed shares exceeding the estate), or bequest allocation. For any of those cases — and before acting on any result — consult a qualified scholar/mufti and a legal advisor.',
+      ...(numDaughters > 0 && numSons === 0 && !hasFather ? ['Your selected case (daughters with no sons and no father) is one of the unsupported complex cases above: daughters may take fixed shares and Radd under Faraid, which this simplified residuary calculation does not claim to settle.'] : []),
       ...(fatherIsResiduary
         ? ['With no children, the father takes the residuary (the remainder after the spouse and mother shares), per Hanafi Faraid.']
         : []),

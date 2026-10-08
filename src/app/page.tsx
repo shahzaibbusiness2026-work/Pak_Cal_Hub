@@ -650,7 +650,7 @@ export default function HomePage() {
                 <Fuel className="h-5 w-5" />
               </div>
               <span className="rounded-lg bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
-                Rs. 254.63/L
+                Rs. 392.76/L
               </span>
             </div>
             <h3 className="mt-3.5 text-sm font-bold text-slate-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400 transition-colors">

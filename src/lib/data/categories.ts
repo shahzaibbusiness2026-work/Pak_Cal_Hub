@@ -1,11 +1,12 @@
 import type { CategoryDefinition, CalculatorDefinition, CalculatorOutput } from '../../types/calculator';
 import { CATEGORIES_DATA as META_CATEGORIES } from './categories-meta';
-import { DEFAULT_GOLD_24K_PER_TOLA } from './market-rates';
+import { DEFAULT_GOLD_24K_PER_TOLA, DEFAULT_SILVER_PER_TOLA } from './market-rates';
 import {
   calculateAge,
   calculateApplianceCost,
   calculateAreaConverter,
   calculateBpsSalary,
+  calculateBasicPay,
   calculateBreakEven,
   calculateBricksRequirement,
   calculateCarDepreciation,
@@ -44,7 +45,7 @@ import {
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
   'bps-salary-calculator': calculateBpsSalary,
-  'basic-pay-calculator': calculateBpsSalary,
+  'basic-pay-calculator': calculateBasicPay,
   'pension-calculator': calculatePension,
   'family-pension-calculator': calculateFamilyPension,
   'leave-encashment-calculator': calculateLeaveEncashment,
@@ -94,10 +95,12 @@ export const CATEGORIES_DATA: CategoryDefinition[] = META_CATEGORIES.map((cat) =
   tools: cat.tools.map((tool) => {
     const calculate = CALCULATE_FNS[tool.id];
     if (!calculate) throw new Error(`No calculate function registered for tool: ${tool.id}`);
-    // Restore the live gold default that the meta module placeholders.
-    const inputs = tool.id === 'gold-price-calculator'
-      ? tool.inputs.map((i) => (i.id === 'goldRate24kPerTola' ? { ...i, defaultValue: DEFAULT_GOLD_24K_PER_TOLA } : i))
-      : tool.inputs;
+    // Restore verified market defaults that the meta module placeholders.
+    const inputs = tool.inputs.map((i) => {
+      if (i.id === 'goldRate24kPerTola' || i.id === 'goldPricePerTola') return { ...i, defaultValue: DEFAULT_GOLD_24K_PER_TOLA };
+      if (i.id === 'silverPricePerTola') return { ...i, defaultValue: DEFAULT_SILVER_PER_TOLA };
+      return i;
+    });
     return { ...tool, inputs, calculate };
   }),
 }));

@@ -6,7 +6,7 @@ import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 // SBP Interbank Closing). CAD 204.50 matches the feed; AUD / QAR / KWD are indicative
 // interbank fallbacks. Live rates come from SBP / Forex.pk — these are fallbacks only.
 export const BASELINE_FX_RATES: Record<string, { name: string; rateInPKR: number; symbol: string }> = {
-  USD: { name: 'US Dollar',            rateInPKR: 280.50, symbol: '$' },
+  USD: { name: 'US Dollar',            rateInPKR: 277.10, symbol: '$' },
   GBP: { name: 'British Pound',        rateInPKR: 357.00, symbol: '£' },
   EUR: { name: 'Euro',                 rateInPKR: 302.80, symbol: '€' },
   AED: { name: 'UAE Dirham',           rateInPKR: 76.40,  symbol: 'AED' },
@@ -85,7 +85,7 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
     ],
     notes: [
       `${regimeLabel} parity rate. Open-market quotes carry an indicative ~0.75% retail spread over interbank.`,
-      'Fallback rates are indicative SBP Interbank Closing values — check SBP or Forex.pk for live rates.',
+      'Fallback USD rate is the verified SBP M2M rate of Rs 277.10 (1 Oct 2026, verified 4 Oct 2026); other fallbacks are indicative SBP Interbank Closing values. Check SBP for live rates.',
     ],
   };
 }

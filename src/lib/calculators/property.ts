@@ -67,11 +67,11 @@ export function calculateAreaConverter(inputs: Record<string, any>): CalculatorO
       { label: `Square Yards (Gaj)`, amount: `${formatNumber(sqYards, 2)} sq yard` },
       { label: `Marlas (at ${marlaStandard} sq ft/marla)`, amount: `${marlas.toFixed(3)} Marla` },
       { label: `Kanals (20 Marlas = 1 Kanal)`, amount: `${kanals.toFixed(4)} Kanal` },
-      { label: `Acres (8 Kanals = 1 Acre)`, amount: `${acres.toFixed(5)} Acre` },
+      { label: `Acres (${(43560 / (marlaStandard * 20)).toFixed(2)} Kanals = 1 Acre at this Marla standard)`, amount: `${acres.toFixed(5)} Acre` },
       { label: `Square Meters`, amount: `${formatNumber(sqMeters, 2)} sq m` },
     ],
     notes: [
-      'Pakistan Revenue Record (Patwari) standard: 1 Marla = 272.25 sq ft (9 Sarsahis).',
+      'Pakistan Revenue Record (Patwari) standard: 1 Marla = 272.25 sq ft (9 Sarsahis), so 8 Kanal = 1 Acre only under this 272.25 sq ft standard.',
       'Lahore Development Authority (LDA) and urban societies standard: 1 Marla = 225 sq ft.',
     ],
   };
@@ -117,7 +117,7 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
   const bricksCost = (bricksCount / 1000) * BRICK_RATE_PER_1000;
 
   // Cement: ~0.46 bags per sq ft covered area
-  const cementBags = Math.round(coveredArea * 0.46);
+  const cementBags = Math.ceil(coveredArea * 0.48);
   const cementCost = cementBags * CEMENT_RATE_PER_BAG;
 
   // Steel / Rebar: ~3.5 kg per sq ft covered area (Grade 60 deformed)
@@ -148,14 +148,13 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
       { id: 'cementBags', label: 'Estimated Cement Required', value: `${cementBags.toLocaleString()} Bags`, type: 'text' },
     ],
     breakdown: [
-      { label: `Grey Structure (${coveredArea.toLocaleString()} sq ft × Rs. ${greyRate.toLocaleString()})`, amount: formatPKR(totalGreyCost) },
-      { label: `Bricks — ${bricksCount.toLocaleString()} Awwal (@ Rs. ${BRICK_RATE_PER_1000.toLocaleString()} per 1,000)`, amount: formatPKR(bricksCost) },
-      { label: `Cement — ${cementBags.toLocaleString()} Bags (@ Rs. ${CEMENT_RATE_PER_BAG.toLocaleString()} per bag)`, amount: formatPKR(cementCost) },
-      { label: `Steel Rebar Grade 60 — ${steelTons.toFixed(2)} Tons (@ Rs. ${STEEL_RATE_PER_TON.toLocaleString()}/ton)`, amount: formatPKR(steelCost) },
-      { label: `Sand (Ravi/Chenab) & Margalla Crush`, amount: formatPKR(sandCost + crushCost) },
-      { label: `Labour Charges — Grey Structure`, amount: formatPKR(labourCost) },
+      { label: `Grey Structure (${coveredArea.toLocaleString()} sq ft × Rs. ${greyRate.toLocaleString()}) — includes bricks, cement, steel, sand/crush and labour below`, amount: formatPKR(totalGreyCost) },
+      { label: `Included in grey structure — Bricks: ${bricksCount.toLocaleString()} Awwal (indicative ${formatPKR(bricksCost)})`, amount: 'Included above — do not add again' },
+      { label: `Included in grey structure — Cement: ${cementBags.toLocaleString()} Bags (indicative ${formatPKR(cementCost)})`, amount: 'Included above — do not add again' },
+      { label: `Included in grey structure — Steel: ${steelTons.toFixed(2)} Tons (indicative ${formatPKR(steelCost)})`, amount: 'Included above — do not add again' },
+      { label: `Included in grey structure — Sand/crush and labour (indicative ${formatPKR(sandCost + crushCost + labourCost)})`, amount: 'Included above — do not add again' },
       { label: `Complete Finishing (Tiles, Paint, Woodwork, Sanitary, Electricals)`, amount: formatPKR(totalFinishCost) },
-      { label: `Total Estimated Construction Budget`, amount: formatPKR(totalCost), isTotal: true },
+      { label: `Total Estimated Construction Budget (grey + finishing only)`, amount: formatPKR(totalCost), isTotal: true },
     ],
     chartType: 'pie',
     chartData: [

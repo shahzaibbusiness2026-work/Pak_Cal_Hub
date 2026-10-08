@@ -32,6 +32,6 @@ export function calculateFuelCost(inputs: FuelInputs): CalculatorOutput {
     distanceKm: inputs.distanceKm,
     fuelAverageKmPerLiter: inputs.fuelAverageKmPerLitre,
     fuelPricePerLiter: pricePerUnit,
-    roundTrip: inputs.isRoundTrip !== false,
+    roundTrip: inputs.isRoundTrip === true,
   });
 }

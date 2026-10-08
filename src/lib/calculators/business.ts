@@ -56,15 +56,16 @@ export function calculateBreakEven(inputs: Record<string, any>): CalculatorOutpu
   const breakEvenUnits = contributionMarginPerUnit > 0 ? Math.ceil(fixedCosts / contributionMarginPerUnit) : 0;
   const breakEvenRevenue = breakEvenUnits * unitSellingPrice;
 
+  const impossible = contributionMarginPerUnit <= 0;
   return {
     primaryResult: {
       id: 'breakEvenUnits',
-      label: 'Break-Even Volume Required',
-      value: `${breakEvenUnits.toLocaleString()} Units`,
+      label: impossible ? 'Break-Even Is Not Possible at This Price' : 'Break-Even Volume Required',
+      value: impossible ? 'No break-even point' : `${breakEvenUnits.toLocaleString()} Units`,
       type: 'text',
       highlight: true,
-      color: 'success',
-      subtext: `Target Sales: ${formatPKR(breakEvenRevenue)}`,
+      color: impossible ? 'error' : 'success',
+      subtext: impossible ? `Each unit loses ${formatPKR(Math.abs(contributionMarginPerUnit))} before fixed costs — raise the price or cut variable cost.` : `Target Sales: ${formatPKR(breakEvenRevenue)}`,
     },
     secondaryResults: [
       { id: 'breakEvenRevenue', label: 'Break-Even Sales Revenue', value: formatPKR(breakEvenRevenue), type: 'currency' },
@@ -78,6 +79,7 @@ export function calculateBreakEven(inputs: Record<string, any>): CalculatorOutpu
       { label: 'Unit Profit Contribution', amount: formatPKR(contributionMarginPerUnit) },
       { label: 'Break-Even Sales Target in PKR', amount: formatPKR(breakEvenRevenue), isTotal: true },
     ],
+    notes: impossible ? ['Break-even cannot be reached while the selling price is less than or equal to the variable cost per unit: every sale increases the loss before fixed costs are even considered.'] : undefined,
   };
 }
 
@@ -89,7 +91,7 @@ export function calculateFreelancerRate(inputs: Record<string, any>): Calculator
   const billableHoursPerWeek = safeNumber(inputs.billableHoursPerWeek, 25);
   const weeksPerYear = safeNumber(inputs.weeksPerYear, 48); // accounting for 4 weeks leave
   const businessExpensesMonthly = safeNumber(inputs.businessExpensesMonthly, 30000); // internet, software, electricity
-  const usdPkrRate = safeNumber(inputs.usdPkrRate, 280);
+  const usdPkrRate = safeNumber(inputs.usdPkrRate, 277.10);
 
   const totalMonthlyNeed = targetMonthlyPKR + businessExpensesMonthly;
   const totalAnnualNeed = totalMonthlyNeed * 12;

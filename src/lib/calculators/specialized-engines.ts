@@ -51,7 +51,7 @@ export function calculateCementRequirement(inputs: Record<string, any>): Calcula
   // Standard engineering factor: ~0.45 to 0.50 bags per sq ft covered area
   const bagFactor = structureType === 'double-story' ? 0.48 : 0.42;
   const totalBags = Math.ceil(coveredArea * bagFactor);
-  const bagPrice = safeNumber(inputs.bagPrice, 1480); // Rs. 1,480 per bag (August 2026 market benchmark)
+  const bagPrice = safeNumber(inputs.bagPrice, 1450); // Canonical market-rate fallback (src/lib/db/dataProvider.ts)
   const totalCost = totalBags * bagPrice;
 
   return {
@@ -112,7 +112,7 @@ export function calculateSteelRequirement(inputs: Record<string, any>): Calculat
   const kgFactor = 3.5; // ~3.5 kg steel per sq ft covered area for Grade 60 de-formed bars
   const totalKg = coveredArea * kgFactor;
   const totalTons = totalKg / 1000;
-  const ratePerTon = safeNumber(inputs.ratePerTon, 275000); // Rs. 275,000 per ton Grade 60 (August 2026 market benchmark)
+  const ratePerTon = safeNumber(inputs.ratePerTon, 255000); // Canonical market-rate fallback (src/lib/db/dataProvider.ts)
   const totalCost = totalTons * ratePerTon;
 
   return {
@@ -198,8 +198,8 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
   const monthlyKm = safeNumber(inputs.monthlyKm, 1500);
   const monthlyCost = costPerKm * monthlyKm;
 
-  // Comparison with Petrol car doing 12 km/L at OGRA August 2026 RON-92 rate: Rs. 254.63/L (~Rs. 21.22/km)
-  const petrolPricePerLiter = 254.63;
+  // Comparison with Petrol car doing 12 km/L at OGRA 3 Oct 2026 RON-92 rate: Rs. 392.76/L
+  const petrolPricePerLiter = 392.76;
   const petrolCostPerKm = petrolPricePerLiter / 12;
   const monthlyPetrolCost = petrolCostPerKm * monthlyKm;
   const monthlySavingsVsPetrol = monthlyPetrolCost - monthlyCost;
@@ -228,7 +228,7 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
     ],
     notes: [
       'NEPRA off-peak residential rate is ~Rs. 23.57/kWh under SRO 279(I)/2026. Public fast charging pumps retail at ~Rs. 110–140/kWh.',
-      `Comparison assumes a 1.5L petrol car averaging 12 km/L at Rs. ${petrolPricePerLiter}/L (OGRA RON-92 rate, August 2026).`,
+      `Comparison assumes a 1.5L petrol car averaging 12 km/L at Rs. ${petrolPricePerLiter}/L (OGRA RON-92 rate, 3 Oct 2026).`,
     ],
   };
 }

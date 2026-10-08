@@ -388,13 +388,13 @@ function runTests() {
   const motherRow = inh.breakdown?.find((r) => r.label.includes('Mother'));
   assert(String(motherRow?.label).includes('(1/3)'), 'No-children: mother label reflects the 1/3 fraction actually used');
 
-  // Currency: 100 USD open market → 280.50 × 1.0075 × 100 = Rs. 28,260
+  // Currency: 100 USD open market → 277.10 × 1.0075 × 100 = Rs. 27,918
   const cur = calculateCurrency({ amount: 100, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'openMarket' });
-  assert(String(cur.primaryResult.value).includes('28,260'), 'Currency open-market conversion applies the 0.75% retail spread');
+  assert(String(cur.primaryResult.value).includes('27,918'), 'Currency open-market conversion applies the 0.75% retail spread');
 
   // Fuel: 380 km @ 14.5 km/L @ Rs. 342.60/L → Rs. 8,978
   const fuel = calculateVehicleFuelCost({ distanceKm: 380, fuelAverageKmPerLiter: 14.5, fuelPricePerLiter: 342.60 });
-  assert(String(fuel.primaryResult.value).includes('8,978'), 'Fuel trip cost computed at verified OGRA rate Rs. 342.60/L');
+  assert(String(fuel.primaryResult.value).includes('8,978'), 'Fuel trip cost computed correctly for the worked-example price Rs. 342.60/L');
 
   // Islamic financing disclosure states the reducing-balance equivalence
   const isl = calculateLoanEmi({ loanAmount: 3000000, annualInterestRate: 13.5, tenureYears: 5, loanType: 'islamic' });

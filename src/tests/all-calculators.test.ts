@@ -97,8 +97,8 @@ async function runAllTests() {
   const gstRow = elecUnprotected.breakdown?.find((r) => r.label.includes('General Sales Tax'));
   assert(Boolean(gstRow), 'GST 18% applied for >200 units consumption');
 
-  // 5. FUEL COST ENGINE (UI-wired, verified 2026 price: Rs. 342.60/litre)
-  console.log('\n--- 5. Fuel & Commute Cost Engine (At Rs. 342.60/Litre) ---');
+  // 5. FUEL COST ENGINE (worked example uses an explicit user-entered Rs. 342.60/litre; current default is Rs. 392.76)
+  console.log('\n--- 5. Fuel & Commute Cost Engine (worked example at Rs. 342.60/Litre) ---');
   const fuelTrip = calculateVehicleFuelCost({ distanceKm: 380, fuelAverageKmPerLiter: 14.5, fuelPricePerLiter: 342.60 });
   assert(String(fuelTrip.primaryResult.value).includes('8,978'), 'UI fuel cost: 380 km @ 14.5 km/L @ Rs. 342.60/L = Rs. 8,978');
 
@@ -122,9 +122,9 @@ async function runAllTests() {
   // 7. CURRENCY CONVERTER ENGINE (UI-wired, interbank vs open-market)
   console.log('\n--- 7. Currency Converter Engine ---');
   const usdToPkr = calculateCurrency({ amount: 1000, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'interbank' });
-  assert(String(usdToPkr.primaryResult.value).includes('2,80,500'), '1000 USD equals Rs. 280,500 (interbank)');
+  assert(String(usdToPkr.primaryResult.value).includes('2,77,100'), '1000 USD equals Rs. 277,100 (verified SBP 1 Oct 2026)');
   const usdToPkrOm = calculateCurrency({ amount: 100, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'openMarket' });
-  assert(String(usdToPkrOm.primaryResult.value).includes('28,260'), '100 USD open market applies 0.75% retail spread (Rs. 28,260)');
+  assert(String(usdToPkrOm.primaryResult.value).includes('27,918'), '100 USD open market applies 0.75% retail spread (Rs. 27,918)');
 
   // 8. SOLAR SYSTEM SIZING ENGINE
   console.log('\n--- 8. Solar Sizing & Net Metering Engine ---');
