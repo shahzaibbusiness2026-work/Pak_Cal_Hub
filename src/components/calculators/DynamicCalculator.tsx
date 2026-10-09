@@ -143,7 +143,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       {/* Interactive Calculator Workspace Grid */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
         {/* Left Column: Input Form (5 cols on Desktop) */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 lg:col-span-5">
+        <div className="print-hide rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 lg:col-span-5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
@@ -294,7 +294,11 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         </div>
 
         {/* Right Column: Dynamic Results & Visual Breakdowns (7 cols on Desktop) */}
-        <div ref={resultsRef} className="space-y-6 lg:col-span-7 lg:sticky lg:top-24" aria-live="polite" aria-atomic="false">
+        <div ref={resultsRef} className="print-area space-y-6 lg:col-span-7 lg:sticky lg:top-24" aria-live="polite" aria-atomic="false">
+          <div className="print-brand" aria-hidden="true">
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '22px', color: '#065f46' }}>Pak Calc Hub</span>
+            <span style={{ fontSize: '11px', color: '#64748b' }}>pak-cal-hub.vercel.app</span>
+          </div>
           {/* Main Key Result Card */}
           <ResultCard
             primary={results.primaryResult}
@@ -381,7 +385,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       <button
         type="button"
         onClick={() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-        className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-between gap-3 rounded-2xl bg-emerald-950/97 px-4 py-3 text-left text-white shadow-2xl ring-1 ring-white/15 backdrop-blur lg:hidden"
+        className="print-hide fixed inset-x-3 bottom-3 z-40 flex items-center justify-between gap-3 rounded-2xl bg-emerald-950/97 px-4 py-3 text-left text-white shadow-2xl ring-1 ring-white/15 backdrop-blur lg:hidden"
         aria-label={`Jump to full result: ${results.primaryResult.label} ${results.primaryResult.value}`}
       >
         <span className="min-w-0">

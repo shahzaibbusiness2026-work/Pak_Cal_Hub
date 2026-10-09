@@ -136,7 +136,7 @@ export default async function CalculatorPage({ params }: CalculatorPageProps) {
 
         {/* Calculator Header Title Banner */}
         <div className="border-b border-slate-200 pb-6 dark:border-slate-800">
-          <div className="flex flex-wrap items-center gap-2 mb-2.5">
+          <div className="print-hide flex flex-wrap items-center gap-2 mb-2.5">
             <span className="rounded-md bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
               {category.name}
             </span>
@@ -184,10 +184,12 @@ export default async function CalculatorPage({ params }: CalculatorPageProps) {
         )}
 
         {/* Official sources & rate verification for this calculator */}
-        <DataSource toolId={calculator.id} />
+        <div className="print-hide">
+          <DataSource toolId={calculator.id} />
+        </div>
 
         {/* Context Guide & Methodological Transparency */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 pt-6">
+        <div className="print-hide grid grid-cols-1 gap-8 lg:grid-cols-12 pt-6">
           <div className="lg:col-span-8 space-y-6">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
               <div className="flex items-center gap-2">

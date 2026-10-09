@@ -110,7 +110,7 @@ export default async function RootLayout({
         <Analytics />
         <ThemeRegistry>
           {announcementOn && (
-            <div className="bg-emerald-900 px-4 py-2 text-center text-xs sm:text-sm font-semibold text-emerald-50">
+            <div className="print-hide bg-emerald-900 px-4 py-2 text-center text-xs sm:text-sm font-semibold text-emerald-50">
               <span className="inline-flex items-center gap-2">
                 <Megaphone className="h-4 w-4 shrink-0" />
                 {settings.announcement_text}
