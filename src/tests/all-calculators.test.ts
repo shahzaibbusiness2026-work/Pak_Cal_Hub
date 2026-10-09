@@ -302,6 +302,9 @@ async function runAllTests() {
   const affordabilityFull = calculateLoanAffordability({ monthlyIncome: 100000, existingEmis: 40000, loanCategory: 'general' });
   assert(String(affordabilityFull.secondaryResults?.find((r) => r.id === 'status')?.value) === 'No EMI capacity left', 'Loan affordability never badges Eligible with zero capacity');
 
+  const liveFx = calculateCurrency({ amount: 100, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'interbank', liveFxRates: { USD: 300 } });
+  assert(String(liveFx.primaryResult.value).includes('30,000') && (liveFx.notes || []).some((n) => /Live mid-market/i.test(n)), 'Currency converter uses injected live FX rates when provided');
+
   const freelancerOther = calculateFreelancerTaxUi({ annualIncome: 4200000, isPsebRegistered: true, remittanceChannel: 'other' });
   assert((freelancerOther.notes || []).some((n) => /non-banking inflow/i.test(n)), 'Freelancer non-banking channel triggers 154A eligibility warning');
 

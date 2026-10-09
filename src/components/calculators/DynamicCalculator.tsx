@@ -38,16 +38,20 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   // UI, no fake data. Client-only effect: safe for SSR/static generation.
   const [liveOverrides, setLiveOverrides] = useState<Record<string, number>>({});
   const [liveAsOf, setLiveAsOf] = useState<string | null>(null);
+  const [liveFxRates, setLiveFxRates] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
 
-    // /api/rates/live payload key -> calculator input id
-    const RATE_INPUT_MAP: Record<string, string> = {
-      petrol: 'fuelPricePerLiter',
-      gold24kTola: 'goldRate24kPerTola',
+    // /api/rates/live payload key -> calculator input ids (one payload rate can
+    // feed several tools' inputs, e.g. live gold for the gold tool and Zakat)
+    const RATE_INPUT_MAP: Record<string, string[]> = {
+      petrol: ['fuelPricePerLiter'],
+      gold24kTola: ['goldRate24kPerTola', 'goldPricePerTola'],
+      silverTola: ['silverPricePerTola'],
+      usdPkr: ['usdPkrRate'],
     };
 
     fetch('/api/rates/live', { signal: controller.signal })
@@ -59,11 +63,17 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         if (cancelled || !calculator) return;
         const validIds = new Set(calculator.inputs.map((f) => f.id));
         const overrides: Record<string, number> = {};
-        for (const [payloadKey, inputId] of Object.entries(RATE_INPUT_MAP)) {
+        for (const [payloadKey, inputIds] of Object.entries(RATE_INPUT_MAP)) {
           const v = data?.[payloadKey];
-          if (validIds.has(inputId) && typeof v === 'number' && Number.isFinite(v) && v > 0) {
-            overrides[inputId] = v;
+          if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
+            for (const inputId of inputIds) {
+              if (validIds.has(inputId)) overrides[inputId] = v;
+            }
           }
+        }
+        // Live FX map for the currency converter (passed into its engine).
+        if (data?.fx && typeof data.fx === 'object' && data.fx.USD > 0) {
+          setLiveFxRates(data.fx as Record<string, number>);
         }
         if (Object.keys(overrides).length > 0) {
           setLiveOverrides(overrides);
@@ -107,14 +117,16 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       return { primaryResult: { id: 'not-found', label: 'Calculator not found', value: '', type: 'text' as const } };
     }
     try {
-      return calculator.calculate(inputs);
+      return calculator.id === 'pkr-currency-converter' && liveFxRates
+        ? calculator.calculate({ ...inputs, liveFxRates })
+        : calculator.calculate(inputs);
     } catch (err) {
       console.error('Calculation error:', err);
       return {
         primaryResult: { id: 'err', label: 'Calculation Error', value: 'Invalid Inputs', type: 'text' },
       };
     }
-  }, [calculator, inputs]);
+  }, [calculator, inputs, liveFxRates]);
 
   if (!calculator) {
     return <div className="p-4 text-center text-slate-500">Calculator not found</div>;

@@ -1,5 +1,6 @@
 import { prisma, isDatabaseConnected } from '../db/prisma';
 import { SyncServiceResult, SyncItemChange, SyncOptions } from './types';
+import { fetchLiveFx } from './live/fxLive';
 
 /**
  * Manually verified FX benchmarks.
@@ -43,7 +44,32 @@ export async function syncCurrencyRates(options: SyncOptions = {}): Promise<Sync
       };
     }
 
-    for (const item of LATEST_FEED_CURRENCY) {
+    // 1. Try live mid-market FX (open.er-api, daily). On any failure, fall
+    // back to the manually verified constants below — the DB is never left
+    // with a half-updated or unvalidated rate set.
+    let feedItems: Array<{ key: string; label: string; value: number; unit: string; source: string; sourceUrl?: string }> = LATEST_FEED_CURRENCY;
+    let liveMode = false;
+    try {
+      const live = await fetchLiveFx();
+      const names: Record<string, string> = { USD: 'US Dollar', GBP: 'British Pound', EUR: 'Euro', AED: 'UAE Dirham', SAR: 'Saudi Riyal', CAD: 'Canadian Dollar', AUD: 'Australian Dollar', CNY: 'Chinese Yuan', QAR: 'Qatari Riyal', KWD: 'Kuwaiti Dinar', JPY: 'Japanese Yen', TRY: 'Turkish Lira' };
+      feedItems = Object.entries(live.fx)
+        .filter(([code]) => code !== 'PKR')
+        .map(([code, value]) => ({
+          key: `${code.toLowerCase()}_pkr`,
+          label: `${names[code] || code} (${code} / PKR)`,
+          value: Math.round(value * 10000) / 10000,
+          unit: `PKR / ${code}`,
+          source: `${live.source}${live.updatedUtc ? ` (updated ${live.updatedUtc})` : ''}`,
+          sourceUrl: 'https://open.er-api.com',
+        }));
+      liveMode = feedItems.length >= 6;
+      if (!liveMode) feedItems = LATEST_FEED_CURRENCY;
+    } catch {
+      feedItems = LATEST_FEED_CURRENCY;
+      liveMode = false;
+    }
+
+    for (const item of feedItems) {
       const existing = await prisma.marketRate.findUnique({
         where: { key: item.key },
       });
@@ -68,7 +94,7 @@ export async function syncCurrencyRates(options: SyncOptions = {}): Promise<Sync
             source: item.source,
             sourceUrl: item.sourceUrl,
             verifiedAt: new Date(),
-            updatedBy: options.adminUser || 'Automated Cron Service',
+            updatedBy: options.adminUser || (liveMode ? 'live-sync' : 'Automated Cron Service'),
           },
           create: {
             key: item.key,
@@ -80,7 +106,7 @@ export async function syncCurrencyRates(options: SyncOptions = {}): Promise<Sync
             source: item.source,
             sourceUrl: item.sourceUrl,
             verifiedAt: new Date(),
-            updatedBy: options.adminUser || 'Automated Cron Service',
+            updatedBy: options.adminUser || (liveMode ? 'live-sync' : 'Automated Cron Service'),
           },
         });
 
@@ -139,11 +165,11 @@ export async function syncCurrencyRates(options: SyncOptions = {}): Promise<Sync
       service: 'currency',
       success: true,
       timestamp,
-      itemsProcessed: LATEST_FEED_CURRENCY.length,
+      itemsProcessed: feedItems.length,
       changesDetected,
       changes,
-      message: `Currency publish completed (manual-verified constants, verified ${FX_VERIFIED_ON}): ${changesDetected} rate changes detected.`,
-      syncMode: 'manual-verified',
+      message: liveMode ? `Currency publish completed (live mid-market FX via open.er-api): ${changesDetected} rate changes detected.` : `Currency publish completed (manual-verified constants, verified ${FX_VERIFIED_ON}): ${changesDetected} rate changes detected.`,
+      syncMode: liveMode ? 'live-fetch' : 'manual-verified',
       verifiedOn: FX_VERIFIED_ON,
     };
   } catch (err: any) {

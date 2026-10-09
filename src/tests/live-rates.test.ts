@@ -9,6 +9,7 @@
  */
 
 import { fetchLiveFuel } from '../lib/sync/live/fuelLive';
+import { fetchLiveFx } from '../lib/sync/live/fxLive';
 import { fetchLiveMetals, tolaFromSpot } from '../lib/sync/live/metalLive';
 import { buildLiveRatesResponse } from '../lib/sync/live/liveRatesPayload';
 import { LiveFetchError } from '../lib/sync/live/http';
@@ -149,6 +150,24 @@ async function runLiveRatesTests() {
   const livePayload = buildLiveRatesResponse(liveRows);
   assert(livePayload.live === true, 'live endpoint reports live=true when rows are live-synced');
   assert(livePayload.petrol === 395.1 && livePayload.gold24kTola === 438549, 'live endpoint serves DB values over fallbacks');
+
+  // ── 13. fxLive: good data converts every code to PKR-per-unit ─────────────
+  const fxMock = async () => ({
+    result: 'success',
+    rates: { PKR: 278.4, USD: 1, GBP: 0.7435, EUR: 0.8612, AED: 3.6725, SAR: 3.75, CAD: 1.3931, AUD: 1.5239, CNY: 7.1188, QAR: 3.64, KWD: 0.3081, JPY: 153.21, TRY: 41.52 },
+    time_last_update_utc: 'Fri, 09 Oct 2026 00:02:31 +0000',
+  });
+  const fx = await fetchLiveFx(fxMock);
+  assert(fx.usdPkr === 278.4 && fx.fx.USD === 278.4 && fx.fx.PKR === 1, 'fxLive anchors USD/PKR from open.er-api');
+  assert(Math.abs(fx.fx.GBP - 278.4 / 0.7435) < 1e-9 && Math.abs(fx.fx.JPY - 278.4 / 153.21) < 1e-9, 'fxLive derives PKR-per-unit for GBP and JPY correctly');
+  assert(fx.source.includes('indicative') && fx.source.includes('not the SBP'), 'fxLive provenance is honest (mid-market, not SBP)');
+
+  // ── 14. fxLive: garbage anchor rejected ───────────────────────────────────
+  await assertRejects(() => fetchLiveFx(async () => ({ rates: { PKR: 25 } })), 'fxLive rejects absurd USD/PKR (25)');
+
+  // ── 15. Payload overlay: live values beat stored fallbacks ────────────────
+  const overlaid = buildLiveRatesResponse([], { petrol: 395.5, fx: { PKR: 1, USD: 278.4 }, usdPkr: 278.4 });
+  assert(overlaid.petrol === 395.5 && overlaid.usdPkr === 278.4 && overlaid.fx.USD === 278.4 && overlaid.live === true, 'live endpoint overlay wins over fallbacks and flags live=true');
 
   console.log('\n======================================================');
   console.log('🎉 ALL LIVE RATE PIPELINE TESTS PASSED');

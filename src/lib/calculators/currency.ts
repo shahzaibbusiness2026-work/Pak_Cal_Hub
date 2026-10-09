@@ -30,11 +30,18 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
   const toCurrency = inputs.toCurrency || 'PKR';
   const customRate = safeNumber(inputs.customRate, 0);
   const rateType = inputs.rateType === 'openMarket' ? 'openMarket' : 'interbank';
+  // Live mid-market FX injected by DynamicCalculator from /api/rates/live
+  // (open.er-api, daily). When present these replace the fallback table.
+  const liveFx: Record<string, number> | undefined =
+    inputs.liveFxRates && typeof inputs.liveFxRates === 'object' ? inputs.liveFxRates : undefined;
+  const usingLive = Boolean(liveFx && (liveFx[fromCurrency] || liveFx[toCurrency]));
   // Open-market retail quotes carry a spread over interbank (indicative ~0.75%)
   const spreadFactor = rateType === 'openMarket' ? 1.0075 : 1.0;
 
   const rateInPkr = (cur: string): number => {
     if (cur === 'PKR') return 1;
+    const live = liveFx?.[cur];
+    if (typeof live === 'number' && Number.isFinite(live) && live > 0) return live * spreadFactor;
     const fx = BASELINE_FX_RATES[cur] || BASELINE_FX_RATES['USD'];
     return fx.rateInPKR * spreadFactor;
   };
@@ -84,8 +91,10 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
       { label: `Final Value in ${toCurrency}`, amount: formattedResult, isTotal: true },
     ],
     notes: [
-      `${regimeLabel} parity rate. Open-market quotes carry an indicative ~0.75% retail spread over interbank.`,
-      'Fallback USD rate is the verified SBP M2M rate of Rs 277.10 (1 Oct 2026, verified 4 Oct 2026); other fallbacks are indicative SBP Interbank Closing values. Check SBP for live rates.',
+      usingLive
+        ? `Live mid-market rates via open.er-api.com (updated daily) — indicative, not the SBP official closing. Open-market selection applies an indicative ~0.75% retail spread. Banks and forex shops quote their own buying/selling rates.`
+        : `${regimeLabel} parity rate. Open-market quotes carry an indicative ~0.75% retail spread over interbank.`,
+      ...(usingLive ? [] : ['Fallback USD rate is the verified SBP M2M rate of Rs 277.10 (1 Oct 2026, verified 4 Oct 2026); other fallbacks are indicative SBP Interbank Closing values. Check SBP for live rates.']),
     ],
   };
 }
