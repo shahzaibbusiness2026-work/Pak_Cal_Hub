@@ -51,6 +51,10 @@ import {
   calculateSalarySlip,
   calculateCssAgeEligibility,
   calculatePakistanIban,
+  calculatePercentage,
+  calculateHijriConverter,
+  calculateTenantBillSplitter,
+  calculatePrizeBondGuide,
 } from '../calculators';
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
@@ -103,6 +107,10 @@ const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorO
   'salary-slip-generator': calculateSalarySlip,
   'css-age-eligibility-calculator': calculateCssAgeEligibility,
   'pakistan-iban-checker': calculatePakistanIban,
+  'percentage-calculator': calculatePercentage,
+  'hijri-date-converter': calculateHijriConverter,
+  'tenant-bill-splitter': calculateTenantBillSplitter,
+  'prize-bond-draw-checker': calculatePrizeBondGuide,
 };
 
 /**

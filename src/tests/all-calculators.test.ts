@@ -42,6 +42,7 @@ import {
   calculateCssAgeEligibility,
   calculatePakistanIban,
 } from '../lib/calculators/pakistan-services';
+import { runDailyToolsTests } from './daily-tools.test';
 import { calculatePension as calculatePensionUi, calculateBasicPay } from '../lib/calculators/salary';
 import { calculateBreakEven } from '../lib/calculators/business';
 import { calculateLoanAffordability } from '../lib/calculators/loans';
@@ -310,6 +311,7 @@ async function runAllTests() {
 
 
   console.log('\n======================================================');
+  runDailyToolsTests();
   console.log('🎉 ALL CALCULATION ENGINES & SYNC PIPELINES VERIFIED (100% SUCCESS)');
   console.log('======================================================\n');
 }

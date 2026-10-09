@@ -38,7 +38,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_FULL_NAME} (${SITE_NAME}) | 49 Free Pakistan Calculators 2026`,
+    default: `${SITE_FULL_NAME} (${SITE_NAME}) | 53 Free Pakistan Calculators 2026`,
     template: `%s | ${SITE_NAME}`,
   },
   description:
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: SITE_FULL_NAME,
-    title: `${SITE_FULL_NAME} (${SITE_NAME}) | 49 Free Pakistan Calculators 2026`,
+    title: `${SITE_FULL_NAME} (${SITE_NAME}) | 53 Free Pakistan Calculators 2026`,
     description:
       'Free, accurate Pakistan calculators: RBPS-2026 Government Salary, FBR Income Tax 2026-27, NEPRA Electricity Bills, Solar, Zakat, Pension & more. Updated October 2026.',
     url: SITE_URL,
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_FULL_NAME} | 49 Free Pakistan Calculators 2026`,
+    title: `${SITE_FULL_NAME} | 53 Free Pakistan Calculators 2026`,
     description:
       'Free, accurate Pakistan calculators: RBPS-2026 Salary, FBR Tax, Electricity Bills, Solar, Zakat, Pension & more.',
   },
