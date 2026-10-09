@@ -97,7 +97,13 @@ export function calculateFreelancerRate(inputs: Record<string, any>): Calculator
   const totalAnnualNeed = totalMonthlyNeed * 12;
   const totalAnnualBillableHours = billableHoursPerWeek * weeksPerYear;
 
-  const hourlyRatePKR = totalAnnualBillableHours > 0 ? totalAnnualNeed / totalAnnualBillableHours : 0;
+  const baseHourlyPKR = totalAnnualBillableHours > 0 ? totalAnnualNeed / totalAnnualBillableHours : 0;
+  // Quote layers: safety buffer for slow months, then gross-up so the stated
+  // rate still lands the target after platform commission.
+  const bufferPct = Math.min(Math.max(safeNumber(inputs.bufferPct, 15), 0), 50);
+  const platformFeePct = Math.min(Math.max(safeNumber(inputs.platformFeePct, 10), 0), 30);
+  const withBufferPKR = baseHourlyPKR * (1 + bufferPct / 100);
+  const hourlyRatePKR = platformFeePct < 100 ? withBufferPKR / (1 - platformFeePct / 100) : withBufferPKR;
   const hourlyRateUSD = usdPkrRate > 0 ? hourlyRatePKR / usdPkrRate : 0;
 
   return {
@@ -120,7 +126,14 @@ export function calculateFreelancerRate(inputs: Record<string, any>): Calculator
       { label: 'Monthly Business Expenses (Hardware, Internet, Software)', amount: formatPKR(businessExpensesMonthly) },
       { label: 'Total Annual Gross Target Needed', amount: formatPKR(totalAnnualNeed) },
       { label: `Billable Hours (${billableHoursPerWeek} hrs/week × ${weeksPerYear} weeks)`, amount: `${totalAnnualBillableHours} hours` },
+      { label: 'Base hourly (target ÷ billable hours)', amount: formatPKR(baseHourlyPKR) },
+      { label: `+ Safety buffer ${bufferPct}% (slow months, unpaid admin time)`, amount: formatPKR(withBufferPKR) },
+      { label: `Gross-up for platform fee ${platformFeePct}% (Upwork/Fiverr commission)`, amount: formatPKR(hourlyRatePKR) },
       { label: `Recommended Rate in USD (at Rs. ${usdPkrRate}/$)`, amount: `$${hourlyRateUSD.toFixed(2)} / hour`, isTotal: true },
+    ],
+    notes: [
+      'The quote is built in layers: income target + expenses, spread over realistic billable hours, padded for slow months, then grossed up so platform commission does not eat your target.',
+      'This rate card does not include income tax. Foreign income received through the banking channel with a PRC can qualify for the Section 154A concession — check your expected tax separately in the Freelancer Tax Calculator.',
     ],
   };
 }

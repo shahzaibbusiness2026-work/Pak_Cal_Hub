@@ -280,6 +280,10 @@ export function calculateCarDepreciation(inputs: Record<string, any>): Calculato
     breakdown: [
       { label: 'Original Vehicle Purchase Price', amount: formatPKR(purchasePrice) },
       { label: `Annual Depreciation Rate`, amount: `${annualDepreciationPct}% per annum` },
+      ...Array.from({ length: Math.min(Math.max(Math.round(ageYears), 1), 15) }, (_, idx) => {
+        const value = purchasePrice * Math.pow(1 - annualDepreciationPct / 100, idx + 1);
+        return { label: `Value after year ${idx + 1}`, amount: formatPKR(value) };
+      }),
       { label: `Total Depreciation over ${ageYears} Years`, amount: formatPKR(totalDepreciation), isDeduction: true },
       { label: 'Estimated Current Market Resale Value', amount: formatPKR(residualValue), isTotal: true },
     ],

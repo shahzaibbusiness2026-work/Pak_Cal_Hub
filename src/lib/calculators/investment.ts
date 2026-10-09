@@ -50,6 +50,13 @@ export function calculateInvestment(inputs: Record<string, any>): CalculatorOutp
     ],
     breakdown: [
       { label: 'Initial Lump Sum Invested', amount: formatPKR(initialPrincipal) },
+      ...Array.from({ length: Math.min(Math.max(Math.round(tenureYears), 1), 30) }, (_, idx) => {
+        const monthsElapsed = (idx + 1) * 12;
+        const fvP = initialPrincipal * Math.pow(1 + monthlyRate, monthsElapsed);
+        const fvM = monthlyRate > 0 ? monthlyDeposit * ((Math.pow(1 + monthlyRate, monthsElapsed) - 1) / monthlyRate) : monthlyDeposit * monthsElapsed;
+        const invested = initialPrincipal + monthlyDeposit * monthsElapsed;
+        return { label: `Year ${idx + 1} — invested ${formatPKR(invested)}`, amount: formatPKR(fvP + fvM) };
+      }),
       { label: `Monthly SIP Contributions (${totalMonths} Months)`, amount: formatPKR(monthlyDeposit * totalMonths) },
       { label: 'Total Invested Capital Outlay', amount: formatPKR(totalInvested) },
       { label: `Compound Returns (${annualReturnPct}% per annum)`, amount: formatPKR(totalWealthGain) },
@@ -92,6 +99,10 @@ export function calculateInflation(inputs: Record<string, any>): CalculatorOutpu
     ],
     breakdown: [
       { label: 'Current Purchasing Basket Value', amount: formatPKR(currentAmount) },
+      ...Array.from({ length: Math.min(Math.max(Math.round(years), 1), 30) }, (_, idx) => {
+        const factor = Math.pow(1 + annualInflationPct / 100, idx + 1);
+        return { label: `After year ${idx + 1} — buys like today's ${formatPKR(Math.round(currentAmount / factor))} (basket will cost ${formatPKR(Math.round(currentAmount * factor))})`, amount: formatPKR(Math.round(currentAmount / factor)) };
+      }),
       { label: 'Assumed Annual Inflation Rate', amount: `${annualInflationPct}% per year` },
       { label: `Future Cost to Buy Same Goods after ${years} Years`, amount: formatPKR(futureEquivalentCost) },
       { label: `Residual Purchasing Value of ${formatPKR(currentAmount)}`, amount: formatPKR(futurePurchasingPower), isTotal: true },

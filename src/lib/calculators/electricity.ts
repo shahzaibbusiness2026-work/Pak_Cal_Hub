@@ -329,6 +329,18 @@ export function calculateApplianceCost(inputs: Record<string, any>): CalculatorO
     ],
     breakdown: [
       { label: 'Appliance Power Rating', amount: `${wattage} Watts` },
+      ...([
+        ['1.5-ton inverter AC', 1200, 8],
+        ['Ceiling fan', 75, 12],
+        ['Refrigerator (running average)', 120, 24],
+        ['Water motor (1 HP)', 750, 1],
+        ['Washing machine', 500, 1],
+        ['Electric iron', 1000, 0.5],
+        ['LED TV (43")', 100, 6],
+      ] as [string, number, number][]).map(([name, watts, hours]) => {
+        const units = (watts * hours * daysMonthly) / 1000;
+        return { label: `For comparison — ${name} (${hours}h/day)`, amount: `${units.toFixed(1)} units ≈ ${formatPKR(units * unitRate)}` };
+      }),
       { label: 'Daily Usage Duration', amount: `${hoursDaily} Hours / day` },
       { label: 'Monthly Power Consumption', amount: `${monthlyUnits.toFixed(1)} kWh (Units)` },
       { label: 'Electricity Tariff Rate', amount: `Rs. ${unitRate} / Unit` },

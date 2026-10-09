@@ -75,3 +75,28 @@ export function runBreakdownTests() {
 
   console.log('Breakdown upgrades reconcile (solar/tiles/steel)');
 }
+
+import { calculateFreelancerRate } from '../lib/calculators/business';
+import { calculateInvestment, calculateInflation } from '../lib/calculators/investment';
+import { calculateCarDepreciation } from '../lib/calculators/specialized-engines';
+import { calculateApplianceCost } from '../lib/calculators/electricity';
+
+export function runDetailTests() {
+  const fr = calculateFreelancerRate({ targetMonthlyPKR: 300000, billableHoursPerWeek: 25, weeksPerYear: 48, businessExpensesMonthly: 30000, usdPkrRate: 277.10, bufferPct: 15, platformFeePct: 10 });
+  // base = 3,960,000/1200 = 3300 → *1.15 = 3795 → /0.9 = 4216.67 → $15.22
+  assert(fr.primaryResult.value === '$15.22 / hr', `Freelancer layered rate wrong: ${fr.primaryResult.value}`);
+
+  const inv = calculateInvestment({ initialPrincipal: 100000, monthlyDeposit: 25000, annualReturnPct: 15, tenureYears: 10 });
+  assert((inv.breakdown || []).some((r: any) => String(r.label).startsWith('Year 10')), 'Compound year rows missing');
+
+  const inf = calculateInflation({ currentAmount: 1000000, annualInflationPct: 9.0, years: 5 });
+  assert((inf.breakdown || []).some((r: any) => String(r.label).startsWith('After year 5')), 'Inflation year rows missing');
+
+  const car = calculateCarDepreciation({ purchasePrice: 4500000, ageYears: 3, annualDepreciationPct: 10 });
+  assert((car.breakdown || []).filter((r: any) => String(r.label).startsWith('Value after year')).length === 3, 'Depreciation year rows missing');
+
+  const app = calculateApplianceCost({ wattage: 1500, hoursDaily: 8, daysMonthly: 30, unitRate: 50 });
+  assert((app.breakdown || []).some((r: any) => String(r.label).includes('For comparison')), 'Appliance comparison rows missing');
+
+  console.log('Detail upgrades verified (freelancer/compound/inflation/depreciation/appliance)');
+}
