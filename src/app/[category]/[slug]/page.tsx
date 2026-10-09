@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: CalculatorPageProps): Promise
   if (!calculator) return { title: 'Calculator Not Found' };
 
   return {
-    title: `${calculator.metaTitle.replace(/\s*\|\s*Pak Calc Hub\s*$/, '')} | Pak Calc Hub`,
+    title: { absolute: `${calculator.metaTitle.replace(/\s*\|\s*Pak Calc Hub\s*$/, '')} | Pak Calc Hub` },
     description: calculator.metaDescription,
     keywords: calculator.tags,
     openGraph: {
