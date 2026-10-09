@@ -8,6 +8,9 @@ import {
   Newspaper,
   Image as ImageIcon,
   Settings,
+  LayoutTemplate,
+  PanelLeftOpen,
+  PanelLeftClose,
   SearchCheck,
   Fuel,
   RefreshCw,
@@ -27,6 +30,7 @@ const NAV = [
   { href: '/admin/posts', label: 'Posts & News', icon: Newspaper },
   { href: '/admin/media', label: 'Media Library', icon: ImageIcon },
   { href: '/admin/seo', label: 'SEO Tools', icon: SearchCheck },
+  { href: '/admin/content', label: 'Site Content', icon: LayoutTemplate },
   { href: '/admin/rates', label: 'Market Rates', icon: Fuel },
   { href: '/admin/tools', label: 'Tool Manager', icon: Wrench },
   { href: '/admin/sync', label: 'Sync & Logs', icon: RefreshCw },
@@ -42,6 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [authState, setAuthState] = useState<'checking' | 'unconfigured' | 'locked' | 'open'>('checking');
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -69,6 +74,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => setDrawerOpen(false), [pathname]);
 
+  useEffect(() => {
+    try { setCollapsed(localStorage.getItem('pkh-admin-collapsed') === '1'); } catch {}
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((c) => {
+      const next = !c;
+      try { localStorage.setItem('pkh-admin-collapsed', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
+
   // Locked-out visitors go straight to the login card — never render the
   // dashboard shell first. The login page itself is excluded to avoid a loop.
   const isPublicAdminPage = pathname === '/admin/login' || pathname === '/admin/setup';
@@ -94,10 +111,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white font-black text-sm">
           PK
         </div>
-        <div>
-          <div className="text-sm font-extrabold text-white leading-tight">Pak Calc Hub</div>
-          <div className="text-[10px] uppercase tracking-widest text-slate-500">Admin Console</div>
-        </div>
+        {!collapsed && (
+          <div>
+            <div className="text-sm font-extrabold text-white leading-tight">Pak Calc Hub</div>
+            <div className="text-[10px] uppercase tracking-widest text-slate-500">Admin Console</div>
+          </div>
+        )}
       </div>
       <nav className="flex-1 space-y-1 px-3" aria-label="Admin navigation">
         {NAV.map((item) => {
@@ -115,16 +134,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               aria-current={active ? 'page' : undefined}
             >
               <Icon className="h-[18px] w-[18px] shrink-0" />
-              <span>{item.label}</span>
+              {!collapsed && <span>{item.label}</span>}
             </Link>
           );
         })}
       </nav>
-      <div className="px-5 py-4 border-t border-slate-800/80">
-        <p className="text-[10px] text-slate-600 leading-relaxed">
-          Supabase backend: {authState === 'unconfigured' ? 'not connected' : 'connected'}
-        </p>
-      </div>
+      {!collapsed && (
+        <div className="px-5 py-4 border-t border-slate-800/80">
+          <p className="text-[10px] text-slate-600 leading-relaxed">
+            Supabase backend: {authState === 'unconfigured' ? 'not connected' : 'connected'}
+          </p>
+        </div>
+      )}
     </div>
   );
 
@@ -140,6 +161,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
+      {/* Desktop sidebar open/close toggle */}
+      <button
+        type="button"
+        onClick={toggleCollapsed}
+        aria-label={collapsed ? 'Open sidebar' : 'Close sidebar'}
+        title={collapsed ? 'Open sidebar' : 'Close sidebar'}
+        className={`fixed bottom-5 z-40 hidden h-10 w-10 items-center justify-center rounded-full bg-emerald-700 text-white shadow-lg ring-1 ring-emerald-600/40 transition-all duration-300 hover:bg-emerald-800 lg:flex ${collapsed ? 'left-[58px]' : 'left-[236px]'}`}
+      >
+        {collapsed ? <PanelLeftOpen className="h-4.5 w-4.5" /> : <PanelLeftClose className="h-4.5 w-4.5" />}
+      </button>
+
       {/* Mobile drawer */}
       {drawerOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -157,9 +189,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       )}
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:block lg:w-64">{sidebar}</div>
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:left-0 lg:block ${collapsed ? "lg:w-[76px]" : "lg:w-64"} transition-all duration-300`}>{sidebar}</div>
 
-      <div className="lg:pl-64">
+      <div className={collapsed ? "lg:pl-[76px] transition-all duration-300" : "lg:pl-64 transition-all duration-300"}>
         {/* Top bar */}
         <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
           <div className="flex h-14 items-center gap-3 px-4 sm:px-6">

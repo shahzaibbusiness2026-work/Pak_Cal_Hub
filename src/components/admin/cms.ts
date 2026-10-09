@@ -29,6 +29,14 @@ export interface SiteSettings {
   footerText?: string | null;
   /** JSON string of tool overrides (disabled ids + title/description overrides). */
   toolOverrides?: string | null;
+  heroTitle?: string | null;
+  heroAccent?: string | null;
+  heroSubtitle?: string | null;
+  footerAbout?: string | null;
+  aboutContent?: string | null;
+  contactContent?: string | null;
+  categoryOverrides?: string | null;
+  rateOverrides?: string | null;
 }
 
 export interface RedirectRule {

@@ -61,3 +61,72 @@ export function applyToolOverride<T extends { id: string; title: string; descrip
 export function isToolDisabled(toolId: string, overrides: ToolOverrides): boolean {
   return overrides.disabled.includes(toolId);
 }
+
+/* ------------------------------------------------------------------ */
+/* Category + rate overrides (v2 — full CMS content control)           */
+/* ------------------------------------------------------------------ */
+
+export interface CategoryOverrideEntry {
+  name?: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface CategoryOverrides {
+  categories: Record<string, CategoryOverrideEntry>;
+}
+
+const EMPTY_CATEGORY_OVERRIDES: CategoryOverrides = { categories: {} };
+
+/** Parse category_overrides JSON from a raw site-settings record. */
+export function parseCategoryOverrides(settingsRaw: Record<string, any> | null | undefined): CategoryOverrides {
+  const raw = settingsRaw?.category_overrides ?? settingsRaw?.categoryOverrides;
+  if (raw == null) return EMPTY_CATEGORY_OVERRIDES;
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (parsed && typeof parsed === 'object' && parsed.categories && typeof parsed.categories === 'object') {
+      const categories: Record<string, CategoryOverrideEntry> = {};
+      for (const [id, entry] of Object.entries<any>(parsed.categories)) {
+        if (entry && typeof entry === 'object') {
+          categories[id] = {
+            name: typeof entry.name === 'string' ? entry.name : undefined,
+            description: typeof entry.description === 'string' ? entry.description : undefined,
+            icon: typeof entry.icon === 'string' ? entry.icon : undefined,
+          };
+        }
+      }
+      return { categories };
+    }
+  } catch {
+    /* degrade silently */
+  }
+  return EMPTY_CATEGORY_OVERRIDES;
+}
+
+export interface RateOverrides {
+  petrol?: number;
+  diesel?: number;
+  gold24kTola?: number;
+  silverTola?: number;
+  usdPkr?: number;
+}
+
+/** Parse rate_overrides JSON from a raw site-settings record. */
+export function parseRateOverrides(settingsRaw: Record<string, any> | null | undefined): RateOverrides {
+  const raw = settingsRaw?.rate_overrides ?? settingsRaw?.rateOverrides;
+  if (raw == null) return {};
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!parsed || typeof parsed !== 'object') return {};
+    const num = (v: any) => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : undefined);
+    return {
+      petrol: num(parsed.petrol),
+      diesel: num(parsed.diesel),
+      gold24kTola: num(parsed.gold24kTola),
+      silverTola: num(parsed.silverTola),
+      usdPkr: num(parsed.usdPkr),
+    };
+  } catch {
+    return {};
+  }
+}

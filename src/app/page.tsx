@@ -26,7 +26,7 @@ import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories-meta';
 import CalculatorCard from '../components/ui/CalculatorCard';
 import LiveRatesStrip from '../components/ui/LiveRatesStrip';
 import { getSiteSettings } from '../lib/cms/settings';
-import { parseToolOverrides, applyToolOverride, isToolDisabled } from '../lib/cms/overrides';
+import { parseToolOverrides, applyToolOverride, isToolDisabled, parseCategoryOverrides } from '../lib/cms/overrides';
 import HeroSearch from '../components/ui/HeroSearch';
 import ArticlesSection from '../components/ui/ArticlesSection';
 import NewsletterSection from '../components/ui/NewsletterSection';
@@ -54,11 +54,21 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const toolOverrides = parseToolOverrides(await getSiteSettings());
-  const displayCategories = CATEGORIES_DATA.map((c) => ({
-    ...c,
-    tools: c.tools.filter((tool) => !isToolDisabled(tool.id, toolOverrides)).map((tool) => applyToolOverride(tool, toolOverrides)),
-  }));
+  const settingsRaw = await getSiteSettings();
+  const toolOverrides = parseToolOverrides(settingsRaw);
+  const categoryOverrides = parseCategoryOverrides(settingsRaw);
+  const heroTitle = (settingsRaw.hero_title || "Pakistan's").toString();
+  const heroAccent = (settingsRaw.hero_accent || 'Calculation Hub').toString();
+  const heroSubtitle = (settingsRaw.hero_subtitle || '{heroSubtitle}').toString();
+  const displayCategories = CATEGORIES_DATA.map((c) => {
+    const cov = categoryOverrides.categories[c.id];
+    return {
+      ...c,
+      name: cov?.name?.trim() || c.name,
+      description: cov?.description?.trim() || c.description,
+      tools: c.tools.filter((tool) => !isToolDisabled(tool.id, toolOverrides)).map((tool) => applyToolOverride(tool, toolOverrides)),
+    };
+  });
   const DAILY_DEMAND_IDS = [
     'bps-salary-calculator',
     'income-tax-calculator',

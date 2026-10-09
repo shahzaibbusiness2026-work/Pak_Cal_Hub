@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { getCategoryById, CATEGORIES_DATA } from '../../lib/data/categories-meta';
 import { getSiteSettings } from '../../lib/cms/settings';
-import { parseToolOverrides, applyToolOverride, isToolDisabled } from '../../lib/cms/overrides';
+import { parseToolOverrides, applyToolOverride, isToolDisabled, parseCategoryOverrides } from '../../lib/cms/overrides';
 import CalculatorCard from '../../components/ui/CalculatorCard';
 import DataSource from '../../components/ui/DataSource';
 import { ChevronRight, Home, Sparkles, ShieldCheck } from 'lucide-react';
@@ -47,7 +47,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const category = getCategoryById(params.category);
-  const toolOverrides = parseToolOverrides(await getSiteSettings());
+  const settingsRaw2 = await getSiteSettings();
+  const toolOverrides = parseToolOverrides(settingsRaw2);
+  const categoryOverrides = parseCategoryOverrides(settingsRaw2);
   const visibleTools = (category?.tools || [])
     .filter((tool) => !isToolDisabled(tool.id, toolOverrides))
     .map((tool) => applyToolOverride(tool, toolOverrides));

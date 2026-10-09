@@ -4,6 +4,8 @@ import { buildLiveRatesResponse, LiveRatesOverlay } from '../../../../lib/sync/l
 import { fetchLiveFx } from '../../../../lib/sync/live/fxLive';
 import { fetchLiveMetals } from '../../../../lib/sync/live/metalLive';
 import { fetchLiveFuel } from '../../../../lib/sync/live/fuelLive';
+import { getSiteSettings } from '../../../../lib/cms/settings';
+import { parseRateOverrides } from '../../../../lib/cms/overrides';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +54,27 @@ export async function GET() {
       overlay.diesel = fuelRes.value.diesel;
       overlay.sources!.petrol = fuelRes.value.source;
       overlay.sources!.diesel = fuelRes.value.source;
+    }
+
+    // Owner's manual rate pins (Admin → Market Rates / Site Content) fill any
+    // gap a live upstream left — fresh upstream quotes always win.
+    try {
+      const pins = parseRateOverrides(await getSiteSettings());
+      const pin = (key: 'petrol' | 'diesel' | 'gold24kTola' | 'silverTola' | 'usdPkr') => {
+        const v = pins[key];
+        if (typeof v === 'number' && (overlay as any)[key] == null) {
+          (overlay as any)[key] = v;
+          (overlay.sources as any)[key] = 'Admin manual pin (CMS)';
+        }
+      };
+      pin('petrol');
+      pin('diesel');
+      pin('gold24kTola');
+      pin('silverTola');
+      pin('usdPkr');
+      if ((overlay as any).usdPkr != null && !overlay.fx) overlay.fx = { PKR: 1, USD: (overlay as any).usdPkr };
+    } catch {
+      /* settings unavailable — fallbacks apply */
     }
 
     const payload = buildLiveRatesResponse(rates, overlay);

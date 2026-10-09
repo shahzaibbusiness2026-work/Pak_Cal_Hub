@@ -37,6 +37,53 @@ interface SyncLogRow {
   createdAt: string;
 }
 
+
+function LiveSitePanel() {
+  const [live, setLive] = useState<any>(null);
+  const [err, setErr] = useState(false);
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await fetch('/api/rates/live', { cache: 'no-store' });
+        if (!r.ok) throw new Error('bad');
+        setLive(await r.json());
+      } catch { setErr(true); }
+    })();
+  }, []);
+  const tiles = live ? [
+    { label: 'Petrol', value: `Rs ${Number(live.petrol).toLocaleString('en-PK')}/L` },
+    { label: 'Diesel', value: `Rs ${Number(live.diesel).toLocaleString('en-PK')}/L` },
+    { label: 'Gold 24K', value: `Rs ${Number(live.gold24kTola).toLocaleString('en-PK')}/tola` },
+    { label: 'USD / PKR', value: `Rs ${Number(live.usdPkr).toFixed(2)}` },
+  ] : [];
+  return (
+    <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-700 to-teal-800 p-5 text-white shadow-sm dark:border-emerald-900">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-sm font-extrabold">
+          <span className="live-dot" /> Your website right now
+        </h2>
+        <span className="text-[11px] font-semibold text-emerald-100">
+          {err ? 'Could not reach live rates — site may be redeploying' : live ? (live.live ? 'Live rates flowing' : 'Serving backup rates') : 'Checking…'}
+        </span>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {tiles.length === 0 ? [0,1,2,3].map((i) => <div key={i} className="h-16 animate-pulse rounded-xl bg-white/10" />) : tiles.map((tile) => (
+          <div key={tile.label} className="rounded-xl bg-white/10 px-4 py-3 backdrop-blur-sm">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-100">{tile.label}</div>
+            <div className="tnum mt-0.5 text-lg font-extrabold">{tile.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-semibold text-emerald-100">
+        <span>49 calculators live</span>
+        <Link href="/admin/content" className="underline underline-offset-2 hover:text-white">Edit site content</Link>
+        <Link href="/admin/rates" className="underline underline-offset-2 hover:text-white">Pin manual rates</Link>
+        <Link href="/" target="_blank" className="underline underline-offset-2 hover:text-white">Open public site</Link>
+      </div>
+    </div>
+  );
+}
+
 function StatCard({
   icon: Icon,
   label,
@@ -129,6 +176,9 @@ export default function AdminOverviewPage() {
           <span>CMS stats unavailable: {stats.cmsError}</span>
         </div>
       )}
+
+      {/* Live website status — pulled from the public site itself */}
+      <LiveSitePanel />
 
       {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
