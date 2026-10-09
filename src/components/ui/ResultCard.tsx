@@ -15,7 +15,7 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
       {/* Primary Result Banner */}
       <div className="relative">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-emerald-200">
             {primary.label}
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-bold text-emerald-300 backdrop-blur-sm">
@@ -45,7 +45,7 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
               key={item.id}
               className="rounded-xl bg-white/5 p-3 sm:p-3.5 backdrop-blur-sm ring-1 ring-white/10 flex flex-col justify-between"
             >
-              <div className="text-[11px] sm:text-xs font-semibold text-emerald-200/80 leading-tight">
+              <div className="text-[11px] sm:text-xs font-semibold text-emerald-100 leading-tight">
                 {item.label}
               </div>
               <div className="mt-1.5 font-mono font-bold text-sm sm:text-lg text-white break-words tabular-nums">

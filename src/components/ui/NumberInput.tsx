@@ -119,7 +119,7 @@ export default function NumberInput({
             type="button"
             onClick={() => handleStep(-stepAmount)}
             disabled={!canDecrement}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
             aria-label={`Decrease ${label}`}
           >
             <Minus className="h-4 w-4" />
@@ -128,7 +128,7 @@ export default function NumberInput({
             type="button"
             onClick={() => handleStep(stepAmount)}
             disabled={!canIncrement}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-all touch-manipulation"
             aria-label={`Increase ${label}`}
           >
             <Plus className="h-4 w-4" />

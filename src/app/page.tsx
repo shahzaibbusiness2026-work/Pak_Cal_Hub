@@ -107,7 +107,7 @@ export default async function HomePage() {
           {/* Main Hero Heading */}
           <h1 className="mt-4 sm:mt-5 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Pakistan Calculator{' '}
-            <span className="bg-gradient-to-r from-emerald-800 to-emerald-950 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-200">
+            <span className="ml-2 bg-gradient-to-r from-emerald-800 to-emerald-950 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-200">
               Hub
             </span>
           </h1>
@@ -123,11 +123,11 @@ export default async function HomePage() {
           <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
             <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 mr-1">Direct Jump:</span>
             {[
-              { label: '🏛️ Govt Suite', href: '#govt-suite' },
-              { label: '💼 FBR Tax Portal', href: '#fbr-tax-suite' },
-              { label: '🚗 Excise & Vehicles', href: '#excise-suite' },
-              { label: '⚡ Top Daily Tools', href: '#daily-demand' },
-              { label: '📂 All 13 Categories', href: '#categories' },
+              { label: 'Govt Suite', href: '#govt-suite' },
+              { label: 'FBR Tax Portal', href: '#fbr-tax-suite' },
+              { label: 'Excise & Vehicles', href: '#excise-suite' },
+              { label: 'Top Daily Tools', href: '#daily-demand' },
+              { label: 'All 13 Categories', href: '#categories' },
             ].map((tag) => (
               <Link
                 key={tag.label}

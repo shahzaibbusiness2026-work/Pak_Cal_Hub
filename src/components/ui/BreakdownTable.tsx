@@ -25,7 +25,9 @@ export default function BreakdownTable({ rows, title = 'Detailed Itemized Breakd
             className={`flex items-center justify-between gap-4 px-4 sm:px-6 py-3 text-xs sm:text-sm transition-colors ${
               row.isTotal
                 ? 'bg-emerald-50/70 font-bold text-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-300'
-                : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
+                : idx % 2 === 1
+                  ? 'bg-slate-50/60 hover:bg-slate-100/70 dark:bg-slate-800/25 dark:hover:bg-slate-800/50'
+                  : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
             }`}
           >
             <div className="min-w-0 pr-2">
