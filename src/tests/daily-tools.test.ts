@@ -28,3 +28,20 @@ export function runDailyToolsTests() {
 
   console.log('Daily-tools (4 new + engine checks) tests passed');
 }
+
+import { calculateConstructionCost } from '../lib/calculators/property';
+
+export function runConstructionTests() {
+  const c = calculateConstructionCost({ coveredArea: 2200, grade: 'a-standard' });
+  const rows = (c.breakdown || []) as { label: string; amount: any; isTotal?: boolean }[];
+  const num = (v: any) => (typeof v === 'number' ? v : parseFloat(String(v).replace(/[^\d.]/g, '')) || 0);
+  const greyItems = rows.slice(0, 8).reduce((s, r) => s + num(r.amount), 0);
+  const subtotal = num(rows.find((r) => r.label.startsWith('Grey structure subtotal'))?.amount);
+  assert(Math.abs(greyItems - subtotal) <= 8, `Grey items ${greyItems} != subtotal ${subtotal}`);
+  const total = rows.find((r) => r.isTotal);
+  const finishSum = rows.slice(9, 16).reduce((s, r) => s + num(r.amount), 0);
+  assert(Math.abs(subtotal + finishSum - num(total?.amount)) <= 8, 'Construction total does not reconcile');
+  assert(JSON.stringify(c.secondaryResults).includes('bags'), 'Cement secondary missing');
+  assert(JSON.stringify(c.secondaryResults).includes('tons'), 'Steel secondary missing');
+  console.log(`Construction breakdown reconciles (grey ${subtotal.toLocaleString()} + finishing ${finishSum.toLocaleString()})`);
+}

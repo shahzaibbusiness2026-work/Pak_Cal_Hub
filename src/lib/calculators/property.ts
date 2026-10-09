@@ -81,56 +81,75 @@ export function calculateAreaConverter(inputs: Record<string, any>): CalculatorO
  * Complete House Construction Cost Estimator (Grey Structure + Finishing)
  */
 export function calculateConstructionCost(inputs: Record<string, any>): CalculatorOutput {
-  const coveredArea = safeNumber(inputs.coveredArea, 2200); // 5 Marla double story is ~2000-2400 sq ft
+  const coveredArea = safeNumber(inputs.coveredArea, 2200); // 5 Marla double storey is ~2000-2400 sq ft
   const constructionGrade = inputs.grade || 'a-standard'; // economy, a-standard, a-plus, luxury
 
-  // Rates in Pakistan — August 2026 prevailing market rates
-  // Grey Structure: Rs. 2,600–3,800/sq ft | Finishing: Rs. 2,200–4,800/sq ft
-  let greyRate = 2900;
-  let finishRate = 2500;
+  /* Material price book — 2026 market estimates. Cement/steel/brick anchors
+     match src/lib/db/dataProvider.ts (DEFAULT_MARKET_RATES). Quantities come
+     from standard Pakistan residential estimating factors per sq ft of
+     covered area; labour is the mason/helper (mistri/mazdoor) component. */
+  const CEMENT_RATE_PER_BAG = 1450;
+  const STEEL_RATE_PER_TON = 255000;
+  const BRICK_RATE_PER_1000 = 21000;
+  const SAND_RATE_PER_CFT = 65;
+  const CRUSH_RATE_PER_CFT = 115; // Margalla/crush bajri
 
-  if (constructionGrade === 'a-plus') {
-    greyRate = 3300;
-    finishRate = 3300;
-  } else if (constructionGrade === 'luxury') {
-    greyRate = 3800;
-    finishRate = 4800;
-  } else if (constructionGrade === 'economy') {
-    greyRate = 2600;
-    finishRate = 2000;
-  }
+  type GradeFactors = {
+    bricksPerSqFt: number; cementBagsPerSqFt: number; steelKgPerSqFt: number;
+    greyLabourPerSqFt: number; finishRate: number; label: string;
+  };
+  const GRADES: Record<string, GradeFactors> = {
+    economy: { bricksPerSqFt: 24, cementBagsPerSqFt: 0.42, steelKgPerSqFt: 3.0, greyLabourPerSqFt: 500, finishRate: 2000, label: 'Economy' },
+    'a-standard': { bricksPerSqFt: 26, cementBagsPerSqFt: 0.48, steelKgPerSqFt: 3.5, greyLabourPerSqFt: 600, finishRate: 2500, label: 'A-Grade Standard' },
+    'a-plus': { bricksPerSqFt: 28, cementBagsPerSqFt: 0.52, steelKgPerSqFt: 4.0, greyLabourPerSqFt: 700, finishRate: 3300, label: 'A+ Premium' },
+    luxury: { bricksPerSqFt: 30, cementBagsPerSqFt: 0.56, steelKgPerSqFt: 4.3, greyLabourPerSqFt: 800, finishRate: 4800, label: 'Luxury' },
+  };
+  const g = GRADES[constructionGrade] || GRADES['a-standard'];
 
-  const totalRatePerSqFt = greyRate + finishRate;
-  const totalGreyCost = coveredArea * greyRate;
-  const totalFinishCost = coveredArea * finishRate;
-  const totalCost = coveredArea * totalRatePerSqFt;
-
-  // Material Breakdown Estimations for Grey Structure.
-  // Single source of truth for material rates: src/lib/db/dataProvider.ts (DEFAULT_MARKET_RATES).
-  // These fallbacks must match 'steel_grade60' and 'cement_bag' there.
-  const STEEL_RATE_PER_TON = 255000; // Pakistan Steel Re-rolling Mills Association
-  const CEMENT_RATE_PER_BAG = 1450; // All Pakistan Cement Manufacturers Association
-  const BRICK_RATE_PER_1000 = 21000; // Awwal grade
-
-  // Bricks: ~26 bricks per sq ft covered area
-  const bricksCount = Math.round(coveredArea * 26);
+  // ── Grey structure: itemised materials + labour ──
+  const bricksCount = Math.round(coveredArea * g.bricksPerSqFt);
   const bricksCost = (bricksCount / 1000) * BRICK_RATE_PER_1000;
 
-  // Cement: ~0.46 bags per sq ft covered area
-  const cementBags = Math.ceil(coveredArea * 0.48);
+  const cementBags = Math.ceil(coveredArea * g.cementBagsPerSqFt);
   const cementCost = cementBags * CEMENT_RATE_PER_BAG;
 
-  // Steel / Rebar: ~3.5 kg per sq ft covered area (Grade 60 deformed)
-  const steelTons = (coveredArea * 3.5) / 1000;
+  const steelKg = coveredArea * g.steelKgPerSqFt;
+  const steelTons = steelKg / 1000;
   const steelCost = steelTons * STEEL_RATE_PER_TON;
 
-  // Sand & Crush:
-  const sandCost = coveredArea * 200;
-  const crushCost = coveredArea * 300;
+  const sandCft = Math.round(coveredArea * 0.55);
+  const sandCost = sandCft * SAND_RATE_PER_CFT;
 
-  // Labour & rough-in plumbing/electrical:
-  const labourCost = coveredArea * 600;
+  const crushCft = Math.round(coveredArea * 0.38);
+  const crushCost = crushCft * CRUSH_RATE_PER_CFT;
 
+  const shutteringCost = coveredArea * 140; // formwork, curing, scaffolding
+  const earthworkCost = coveredArea * 90; // excavation, termite/DPC, backfilling
+  const greyLabourCost = coveredArea * g.greyLabourPerSqFt;
+
+  const totalGreyCost = bricksCost + cementCost + steelCost + sandCost + crushCost + shutteringCost + earthworkCost + greyLabourCost;
+  const greyRate = Math.round(totalGreyCost / coveredArea);
+
+  // ── Finishing: itemised by trade (supply + fixing) ──
+  const finishComponents: { label: string; share: number }[] = [
+    { label: 'Flooring — tiles / marble / wooden floors', share: 0.38 },
+    { label: 'Woodwork — doors, wardrobes & frames', share: 0.16 },
+    { label: 'Sanitary ware & plumbing fixtures', share: 0.14 },
+    { label: 'Kitchen — cabinets, counter & fittings', share: 0.12 },
+    { label: 'Electrical fittings, fans & lights', share: 0.09 },
+    { label: 'Paint, polish & wall finish', share: 0.08 },
+    { label: 'Ceiling & final plaster touches', share: 0.03 },
+  ];
+  const totalFinishCost = coveredArea * g.finishRate;
+  const finishRows = finishComponents.map((c) => ({
+    label: `Finishing — ${c.label}`,
+    amount: Math.round(totalFinishCost * c.share),
+  }));
+
+  const totalCost = totalGreyCost + totalFinishCost;
+  const totalRatePerSqFt = Math.round(totalCost / coveredArea);
+
+  const areaStr = coveredArea.toLocaleString('en-PK');
   return {
     primaryResult: {
       id: 'totalCost',
@@ -139,32 +158,40 @@ export function calculateConstructionCost(inputs: Record<string, any>): Calculat
       type: 'currency',
       highlight: true,
       color: 'success',
-      subtext: `@ Rs. ${totalRatePerSqFt.toLocaleString()} / Sq. Ft. (${coveredArea.toLocaleString()} sq ft)`,
+      subtext: `@ Rs. ${totalRatePerSqFt.toLocaleString('en-PK')} / sq ft over ${areaStr} sq ft (${g.label}) — full itemised estimate below.`,
     },
     secondaryResults: [
-      { id: 'greyCost', label: 'Grey Structure Cost', value: formatPKR(totalGreyCost), type: 'currency' },
-      { id: 'finishCost', label: 'Finishing Cost', value: formatPKR(totalFinishCost), type: 'currency' },
-      { id: 'ratePerSqFt', label: 'All-In Rate per Sq. Ft.', value: `Rs. ${totalRatePerSqFt.toLocaleString()}`, type: 'text' },
-      { id: 'cementBags', label: 'Estimated Cement Required', value: `${cementBags.toLocaleString()} Bags`, type: 'text' },
+      { id: 'greyCost', label: 'Grey Structure (itemised)', value: formatPKR(totalGreyCost), type: 'currency' },
+      { id: 'finishCost', label: 'Finishing (itemised)', value: formatPKR(totalFinishCost), type: 'currency' },
+      { id: 'cementBags', label: 'Cement Needed', value: `${cementBags.toLocaleString('en-PK')} bags`, type: 'text' },
+      { id: 'steelTons', label: 'Steel (Sarya) Needed', value: `${steelTons.toFixed(2)} tons`, type: 'text' },
     ],
     breakdown: [
-      { label: `Grey Structure (${coveredArea.toLocaleString()} sq ft × Rs. ${greyRate.toLocaleString()}) — includes bricks, cement, steel, sand/crush and labour below`, amount: formatPKR(totalGreyCost) },
-      { label: `Included in grey structure — Bricks: ${bricksCount.toLocaleString()} Awwal (indicative ${formatPKR(bricksCost)})`, amount: 'Included above — do not add again' },
-      { label: `Included in grey structure — Cement: ${cementBags.toLocaleString()} Bags (indicative ${formatPKR(cementCost)})`, amount: 'Included above — do not add again' },
-      { label: `Included in grey structure — Steel: ${steelTons.toFixed(2)} Tons (indicative ${formatPKR(steelCost)})`, amount: 'Included above — do not add again' },
-      { label: `Included in grey structure — Sand/crush and labour (indicative ${formatPKR(sandCost + crushCost + labourCost)})`, amount: 'Included above — do not add again' },
-      { label: `Complete Finishing (Tiles, Paint, Woodwork, Sanitary, Electricals)`, amount: formatPKR(totalFinishCost) },
-      { label: `Total Estimated Construction Budget (grey + finishing only)`, amount: formatPKR(totalCost), isTotal: true },
+      { label: `Cement — ${cementBags.toLocaleString('en-PK')} bags @ Rs ${CEMENT_RATE_PER_BAG.toLocaleString('en-PK')}/bag`, amount: Math.round(cementCost) },
+      { label: `Sarya (Grade-60 steel) — ${steelTons.toFixed(2)} tons @ Rs ${STEEL_RATE_PER_TON.toLocaleString('en-PK')}/ton`, amount: Math.round(steelCost) },
+      { label: `Bricks (Awwal) — ${bricksCount.toLocaleString('en-PK')} @ Rs ${BRICK_RATE_PER_1000.toLocaleString('en-PK')}/1,000`, amount: Math.round(bricksCost) },
+      { label: `Sand — ${sandCft.toLocaleString('en-PK')} cft @ Rs ${SAND_RATE_PER_CFT}/cft`, amount: Math.round(sandCost) },
+      { label: `Crush / Bajri — ${crushCft.toLocaleString('en-PK')} cft @ Rs ${CRUSH_RATE_PER_CFT}/cft`, amount: Math.round(crushCost) },
+      { label: 'Shuttering, scaffolding & curing', amount: Math.round(shutteringCost) },
+      { label: 'Earthwork, termite proofing & DPC', amount: Math.round(earthworkCost) },
+      { label: 'Labour — mistri & mazdoor (grey structure)', amount: Math.round(greyLabourCost) },
+      { label: `Grey structure subtotal (@ Rs ${greyRate.toLocaleString('en-PK')}/sq ft)`, amount: Math.round(totalGreyCost) },
+      ...finishRows,
+      { label: `Complete house — grey + finishing (${areaStr} sq ft, ${g.label})`, amount: Math.round(totalCost), isTotal: true },
     ],
     chartType: 'pie',
     chartData: [
-      { name: 'Grey Structure', value: Math.round(totalGreyCost), color: '#475569' },
-      { name: 'Finishing & Fittings', value: Math.round(totalFinishCost), color: '#16a34a' },
+      { name: 'Cement', value: Math.round(cementCost), color: '#64748b' },
+      { name: 'Steel (Sarya)', value: Math.round(steelCost), color: '#334155' },
+      { name: 'Bricks', value: Math.round(bricksCost), color: '#b45309' },
+      { name: 'Sand + Bajri', value: Math.round(sandCost + crushCost), color: '#ca8a04' },
+      { name: 'Labour & Other Grey', value: Math.round(greyLabourCost + shutteringCost + earthworkCost), color: '#0ea5e9' },
+      { name: 'Finishing', value: Math.round(totalFinishCost), color: '#16a34a' },
     ],
     notes: [
-      'Rates based on Pakistan construction market benchmarks (Grade-A quality). Material fallback rates match the market-rate table in src/lib/db/dataProvider.ts.',
-      `Steel: Grade-60 deformed rebar @ Rs. ${STEEL_RATE_PER_TON.toLocaleString()}/ton. Cement: OPC @ Rs. ${CEMENT_RATE_PER_BAG.toLocaleString()}/bag. Bricks: Awwal-grade @ Rs. ${BRICK_RATE_PER_1000.toLocaleString()} per 1,000.`,
-      'Finishing cost includes flooring tiles, sanitary ware, kitchen cabinets, internal doors, ceiling plaster, and paint.',
+      'Every material is estimated from covered area using standard Pakistan residential factors — cement 0.42–0.56 bags/sq ft, steel 3.0–4.3 kg/sq ft, bricks 24–30/sq ft by finishing grade — then priced at the rates shown. Quantities scale with your grade choice here.',
+      `Price book (Oct 2026 market estimates): cement Rs ${CEMENT_RATE_PER_BAG.toLocaleString('en-PK')}/bag, Grade-60 sarya Rs ${STEEL_RATE_PER_TON.toLocaleString('en-PK')}/ton, Awwal bricks Rs ${BRICK_RATE_PER_1000.toLocaleString('en-PK')}/1,000, sand Rs ${SAND_RATE_PER_CFT}/cft, crush/bajri Rs ${CRUSH_RATE_PER_CFT}/cft. City prices move ±10–15% — confirm with your local supplier before ordering.`,
+      'Not included: plot/land, boundary wall & gate, water boring, sewerage and utility connections, architect/map approval fees, and escalation during construction. Add a 5–10% contingency for peace of mind.',
     ],
   };
 }
