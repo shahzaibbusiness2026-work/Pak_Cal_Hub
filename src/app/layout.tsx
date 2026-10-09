@@ -6,6 +6,8 @@ import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Analytics from '../components/ui/Analytics';
 import { SITE_URL, SITE_NAME, SITE_FULL_NAME } from '../lib/site';
+import { getSiteSettings } from '../lib/cms/settings';
+import { Megaphone } from 'lucide-react';
 
 const sansFont = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -62,11 +64,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getSiteSettings();
+  const announcementOn =
+    (settings.announcement_enabled === true || settings.announcement_enabled === 'true') &&
+    typeof settings.announcement_text === 'string' &&
+    settings.announcement_text.trim().length > 0;
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -88,6 +95,14 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col justify-between font-sans antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50">
         <Analytics />
         <ThemeRegistry>
+          {announcementOn && (
+            <div className="bg-emerald-900 px-4 py-2 text-center text-xs sm:text-sm font-semibold text-emerald-50">
+              <span className="inline-flex items-center gap-2">
+                <Megaphone className="h-4 w-4 shrink-0" />
+                {settings.announcement_text}
+              </span>
+            </div>
+          )}
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />

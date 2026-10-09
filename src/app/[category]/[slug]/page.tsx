@@ -6,6 +6,9 @@ import { Metadata } from 'next';
 import { getCalculatorBySlug, getCategoryById, ALL_CALCULATORS } from '../../../lib/data/categories-meta';
 import DynamicCalculator from '../../../components/calculators/DynamicCalculator';
 import DataSource from '../../../components/ui/DataSource';
+import { getSiteSettings } from '../../../lib/cms/settings';
+import { parseToolOverrides, applyToolOverride, isToolDisabled } from '../../../lib/cms/overrides';
+import { PauseCircle } from 'lucide-react';
 import CalculatorCard from '../../../components/ui/CalculatorCard';
 import { ChevronRight, Home, ShieldCheck, Sparkles, BookOpen, HelpCircle, Calendar, FileText, CheckCircle2 } from 'lucide-react';
 
@@ -43,11 +46,17 @@ export async function generateMetadata({ params }: CalculatorPageProps): Promise
   };
 }
 
-export default function CalculatorPage({ params }: CalculatorPageProps) {
-  const calculator = getCalculatorBySlug(params.slug);
+export default async function CalculatorPage({ params }: CalculatorPageProps) {
+  const baseCalculator = getCalculatorBySlug(params.slug);
   const category = getCategoryById(params.category);
 
-  if (!calculator || !category) notFound();
+  if (!baseCalculator || !category) notFound();
+
+  // Admin-managed overrides (hide + public label changes) — degrades to the
+  // static catalogue when site settings are unavailable.
+  const overrides = parseToolOverrides(await getSiteSettings());
+  const calculator = applyToolOverride(baseCalculator, overrides);
+  const toolDisabled = isToolDisabled(baseCalculator.id, overrides);
 
   // Related calculators in same category
   const relatedCalculators = category.tools
@@ -144,7 +153,18 @@ export default function CalculatorPage({ params }: CalculatorPageProps) {
         </div>
 
         {/* Main Interactive Calculation Engine Workspace */}
-        <DynamicCalculator slug={calculator.slug} />
+        {toolDisabled ? (
+          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-6 text-center dark:border-amber-800 dark:bg-amber-950/40">
+            <PauseCircle className="mx-auto h-8 w-8 text-amber-600" />
+            <h2 className="mt-2 text-base font-bold text-slate-900 dark:text-white">This calculator is temporarily unavailable</h2>
+            <p className="mx-auto mt-1 max-w-md text-sm text-slate-600 dark:text-slate-300">
+              We are updating this tool with the latest official figures. Please check back shortly, or try one of the
+              related calculators below.
+            </p>
+          </div>
+        ) : (
+          <DynamicCalculator slug={calculator.slug} />
+        )}
 
         {/* Official sources & rate verification for this calculator */}
         <DataSource toolId={calculator.id} />

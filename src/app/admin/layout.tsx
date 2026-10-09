@@ -11,6 +11,7 @@ import {
   SearchCheck,
   Fuel,
   RefreshCw,
+  Wrench,
   Menu,
   X,
   ExternalLink,
@@ -27,6 +28,7 @@ const NAV = [
   { href: '/admin/media', label: 'Media Library', icon: ImageIcon },
   { href: '/admin/seo', label: 'SEO Tools', icon: SearchCheck },
   { href: '/admin/rates', label: 'Market Rates', icon: Fuel },
+  { href: '/admin/tools', label: 'Tool Manager', icon: Wrench },
   { href: '/admin/sync', label: 'Sync & Logs', icon: RefreshCw },
   { href: '/admin/settings', label: 'Site Settings', icon: Settings },
 ];

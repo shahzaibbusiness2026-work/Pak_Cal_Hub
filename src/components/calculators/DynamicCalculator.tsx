@@ -291,7 +291,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         </div>
 
         {/* Right Column: Dynamic Results & Visual Breakdowns (7 cols on Desktop) */}
-        <div ref={resultsRef} className="space-y-6 lg:col-span-7" aria-live="polite" aria-atomic="false">
+        <div ref={resultsRef} className="space-y-6 lg:col-span-7 lg:sticky lg:top-24" aria-live="polite" aria-atomic="false">
           {/* Main Key Result Card */}
           <ResultCard
             primary={results.primaryResult}

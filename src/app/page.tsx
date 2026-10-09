@@ -24,6 +24,9 @@ import {
 } from 'lucide-react';
 import { CATEGORIES_DATA, ALL_CALCULATORS } from '../lib/data/categories-meta';
 import CalculatorCard from '../components/ui/CalculatorCard';
+import LiveRatesStrip from '../components/ui/LiveRatesStrip';
+import { getSiteSettings } from '../lib/cms/settings';
+import { parseToolOverrides, applyToolOverride, isToolDisabled } from '../lib/cms/overrides';
 import HeroSearch from '../components/ui/HeroSearch';
 import ArticlesSection from '../components/ui/ArticlesSection';
 import NewsletterSection from '../components/ui/NewsletterSection';
@@ -50,7 +53,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const toolOverrides = parseToolOverrides(await getSiteSettings());
+  const displayCategories = CATEGORIES_DATA.map((c) => ({
+    ...c,
+    tools: c.tools.filter((tool) => !isToolDisabled(tool.id, toolOverrides)).map((tool) => applyToolOverride(tool, toolOverrides)),
+  }));
   const DAILY_DEMAND_IDS = [
     'bps-salary-calculator',
     'income-tax-calculator',
@@ -68,7 +76,7 @@ export default function HomePage() {
 
   const dailyHighDemandTools = DAILY_DEMAND_IDS.map((id) =>
     ALL_CALCULATORS.find((c) => c.id === id)
-  ).filter(Boolean) as typeof ALL_CALCULATORS;
+  ).filter(Boolean).filter((c) => !isToolDisabled((c as any).id, toolOverrides)).map((c) => applyToolOverride(c as any, toolOverrides)) as typeof ALL_CALCULATORS;
 
   const topHeroQuickLaunch = [
     { title: 'BPS Salary 2026', subtitle: 'RBPS-2026 Net Pay & GP Fund', href: '/salary/bps-salary-calculator', badge: 'Updated 2026', color: 'emerald' },
@@ -129,6 +137,11 @@ export default function HomePage() {
                 {tag.label}
               </Link>
             ))}
+          </div>
+
+          {/* Live rates strip — today's petrol, diesel, gold, silver, USD */}
+          <div className="mt-8 -mx-4 sm:mx-0 text-left">
+            <LiveRatesStrip />
           </div>
 
           {/* ⚡ High-Visibility Quick Launch Matrix (Top 8 Daily Tools) */}
@@ -769,7 +782,7 @@ export default function HomePage() {
         </div>
 
         <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {CATEGORIES_DATA.map((cat, index) => (
+          {displayCategories.map((cat, index) => (
             <Link
               key={cat.id}
               href={`/${cat.slug}`}

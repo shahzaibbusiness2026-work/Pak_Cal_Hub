@@ -27,6 +27,8 @@ export interface SiteSettings {
   socialInstagram?: string | null;
   socialYoutube?: string | null;
   footerText?: string | null;
+  /** JSON string of tool overrides (disabled ids + title/description overrides). */
+  toolOverrides?: string | null;
 }
 
 export interface RedirectRule {

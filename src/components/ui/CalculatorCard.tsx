@@ -101,7 +101,7 @@ export default function CalculatorCard({ calc }: CalculatorCardProps) {
   return (
     <Link
       href={`/${calc.category}/${calc.slug}`}
-      className={`group relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 ${style.border}`}
+      className={`group card-hover relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 ${style.border}`}
     >
       <div>
         <div className="flex items-center justify-between">
