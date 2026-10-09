@@ -71,9 +71,15 @@ export function calculateCementRequirement(inputs: Record<string, any>): Calcula
     breakdown: [
       { label: `Covered Construction Area`, amount: `${coveredArea} sq ft` },
       { label: `Average Consumption Index`, amount: `${bagFactor} Bags / sq ft` },
+      { label: `Foundation, columns & beams (~22%)`, amount: `${Math.ceil(totalBags * 0.22).toLocaleString()} Bags` },
+      { label: `Roof slabs / RCC work (~30%)`, amount: `${Math.ceil(totalBags * 0.30).toLocaleString()} Bags` },
+      { label: `Brick masonry mortar (~18%)`, amount: `${Math.ceil(totalBags * 0.18).toLocaleString()} Bags` },
+      { label: `Plaster work (~20%)`, amount: `${Math.ceil(totalBags * 0.20).toLocaleString()} Bags` },
+      { label: `Flooring & miscellaneous (~10%)`, amount: `${Math.max(totalBags - Math.ceil(totalBags * 0.22) - Math.ceil(totalBags * 0.30) - Math.ceil(totalBags * 0.18) - Math.ceil(totalBags * 0.20), 0).toLocaleString()} Bags` },
       { label: `Total Cement Bags`, amount: `${totalBags.toLocaleString()} Bags` },
       { label: `Total Estimated Cement Budget`, amount: formatPKR(totalCost), isTotal: true },
     ],
+    notes: ['Stage shares are the standard estimator split for a residential frame (foundation/columns 22%, roof slabs 30%, masonry mortar 18%, plaster 20%, flooring/misc 10%) — useful for staged ordering so cement is not bought all at once and left to spoil.', 'For one 100 sq ft roof slab (6-inch thick, 1:2:4 mix), allow roughly 40–44 bags. Order 5% extra for wastage and never store bags directly on the floor.'],
   };
 }
 
@@ -102,8 +108,12 @@ export function calculateBricksRequirement(inputs: Record<string, any>): Calcula
       { label: 'Covered Area', amount: `${coveredArea} sq ft` },
       { label: 'Estimated Brick Count (9" & 4.5" walls)', amount: `${totalBricks.toLocaleString()} Bricks` },
       { label: 'A-Grade Rate per 1,000 Bricks', amount: `Rs. ${ratePer1000.toLocaleString()}` },
-      { label: 'Total Brick Cost', amount: formatPKR(totalCost), isTotal: true },
+      { label: 'Brick Cost', amount: formatPKR(totalCost) },
+      { label: `Mortar cement for laying (~2.2 bags per 1,000 bricks)`, amount: `${Math.ceil((totalBricks / 1000) * 2.2).toLocaleString()} Bags ≈ ${formatPKR(Math.ceil((totalBricks / 1000) * 2.2) * 1450)}` },
+      { label: `Mortar sand (~9 cft per 1,000 bricks)`, amount: `${Math.round((totalBricks / 1000) * 9).toLocaleString()} cft ≈ ${formatPKR(Math.round((totalBricks / 1000) * 9) * 65)}` },
+      { label: 'Bricks + Laying Mortar (materials)', amount: formatPKR(totalCost + Math.ceil((totalBricks / 1000) * 2.2) * 1450 + Math.round((totalBricks / 1000) * 9) * 65), isTotal: true },
     ],
+    notes: ['Mortar for 1,000 Awwal bricks (10mm joints) is about 2.2 cement bags and 9 cft sand — budgeted here at Rs 1,450/bag and Rs 65/cft so you can order everything together.', 'Rule of thumb for a single wall: a 9-inch wall takes ~13 bricks per sq ft of wall, a 4.5-inch partition ~7 per sq ft.'],
   };
 }
 
@@ -132,9 +142,14 @@ export function calculateSteelRequirement(inputs: Record<string, any>): Calculat
     breakdown: [
       { label: 'Covered Area', amount: `${coveredArea} sq ft` },
       { label: 'Steel Consumption (3.5 kg / sq ft)', amount: `${totalKg.toLocaleString()} kg` },
+      { label: `Bar #3 (10mm) — main bars ~40%`, amount: `${Math.round(totalKg * 0.40).toLocaleString()} kg ≈ ${formatPKR(totalCost * 0.40)}` },
+      { label: `Bar #4 (13mm) — beams/columns ~35%`, amount: `${Math.round(totalKg * 0.35).toLocaleString()} kg ≈ ${formatPKR(totalCost * 0.35)}` },
+      { label: `Bar #5 (16mm) — heavy members ~15%`, amount: `${Math.round(totalKg * 0.15).toLocaleString()} kg ≈ ${formatPKR(totalCost * 0.15)}` },
+      { label: `Bar #2 (6mm) — stirrups/rings ~10%`, amount: `${Math.round(totalKg * 0.10).toLocaleString()} kg ≈ ${formatPKR(totalCost * 0.10)}` },
       { label: 'Metric Tons Required', amount: `${totalTons.toFixed(3)} Tons` },
       { label: 'Total Steel Budget', amount: formatPKR(totalCost), isTotal: true },
     ],
+    notes: ['Bar-size shares follow a typical residential frame (40% 10mm, 35% 13mm, 15% 16mm, 10% stirrups). Your structural drawing governs exact cutting lists — share this split with your steel supplier for bundled pricing.', 'Add roughly 3–5% for cutting waste and laps when placing the order.'],
   };
 }
 
@@ -171,9 +186,16 @@ export function calculateTilesRequirement(inputs: Record<string, any>): Calculat
     breakdown: [
       { label: `Room Dimensions (${roomLength}ft × ${roomWidth}ft)`, amount: `${roomAreaSqFt} sq ft` },
       { label: `Tile Dimensions (${tileLengthInch}" × ${tileWidthInch}")`, amount: `${tileAreaSqFt.toFixed(2)} sq ft / tile` },
+      { label: `Tiles for floor (before wastage)`, amount: `${Math.ceil(rawTilesNeeded)} Pieces` },
       { label: `Cutting & Laying Wastage (${wastagePct}%)`, amount: `+${(totalSqFtWithWastage - roomAreaSqFt).toFixed(1)} sq ft` },
-      { label: `Total Tiles to Buy`, amount: `${totalTilesWithWastage} Pieces`, isTotal: true },
+      { label: `Total Tiles to Buy`, amount: `${totalTilesWithWastage} Pieces` },
+      { label: `Boxes to order (≈4 large tiles/box)`, amount: `${Math.ceil(totalTilesWithWastage / 4)} Boxes` },
+      { label: `Tile material cost @ Rs ${pricePerSqFt}/sq ft`, amount: formatPKR(totalCost) },
+      { label: `Adhesive/grout & spacers @ Rs 35/sq ft`, amount: formatPKR(Math.round(totalSqFtWithWastage * 35)) },
+      { label: `Laying labour @ Rs 130/sq ft`, amount: formatPKR(Math.round(totalSqFtWithWastage * 130)) },
+      { label: 'Tiles + Fixing (complete floor)', amount: formatPKR(totalCost + Math.round(totalSqFtWithWastage * 35) + Math.round(totalSqFtWithWastage * 130)), isTotal: true },
     ],
+    notes: ['Box count assumes 4 large-format tiles per box — check the tiles-per-box printed on your chosen tile before ordering, and keep one spare box for future repairs (same batch/shade).', 'Adhesive/grout (Rs 35/sq ft) and laying labour (Rs 130/sq ft) are Oct-2026 market estimates; marble and wooden flooring price very differently.'],
   };
 }
 

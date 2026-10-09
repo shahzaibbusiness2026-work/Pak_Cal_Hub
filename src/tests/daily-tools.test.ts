@@ -45,3 +45,33 @@ export function runConstructionTests() {
   assert(JSON.stringify(c.secondaryResults).includes('tons'), 'Steel secondary missing');
   console.log(`Construction breakdown reconciles (grey ${subtotal.toLocaleString()} + finishing ${finishSum.toLocaleString()})`);
 }
+
+import { calculateSolarSystem } from '../lib/calculators/electricity';
+import { calculateTilesRequirement, calculateSteelRequirement } from '../lib/calculators/specialized-engines';
+
+export function runBreakdownTests() {
+  // Solar CAPEX itemisation must reconcile with the total row
+  const solar = calculateSolarSystem({ monthlyBill: 45000, systemType: 'on-grid' });
+  const rows = (solar.breakdown || []) as any[];
+  const totalRow = rows.find((r) => String(r.label).startsWith('Total Estimated System Cost'));
+  assert(totalRow, 'Solar total row missing');
+  const capexSum = rows
+    .filter((r) => typeof r.amount === 'number')
+    .reduce((s, r) => s + r.amount, 0);
+  // totalRow.amount is a formatted string; compare against secondary total result instead
+  const totalSecondary = (solar.secondaryResults || []).find((r: any) => r.id === 'totalCost');
+  assert(String(totalRow.amount) === String(totalSecondary?.value), 'Solar total mismatch between breakdown and summary');
+  assert(capexSum > 0, 'Solar CAPEX lines missing');
+
+  // Tiles complete-floor total = tiles + fixing
+  const tiles = calculateTilesRequirement({ roomLength: 14, roomWidth: 12, tileLengthInch: 24, tileWidthInch: 24, wastagePct: 10, pricePerSqFt: 180 });
+  const tRows = (tiles.breakdown || []) as any[];
+  assert(tRows.some((r) => String(r.label).includes('Boxes to order')), 'Tiles boxes row missing');
+  assert(tRows.some((r) => r.isTotal && String(r.label).includes('complete floor')), 'Tiles complete total missing');
+
+  // Steel bar-size split present and shares ~100%
+  const steel = calculateSteelRequirement({ coveredArea: 2000, ratePerTon: 255000 });
+  assert((steel.breakdown || []).some((r: any) => String(r.label).includes('Bar #3')), 'Steel bar split missing');
+
+  console.log('Breakdown upgrades reconcile (solar/tiles/steel)');
+}

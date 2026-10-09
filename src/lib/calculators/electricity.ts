@@ -220,6 +220,24 @@ export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOut
   const licensingFee = billingRegime === 'net-billing' ? actualKw * 1000 : 0;
   const totalSystemCost = (actualKw * costPerKw) + licensingFee;
 
+  // Itemised CAPEX — anchored so the lines sum exactly to costPerKw.
+  const panelCostPerKw = 62000;
+  const inverterCostPerKw = systemType === 'on-grid' ? 28000 : systemType === 'hybrid' ? 38000 : 30000;
+  const batteryCostPerKw = systemType === 'hybrid' ? 45000 : systemType === 'off-grid' ? 73000 : 0;
+  const structureCostPerKw = 8000;
+  const wiringCostPerKw = 7000;
+  const installCostPerKw = Math.max(costPerKw - panelCostPerKw - inverterCostPerKw - batteryCostPerKw - structureCostPerKw - wiringCostPerKw, 0);
+  const panelUnitPrice = Math.round(panelCostPerKw * (panelWattage / 1000));
+  const capexRows: { label: string; amount: number }[] = [
+    { label: `Solar panels — ${panelCount} × ${panelWattage}W Tier-1 N-type @ Rs ${panelUnitPrice.toLocaleString('en-PK')}/panel`, amount: Math.round(panelCostPerKw * actualKw) },
+    { label: systemType === 'on-grid' ? `On-grid inverter (${Math.ceil(actualKw)} kW class, net-billing ready)` : systemType === 'hybrid' ? `Hybrid inverter (${Math.ceil(actualKw)} kW class)` : `Off-grid inverter (${Math.ceil(actualKw)} kW class)`, amount: Math.round(inverterCostPerKw * actualKw) },
+    ...(batteryCostPerKw > 0 ? [{ label: systemType === 'hybrid' ? 'Lithium battery backup (hybrid storage share)' : 'Battery bank (off-grid storage share)', amount: Math.round(batteryCostPerKw * actualKw) }] : []),
+    { label: 'Galvanised mounting structure', amount: Math.round(structureCostPerKw * actualKw) },
+    { label: 'DC/AC cabling, breakers & safety protection', amount: Math.round(wiringCostPerKw * actualKw) },
+    { label: 'Installation, testing & commissioning labour', amount: Math.round(installCostPerKw * actualKw) },
+    ...(licensingFee > 0 ? [{ label: 'Net-billing licence fee (@ Rs 1,000/kW)', amount: Math.round(licensingFee) }] : []),
+  ];
+
   // Savings modeling:
   // Retail grid tariff ~Rs. 48/unit
   // Net Billing buyback rate Rs. 10.20/unit (NEPRA Prosumer Regulations 2026)
@@ -267,6 +285,7 @@ export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOut
       { label: 'Expected Monthly Energy Generation', amount: `${Math.round(expectedMonthlyGeneration)} kWh (Units)` },
       { label: `Applicable Compensation Model`, detail: billingRegime === 'net-billing' ? `Net Billing (Rs ${exportBuybackRate}/unit export)` : '1:1 Grandfathered Net Metering', amount: billingRegime === 'net-billing' ? 'Net Billing' : '1:1 Offset' },
       { label: 'Annual Electricity Bill Savings', amount: formatPKR(annualSavings) },
+      ...capexRows,
       { label: 'Total Estimated System Cost (inc. Licensing)', amount: formatPKR(totalSystemCost) },
       { label: '25-Year Net Financial Benefit', amount: formatPKR(twentyFiveYearReturn), isTotal: true },
     ],
