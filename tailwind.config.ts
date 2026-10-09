@@ -32,9 +32,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Plus Jakarta Sans", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        sans: ["var(--font-sans)", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "Fira Code", "Courier New", "monospace"],
-        display: ["var(--font-sans)", "Plus Jakarta Sans", "sans-serif"],
+        display: ["var(--font-display)", "Sora", "sans-serif"],
       },
       boxShadow: {
         // Tailwind v4-style extra-small shadows used across the codebase (v3 has no shadow-xs/2xs)

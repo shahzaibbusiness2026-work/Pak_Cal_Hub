@@ -105,7 +105,7 @@ export default async function HomePage() {
           </div>
 
           {/* Main Hero Heading */}
-          <h1 className="mt-4 sm:mt-5 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="font-display mt-4 sm:mt-5 text-4xl sm:text-5xl lg:text-[64px] font-extrabold tracking-tight text-slate-900 dark:text-white">
             Pakistan Calculator{' '}
             <span className="ml-2 bg-gradient-to-r from-emerald-800 to-emerald-950 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-200">
               Hub

@@ -126,11 +126,11 @@ export default function CalculatorCard({ calc }: CalculatorCardProps) {
           </div>
         </div>
 
-        <h3 className="mt-3.5 text-sm sm:text-base font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
+        <h3 className="mt-3.5 font-display text-base sm:text-[17px] font-bold text-slate-900 group-hover:text-emerald-800 dark:text-white dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
           {calc.title}
         </h3>
 
-        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        <p className="mt-1.5 line-clamp-2 text-[13px] leading-6 text-slate-500 dark:text-slate-400">
           {calc.description}
         </p>
       </div>

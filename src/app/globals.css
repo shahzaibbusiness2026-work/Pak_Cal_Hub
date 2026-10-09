@@ -26,11 +26,20 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Refined Typography Hierarchy */
+  /* Refined Typography Hierarchy — premium editorial scale */
+  body {
+    font-size: 1.015rem;
+    line-height: 1.65;
+  }
+
   h1, h2, h3, h4, h5, h6 {
-    letter-spacing: -0.025em;
+    font-family: var(--font-display), 'Sora', sans-serif;
+    letter-spacing: -0.022em;
     text-wrap: balance;
   }
+
+  h1 { line-height: 1.12; }
+  h2 { line-height: 1.2; }
 
   p, li, blockquote {
     text-wrap: pretty;
@@ -50,11 +59,11 @@
 
   /* ── Design System: form controls ──────────────────────────── */
   .form-label {
-    @apply text-sm font-semibold text-slate-800 dark:text-slate-200;
+    @apply text-[15px] font-semibold text-slate-800 dark:text-slate-200;
   }
 
   .form-help {
-    @apply text-xs leading-relaxed text-slate-500 dark:text-slate-400;
+    @apply text-[13px] leading-relaxed text-slate-500 dark:text-slate-400;
   }
 
   .form-input {

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter, Sora, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import ThemeRegistry from '../components/ui/ThemeRegistry';
 import Navbar from '../components/layout/Navbar';
@@ -9,10 +9,24 @@ import { SITE_URL, SITE_NAME, SITE_FULL_NAME } from '../lib/site';
 import { getSiteSettings } from '../lib/cms/settings';
 import { Megaphone } from 'lucide-react';
 
-const sansFont = Plus_Jakarta_Sans({
+const sansFont = Inter({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+const displayFont = Sora({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const monoFont = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500', '700', '800'],
+  variable: '--font-mono',
   display: 'swap',
 });
 
@@ -85,7 +99,7 @@ export default async function RootLayout({
     inLanguage: 'en-PK',
   };
   return (
-    <html lang="en" className={`scroll-smooth ${sansFont.variable}`}>
+    <html lang="en" className={`scroll-smooth ${sansFont.variable} ${displayFont.variable} ${monoFont.variable}`}>
       <head>
         <script
           type="application/ld+json"
