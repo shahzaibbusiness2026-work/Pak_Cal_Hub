@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { getCategoryById, CATEGORIES_DATA } from '../../lib/data/categories-meta';
+import { getSiteSettings } from '../../lib/cms/settings';
+import { parseToolOverrides, applyToolOverride, isToolDisabled } from '../../lib/cms/overrides';
 import CalculatorCard from '../../components/ui/CalculatorCard';
 import DataSource from '../../components/ui/DataSource';
 import { ChevronRight, Home, Sparkles, ShieldCheck } from 'lucide-react';
@@ -43,8 +45,12 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   };
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
   const category = getCategoryById(params.category);
+  const toolOverrides = parseToolOverrides(await getSiteSettings());
+  const visibleTools = (category?.tools || [])
+    .filter((tool) => !isToolDisabled(tool.id, toolOverrides))
+    .map((tool) => applyToolOverride(tool, toolOverrides));
   if (!category) notFound();
 
   return (
@@ -86,7 +92,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
         </div>
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {category.tools.map((calc) => (
+          {visibleTools.map((calc) => (
             <CalculatorCard key={calc.id} calc={calc} />
           ))}
         </div>
@@ -99,7 +105,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           Official Sources & Rate Verification
         </h2>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {category.tools.map((calc) => (
+          {visibleTools.map((calc) => (
             <div key={calc.id} className="space-y-1.5">
               <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 {calc.shortTitle || calc.title}

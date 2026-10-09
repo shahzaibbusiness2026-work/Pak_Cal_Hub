@@ -10,6 +10,9 @@
 export interface ToolOverrideEntry {
   title?: string;
   description?: string;
+  /** SEO overrides applied to the tool page <title> and meta description. */
+  metaTitle?: string;
+  metaDescription?: string;
 }
 
 export interface ToolOverrides {
@@ -31,6 +34,8 @@ export function parseToolOverrides(settings: Record<string, any> | null | undefi
         titles[id] = {
           title: typeof entry?.title === 'string' ? entry.title : undefined,
           description: typeof entry?.description === 'string' ? entry.description : undefined,
+          metaTitle: typeof entry?.metaTitle === 'string' ? entry.metaTitle : undefined,
+          metaDescription: typeof entry?.metaDescription === 'string' ? entry.metaDescription : undefined,
         };
       }
     }

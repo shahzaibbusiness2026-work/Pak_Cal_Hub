@@ -46,7 +46,7 @@ export default function AdminToolsPage() {
       disabled: o.disabled.includes(id) ? o.disabled.filter((d) => d !== id) : [...o.disabled, id],
     }));
 
-  const setTitle = (id: string, patch: { title?: string; description?: string }) =>
+  const setTitle = (id: string, patch: { title?: string; description?: string; metaTitle?: string; metaDescription?: string }) =>
     setOverrides((o) => ({ ...o, titles: { ...o.titles, [id]: { ...o.titles[id], ...patch } } }));
 
   const save = async () => {
@@ -57,7 +57,7 @@ export default function AdminToolsPage() {
         disabled: overrides.disabled,
         titles: Object.fromEntries(
           Object.entries(overrides.titles).filter(
-            ([, v]) => (v.title && v.title.trim()) || (v.description && v.description.trim())
+            ([, v]) => (v.title && v.title.trim()) || (v.description && v.description.trim()) || (v.metaTitle && v.metaTitle.trim()) || (v.metaDescription && v.metaDescription.trim())
           )
         ),
       };
@@ -195,6 +195,32 @@ export default function AdminToolsPage() {
                       placeholder={tool.description}
                       className={inputCls}
                     />
+                  </label>
+                </div>
+                <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="mb-1 block text-[11px] font-bold text-slate-500">Google title (SEO) — blank = default</span>
+                    <input
+                      value={ov.metaTitle || ''}
+                      onChange={(e) => setTitle(tool.id, { metaTitle: e.target.value })}
+                      placeholder={tool.metaTitle}
+                      className={inputCls}
+                    />
+                    <span className={`mt-1 block text-[10px] font-semibold ${(ov.metaTitle || tool.metaTitle).length > 60 ? 'text-red-500' : 'text-slate-400'}`}>
+                      {(ov.metaTitle || tool.metaTitle).length}/60 characters
+                    </span>
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-[11px] font-bold text-slate-500">Google description (SEO) — blank = default</span>
+                    <input
+                      value={ov.metaDescription || ''}
+                      onChange={(e) => setTitle(tool.id, { metaDescription: e.target.value })}
+                      placeholder={tool.metaDescription}
+                      className={inputCls}
+                    />
+                    <span className={`mt-1 block text-[10px] font-semibold ${(ov.metaDescription || tool.metaDescription).length > 160 ? 'text-red-500' : 'text-slate-400'}`}>
+                      {(ov.metaDescription || tool.metaDescription).length}/160 characters
+                    </span>
                   </label>
                 </div>
               </article>

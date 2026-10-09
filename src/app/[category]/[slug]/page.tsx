@@ -31,13 +31,17 @@ export async function generateMetadata({ params }: CalculatorPageProps): Promise
   const calculator = getCalculatorBySlug(params.slug);
   if (!calculator) return { title: 'Calculator Not Found' };
 
+  const metaOverrides = parseToolOverrides(await getSiteSettings());
+  const ov = metaOverrides.titles[calculator.id];
+  const cleanTitle = (ov?.metaTitle?.trim() || calculator.metaTitle).replace(/\s*\|\s*Pak Calc Hub\s*$/, '');
+  const cleanDesc = ov?.metaDescription?.trim() || calculator.metaDescription;
   return {
-    title: { absolute: `${calculator.metaTitle.replace(/\s*\|\s*Pak Calc Hub\s*$/, '')} | Pak Calc Hub` },
-    description: calculator.metaDescription,
+    title: { absolute: `${cleanTitle} | Pak Calc Hub` },
+    description: cleanDesc,
     keywords: calculator.tags,
     openGraph: {
       title: `${calculator.title} | Pak Calc Hub`,
-      description: calculator.description,
+      description: cleanDesc,
       type: 'website',
       url: `${SITE_URL}/${calculator.category}/${calculator.slug}`,
     },
