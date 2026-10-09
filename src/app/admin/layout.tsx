@@ -128,6 +128,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 
+  // Public admin pages (sign-in, first-run setup) render on a clean page —
+  // no sidebar shell around them.
+  if (isPublicAdminPage) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-950 to-slate-900 px-4 py-10">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-950">
       {/* Mobile drawer */}
