@@ -11,8 +11,7 @@ export type CategoryId =
   | 'currency'
   | 'investment'
   | 'date-time'
-  | 'data-tools'
-  | 'overseas';
+  | 'data-tools';
 
 export interface FieldOption {
   label: string;

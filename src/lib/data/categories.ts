@@ -55,8 +55,6 @@ import {
   calculateHijriConverter,
   calculateTenantBillSplitter,
   calculatePrizeBondGuide,
-  calculateRemittanceCorridor,
-  calculatePtaTemporaryRegistration,
 } from '../calculators';
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
@@ -113,8 +111,6 @@ const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorO
   'hijri-date-converter': calculateHijriConverter,
   'tenant-bill-splitter': calculateTenantBillSplitter,
   'prize-bond-draw-checker': calculatePrizeBondGuide,
-  'remittance-corridor-calculator': calculateRemittanceCorridor,
-  'pta-temporary-registration-checker': calculatePtaTemporaryRegistration,
 };
 
 /**

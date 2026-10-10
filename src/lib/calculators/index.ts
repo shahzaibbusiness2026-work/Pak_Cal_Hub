@@ -14,4 +14,3 @@ export * from './data-tools';
 export * from './specialized-engines';
 export * from './pakistan-services';
 export * from './daily-tools';
-export * from './overseas';

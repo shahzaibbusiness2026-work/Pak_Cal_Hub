@@ -48,7 +48,6 @@ import { calculateBreakEven } from '../lib/calculators/business';
 import { calculateLoanAffordability } from '../lib/calculators/loans';
 import { calculatePropertyTax as calculatePropertyTaxUi, calculateFreelancerTax as calculateFreelancerTaxUi } from '../lib/calculators/tax';
 import { calculateTokenTax } from '../lib/calculators/vehicles';
-import { calculateRemittanceCorridor, calculatePtaTemporaryRegistration } from '../lib/calculators/overseas';
 
 import {
   syncFuelPrices,
@@ -309,24 +308,6 @@ async function runAllTests() {
 
   const freelancerOther = calculateFreelancerTaxUi({ annualIncome: 4200000, isPsebRegistered: true, remittanceChannel: 'other' });
   assert((freelancerOther.notes || []).some((n) => /non-banking inflow/i.test(n)), 'Freelancer non-banking channel triggers 154A eligibility warning');
-
-  // Overseas hub (approved 9 Oct 2026): SAR 1,000, no fees, 1% margin on the
-  // 74.80 baseline = 1,000 × 74.052 = Rs 74,052 received.
-  const remit = calculateRemittanceCorridor({ corridor: 'SAR', amount: 1000, flatFee: 0, feePercent: 0, marginPercent: 1 });
-  assert(String(remit.primaryResult.value).includes('74,052'), 'Remittance SAR 1000 @1% margin on baseline 74.80 = Rs 74,052');
-  const remitFee = calculateRemittanceCorridor({ corridor: 'SAR', amount: 1000, flatFee: 20, feePercent: 1, marginPercent: 0 });
-  assert(String(remitFee.secondaryResults?.find((r) => r.id === 'perThousand')?.value).includes('72,'), 'Remittance flat+percent fees reduce the per-1000 received amount');
-  const remitLive = calculateRemittanceCorridor({ corridor: 'USD', amount: 100, flatFee: 0, feePercent: 0, marginPercent: 0, liveFxRates: { USD: 300 } });
-  assert(String(remitLive.primaryResult.value).includes('30,000') && (remitLive.notes || []).some((n) => /Live mid-market/i.test(n)), 'Remittance uses injected live FX rates when provided');
-
-  // PTA 120-day: arrival counts as day 1, so 2026-01-01 arrival -> day 120 = 2026-04-30.
-  const pta120 = calculatePtaTemporaryRegistration({ arrivalDate: '2026-01-01', departureDate: '2026-03-01' });
-  assert(String(pta120.primaryResult.value) === '30 Apr 2026', 'PTA day 120 for 1 Jan 2026 arrival is 30 Apr 2026 (arrival = day 1)');
-  assert(String(pta120.secondaryResults?.find((r) => r.id === 'tripFit')?.value).includes('Fits inside'), 'PTA 60-day trip fits inside the 120-day window');
-  const ptaLong = calculatePtaTemporaryRegistration({ arrivalDate: '2026-01-01', departureDate: '2026-06-01' });
-  assert(String(ptaLong.secondaryResults?.find((r) => r.id === 'tripFit')?.value).includes('Longer than 120'), 'PTA trip over 120 days is flagged for permanent registration');
-  const ptaEmpty = calculatePtaTemporaryRegistration({ arrivalDate: '' });
-  assert(String(ptaEmpty.primaryResult.value).includes('arrival date'), 'PTA checker asks for an arrival date instead of guessing');
 
 
   console.log('\n======================================================');
