@@ -55,10 +55,8 @@ import {
   calculateHijriConverter,
   calculateTenantBillSplitter,
   calculatePrizeBondGuide,
-  calculateYouTubeEarnings,
-  calculateYouTubeTagGenerator,
-  calculateYouTubeDescriptionGenerator,
-  calculateBestTimeToPost,
+  calculateRemittanceCorridor,
+  calculatePtaTemporaryRegistration,
 } from '../calculators';
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
@@ -115,10 +113,8 @@ const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorO
   'hijri-date-converter': calculateHijriConverter,
   'tenant-bill-splitter': calculateTenantBillSplitter,
   'prize-bond-draw-checker': calculatePrizeBondGuide,
-  'youtube-earnings-estimator': calculateYouTubeEarnings,
-  'youtube-tag-generator': calculateYouTubeTagGenerator,
-  'youtube-description-generator': calculateYouTubeDescriptionGenerator,
-  'best-time-to-post-youtube': calculateBestTimeToPost,
+  'remittance-corridor-calculator': calculateRemittanceCorridor,
+  'pta-temporary-registration-checker': calculatePtaTemporaryRegistration,
 };
 
 /**

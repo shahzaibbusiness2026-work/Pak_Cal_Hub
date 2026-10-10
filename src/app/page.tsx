@@ -146,7 +146,7 @@ export default async function HomePage() {
             {[
               { label: 'Top Tools', href: '#quick-launch' },
               { label: 'New & Trending', href: '#daily-demand' },
-              { label: `All ${CATEGORIES_DATA.length} Categories`, href: '#categories' },
+              { label: 'All 13 Categories', href: '#categories' },
               { label: 'Guides & Blog', href: '/blog' },
             ].map((tag) => (
               <Link

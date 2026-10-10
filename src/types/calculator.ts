@@ -12,7 +12,7 @@ export type CategoryId =
   | 'investment'
   | 'date-time'
   | 'data-tools'
-  | 'creator-tools';
+  | 'overseas';
 
 export interface FieldOption {
   label: string;

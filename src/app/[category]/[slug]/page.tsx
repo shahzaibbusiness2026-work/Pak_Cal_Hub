@@ -5,9 +5,6 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { getCalculatorBySlug, getCategoryById, ALL_CALCULATORS } from '../../../lib/data/categories-meta';
 import DynamicCalculator from '../../../components/calculators/DynamicCalculator';
-import YouTubeTagGenerator from '../../../components/creator-tools/YouTubeTagGenerator';
-import YouTubeDescriptionGenerator from '../../../components/creator-tools/YouTubeDescriptionGenerator';
-import BestTimeToPost from '../../../components/creator-tools/BestTimeToPost';
 import DataSource from '../../../components/ui/DataSource';
 import { getSiteSettings } from '../../../lib/cms/settings';
 import { parseToolOverrides, applyToolOverride, isToolDisabled } from '../../../lib/cms/overrides';
@@ -22,14 +19,6 @@ interface CalculatorPageProps {
     slug: string;
   };
 }
-
-/** Tools with bespoke interactive UIs (DynamicCalculator can't render text/textarea
- *  inputs), keyed by tool id. Admin visibility + SEO overrides still apply. */
-const CUSTOM_TOOL_RENDERERS: Record<string, React.ComponentType> = {
-  'youtube-tag-generator': YouTubeTagGenerator,
-  'youtube-description-generator': YouTubeDescriptionGenerator,
-  'best-time-to-post-youtube': BestTimeToPost,
-};
 
 export async function generateStaticParams() {
   return ALL_CALCULATORS.map((calc) => ({
@@ -191,10 +180,7 @@ export default async function CalculatorPage({ params }: CalculatorPageProps) {
             </p>
           </div>
         ) : (
-          (() => {
-            const CustomTool = CUSTOM_TOOL_RENDERERS[baseCalculator.id];
-            return CustomTool ? <CustomTool /> : <DynamicCalculator slug={calculator.slug} />;
-          })()
+          <DynamicCalculator slug={calculator.slug} />
         )}
 
         {/* Official sources & rate verification for this calculator */}

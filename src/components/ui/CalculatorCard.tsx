@@ -17,7 +17,6 @@ import {
   Calculator,
   ShieldCheck,
   Award,
-  Youtube,
 } from 'lucide-react';
 import type { CalculatorMeta } from '../../lib/data/categories-meta';
 import { CATEGORIES_DATA } from '../../lib/data/categories-meta';
@@ -87,12 +86,6 @@ const categoryStyleMap: Record<string, { icon: React.ReactNode; bg: string; text
     bg: 'bg-green-50 dark:bg-green-950/60',
     text: 'text-green-800 dark:text-green-300',
     border: 'hover:border-green-600/50',
-  },
-  'creator-tools': {
-    icon: <Youtube className="h-5 w-5" />,
-    bg: 'bg-rose-50 dark:bg-rose-950/60',
-    text: 'text-rose-700 dark:text-rose-300',
-    border: 'hover:border-rose-600/50',
   },
 };
 

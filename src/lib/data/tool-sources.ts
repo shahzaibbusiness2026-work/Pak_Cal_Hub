@@ -452,46 +452,6 @@ const ENTRIES: ToolSourceEntry[] = [
     rateKeys: [],
     note: 'This page never publishes winning numbers — always verify in the official National Savings result.',
   },
-  {
-    toolId: 'youtube-earnings-estimator',
-    sources: [
-      { name: 'Aggregated 2026 creator-economy CPM benchmarks', description: 'US niche CPM ranges compiled from published 2026 industry reports; country multipliers are relative advertiser-demand estimates, not official rates' },
-    ],
-    ratesStatus: 'verify',
-    ratesVerifiedOn: '2026-10-10',
-    rateKeys: ['youtube-cpm-2026'],
-    note: 'Rough estimate, not a guarantee — actual RPM varies by season, watch time, video length and ad demand.',
-  },
-  {
-    toolId: 'youtube-tag-generator',
-    sources: [
-      { name: 'YouTube Studio tags field (500-character limit)', description: 'Tags are a minor ranking signal; title, description and watch time matter far more' },
-    ],
-    ratesStatus: 'verify',
-    ratesVerifiedOn: '2026-10-10',
-    rateKeys: [],
-    note: 'Template-based suggestions generated in your browser — no data leaves your device.',
-  },
-  {
-    toolId: 'youtube-description-generator',
-    sources: [
-      { name: 'YouTube Creator Academy metadata best practices', description: 'Hook-first descriptions with keywords, chapters and CTAs' },
-    ],
-    ratesStatus: 'verify',
-    ratesVerifiedOn: '2026-10-10',
-    rateKeys: [],
-    note: 'Template-built from your own inputs — personalize the hook and key points for best results.',
-  },
-  {
-    toolId: 'best-time-to-post-youtube',
-    sources: [
-      { name: 'Aggregated 2026 creator posting-time studies', description: 'General benchmarks; your own YouTube Studio Audience tab always beats a generic heatmap' },
-    ],
-    ratesStatus: 'verify',
-    ratesVerifiedOn: '2026-10-10',
-    rateKeys: [],
-    note: 'Generic guidance — check YouTube Studio → Analytics → Audience for your channel’s real peak hours.',
-  },
 ];
 
 const BY_ID: Record<string, ToolSourceEntry> = Object.fromEntries(
