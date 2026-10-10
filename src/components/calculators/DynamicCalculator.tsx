@@ -117,7 +117,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       return { primaryResult: { id: 'not-found', label: 'Calculator not found', value: '', type: 'text' as const } };
     }
     try {
-      return calculator.id === 'pkr-currency-converter' && liveFxRates
+      return (calculator.id === 'pkr-currency-converter' || calculator.id === 'youtube-earnings-estimator') && liveFxRates
         ? calculator.calculate({ ...inputs, liveFxRates })
         : calculator.calculate(inputs);
     } catch (err) {

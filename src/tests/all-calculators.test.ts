@@ -48,6 +48,12 @@ import { calculateBreakEven } from '../lib/calculators/business';
 import { calculateLoanAffordability } from '../lib/calculators/loans';
 import { calculatePropertyTax as calculatePropertyTaxUi, calculateFreelancerTax as calculateFreelancerTaxUi } from '../lib/calculators/tax';
 import { calculateTokenTax } from '../lib/calculators/vehicles';
+import {
+  calculateYouTubeEarnings,
+  generateYouTubeTags,
+  buildYouTubeDescription,
+  getBestTimeGrid,
+} from '../lib/calculators/creator-tools';
 
 import {
   syncFuelPrices,
@@ -309,6 +315,49 @@ async function runAllTests() {
   const freelancerOther = calculateFreelancerTaxUi({ annualIncome: 4200000, isPsebRegistered: true, remittanceChannel: 'other' });
   assert((freelancerOther.notes || []).some((n) => /non-banking inflow/i.test(n)), 'Freelancer non-banking channel triggers 154A eligibility warning');
 
+
+  // 13. CREATOR TOOLS — YouTube earnings estimator, tag/description/best-time (10 Oct 2026)
+  console.log('\n--- 13. Creator Tools (YouTube) ---');
+
+  // Long-form: 100k views, finance, global mix (0.5x), 55% share
+  // low = 100 × 12 × 0.5 × 0.55 = $330 ; high = 100 × 22 × 0.5 × 0.55 = $605
+  const ytLong = calculateYouTubeEarnings({ monthlyViews: 100000, contentType: 'longform', niche: 'finance', audienceCountry: 'global', currency: 'USD' });
+  assert(String(ytLong.primaryResult.value).includes('$330') && String(ytLong.primaryResult.value).includes('$605'), 'YouTube earnings: 100k finance/global long-form = $330 – $605/mo');
+  assert(String(ytLong.secondaryResults?.find((r) => r.id === 'per1k')?.value).includes('$3.3'), 'YouTube earnings: per-1k range starts at $3.3 (12 × 0.5 × 0.55)');
+
+  // PKR with injected live FX: 330 × 300 = Rs 99,000
+  const ytPkr = calculateYouTubeEarnings({ monthlyViews: 100000, contentType: 'longform', niche: 'finance', audienceCountry: 'global', currency: 'PKR', liveFxRates: { USD: 300 } });
+  assert(String(ytPkr.primaryResult.value).includes('99,000'), 'YouTube earnings PKR uses injected live FX (330 × 300 = Rs 99,000)');
+  assert((ytPkr.notes || []).some((n) => /live USD\/PKR/i.test(n)), 'YouTube earnings PKR discloses the live rate used');
+
+  // Pakistan audience multiplier: 100k gaming, Pakistan (0.1x)
+  // low = 100 × 1 × 0.1 × 0.55 = $5.50 ; high = 100 × 5 × 0.1 × 0.55 = $27.50
+  const ytPk = calculateYouTubeEarnings({ monthlyViews: 100000, contentType: 'longform', niche: 'gaming', audienceCountry: 'pakistan', currency: 'USD' });
+  assert(String(ytPk.primaryResult.value).includes('$5.5') && String(ytPk.primaryResult.value).includes('$28'), 'YouTube earnings: Pakistan gaming audience = $5.5 – $28/mo');
+
+  // Shorts: 1M views, global → low = 1000 × 0.03 × 0.5 = $15 ; high = 1000 × 0.15 × 0.5 = $75
+  const ytShorts = calculateYouTubeEarnings({ monthlyViews: 1000000, contentType: 'shorts', niche: 'finance', audienceCountry: 'global', currency: 'USD' });
+  assert(String(ytShorts.primaryResult.value).includes('$15') && String(ytShorts.primaryResult.value).includes('$75'), 'YouTube Shorts: 1M global views = $15 – $75/mo (30–100x less than long-form)');
+  assert((ytShorts.notes || []).some((n) => /30–100× less/i.test(n)), 'Shorts result carries the 30–100x honesty note');
+
+  // Tag generator: 10 tags, deduped, includes the raw keyword; shorts mode adds #shorts
+  const tags = generateYouTubeTags('home workout', 'video', 10);
+  assert(tags.tags.length === 10 && tags.tags[0] === 'home workout', 'Tag generator returns exactly 10 tags starting with the keyword');
+  assert(tags.totalChars === tags.tags.join(',').length, 'Tag char counter matches joined tags');
+  const tagsShorts = generateYouTubeTags('home workout', 'shorts', 15);
+  assert(tagsShorts.hashtags.some((h) => h.toLowerCase() === '#shorts'), 'Shorts mode includes #shorts hashtag');
+  assert(generateYouTubeTags('', 'video', 10).tags.length === 0, 'Empty keyword yields no tags (no fabricated output)');
+
+  // Description builder: hook + chapters + hashtags present when enabled
+  const desc = buildYouTubeDescription({ title: 'Test Title', keyword: 'home workout', keyPoints: ['Warm up', 'Squats'], tone: 'friendly', includeChapters: true, includeHashtags: true, cta: 'subscribe' });
+  assert(desc.includes('Test Title') && desc.includes('home workout'), 'Description includes title and keyword');
+  assert(desc.includes('00:00 Intro') && desc.includes('02:00 Warm up'), 'Description chapters get placeholder timestamps');
+  assert(desc.includes('#homeWorkout'), 'Description hashtags use camelCase keyword');
+
+  // Best-time grid: 7 days × 4 slots, non-empty recommendation
+  const grid = getBestTimeGrid('pkt', 'gaming', 'longform');
+  assert(grid.days.length === 7 && grid.days.every((d) => d.slots.length === 4), 'Best-time grid is 7 days × 4 slots');
+  assert(grid.recommendation.includes('PKT') && grid.recommendation.length > 40, 'Best-time recommendation names the timezone');
 
   console.log('\n======================================================');
   runDailyToolsTests();
