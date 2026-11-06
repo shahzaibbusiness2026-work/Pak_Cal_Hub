@@ -16,14 +16,18 @@ export interface LiveRatesPayload {
   fx: Record<string, number>;
   /** ISO timestamp of the freshest rate in the payload. */
   asOf: string;
+  asOfByRate: Record<string, string>;
   /** Provenance per rate key. */
   sources: Record<string, string>;
   /** True when at least one rate was published by the live-sync pipeline. */
   live: boolean;
+  liveByRate: Record<string, boolean>;
 }
 
 /** Optional live overlay applied over DB/fallback values (used by the route after an upstream fetch). */
 export interface LiveRatesOverlay {
+  liveByRate?: Record<string, boolean>;
+  asOfByRate?: Record<string, string>;
   petrol?: number;
   diesel?: number;
   gold24kTola?: number;
@@ -37,11 +41,11 @@ export const LIVE_RATES_FALLBACKS: Record<
   'petrol' | 'diesel' | 'gold24kTola' | 'silverTola' | 'usdPkr',
   number
 > = {
-  petrol: 392.76,
-  diesel: 399.64,
-  gold24kTola: 440636,
-  silverTola: 6528,
-  usdPkr: 277.1,
+  petrol: 362.00,
+  diesel: 387.81,
+  gold24kTola: 435636,
+  silverTola: 5763,
+  usdPkr: 276.7040,
 };
 
 /** Pure shape builder — unit-tested without network or DB. */
@@ -49,13 +53,11 @@ export function buildLiveRatesResponse(rates: MarketRateRecord[], overlay?: Live
   const byKey = new Map(rates.map((r) => [r.key, r]));
   const pick = (key: string, fallback: number): { value: number; source: string; at: string } => {
     const r = byKey.get(key);
-    const at = r?.verifiedAt
-      ? new Date(r.verifiedAt).toISOString()
-      : r?.updatedAt
-        ? new Date(r.updatedAt).toISOString()
-        : new Date(0).toISOString();
+    const fallbackDates: Record<string, string> = { petrol: '2026-11-05', diesel: '2026-11-05', gold_24k_tola: '2026-11-05', silver_tola: '2026-11-05', usd_pkr: '2026-11-04' };
+    const candidateDate = r?.verifiedAt || r?.updatedAt || fallbackDates[key];
+    const at = candidateDate && Number.isFinite(new Date(candidateDate).getTime()) ? new Date(candidateDate).toISOString() : new Date(0).toISOString();
     return {
-      value: r && Number.isFinite(r.value) ? r.value : fallback,
+      value: r && Number.isFinite(r.value) && r.value > 0 ? r.value : fallback,
       source: r?.source || 'Manually verified fallback constant',
       at,
     };
@@ -74,7 +76,7 @@ export function buildLiveRatesResponse(rates: MarketRateRecord[], overlay?: Live
   const fx: Record<string, number> = { PKR: 1 };
   for (const code of FXCODES) {
     const stored = byKey.get(`${code.toLowerCase()}_pkr`);
-    if (stored && Number.isFinite(stored.value)) fx[code] = stored.value;
+    if (stored && Number.isFinite(stored.value) && stored.value > 0) fx[code] = stored.value;
   }
   if (!fx.USD) fx.USD = fxUsd.value;
   if (overlay?.fx) {
@@ -84,8 +86,9 @@ export function buildLiveRatesResponse(rates: MarketRateRecord[], overlay?: Live
   }
   if (overlay?.usdPkr && Number.isFinite(overlay.usdPkr)) fx.USD = overlay.usdPkr;
 
-  const asOf = [petrol.at, diesel.at, gold.at, silver.at, fxUsd.at].sort().reverse()[0];
-  const live = rates.some(
+  const overlayDates = Object.values(overlay?.asOfByRate || {}).filter((value) => Number.isFinite(Date.parse(value))).map((value) => new Date(value).toISOString());
+  const asOf = [petrol.at, diesel.at, gold.at, silver.at, fxUsd.at, ...overlayDates].sort().reverse()[0];
+  const live = overlay?.liveByRate ? Object.values(overlay.liveByRate).some(Boolean) : rates.some(
     (r) =>
       ['petrol', 'diesel', 'gold_24k_tola', 'silver_tola'].includes(r.key) &&
       r.updatedBy === 'live-sync'
@@ -101,6 +104,7 @@ export function buildLiveRatesResponse(rates: MarketRateRecord[], overlay?: Live
     usdPkr: num(overlay?.usdPkr, fxUsd.value),
     fx,
     asOf,
+    asOfByRate: { petrol: petrol.at, diesel: diesel.at, gold24kTola: gold.at, silverTola: silver.at, usdPkr: fxUsd.at, ...overlay?.asOfByRate },
     sources: {
       petrol: overlay?.sources?.petrol || petrol.source,
       diesel: overlay?.sources?.diesel || diesel.source,
@@ -109,5 +113,6 @@ export function buildLiveRatesResponse(rates: MarketRateRecord[], overlay?: Live
       usdPkr: overlay?.sources?.usdPkr || fxUsd.source,
     },
     live,
+    liveByRate: overlay?.liveByRate || {},
   };
 }

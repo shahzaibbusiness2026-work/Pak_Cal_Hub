@@ -7,9 +7,9 @@ import { CalculatorOutput } from '../../types/calculator';
 export function calculateFuelCost(inputs: Record<string, any>): CalculatorOutput {
   const distanceKm = safeNumber(inputs.distanceKm, 380); // e.g. Lahore to Islamabad
   const fuelAverageKmPerLiter = safeNumber(inputs.fuelAverageKmPerLiter, 14.5); // 14.5 km/L
-  // Petroleum Division / OGRA notified RON-92 Motor Spirit price (3 Oct 2026 notification): Rs. 392.76/L
+  // Petroleum Division / OGRA notified RON-92 Motor Spirit price (5 Nov 2026 notification): Rs. 362.00/L
   // Source of truth: src/lib/sync/fuel.ts LATEST_FEED_FUEL (manually verified 2026-10-04)
-  const fuelPricePerLiter = safeNumber(inputs.fuelPricePerLiter, 392.76);
+  const fuelPricePerLiter = safeNumber(inputs.fuelPricePerLiter, 362.00);
   const roundTrip = inputs.roundTrip === true;
 
   const effectiveDistance = roundTrip ? distanceKm * 2 : distanceKm;
@@ -40,7 +40,7 @@ export function calculateFuelCost(inputs: Record<string, any>): CalculatorOutput
       { label: 'Total Estimated Fuel Expense', amount: formatPKR(totalFuelCost), isTotal: true },
     ],
     notes: [
-      "Default price: Rs. 392.76/L for RON-92 Motor Spirit per the Petroleum Division / OGRA notification of 3 October 2026 (see src/lib/sync/fuel.ts). Enter today's pump price for the most accurate estimate.",
+      "Default price: Rs. 362.00/L for RON-92 Motor Spirit per the Petroleum Division / OGRA notification of 5 November 2026 (see src/lib/sync/fuel.ts). Enter today's pump price for the most accurate estimate.",
     ],
   };
 }

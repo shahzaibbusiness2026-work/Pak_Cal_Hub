@@ -1,5 +1,6 @@
 import { formatPKR, formatPercent, safeNumber, formatNumber } from '../utils/formatters';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
+import { invalidInput } from './validation';
 
 /**
  * Calculates Loan Monthly Installment (EMI), Total Markup & Amortization Schedule
@@ -10,7 +11,8 @@ export function calculateLoanEmi(inputs: Record<string, any>): CalculatorOutput 
   const tenureYears = safeNumber(inputs.tenureYears, 5); // 5 years
   const isIslamic = inputs.loanType === 'islamic'; // Diminishing Musharakah vs Conventional
 
-  const totalMonths = tenureYears * 12;
+  const totalMonths = Math.round(tenureYears * 12);
+  if (totalMonths < 1 || totalMonths > 1200 || loanAmount < 0 || annualInterestRate < 0) return invalidInput('Enter a non-negative loan and rate, with a tenure between 1 and 1,200 months.');
   const monthlyRate = annualInterestRate / (12 * 100);
 
   // EMI formula: [P * r * (1 + r)^n] / [(1 + r)^n - 1]
@@ -18,9 +20,7 @@ export function calculateLoanEmi(inputs: Record<string, any>): CalculatorOutput 
   if (monthlyRate === 0) {
     monthlyEmi = loanAmount / totalMonths;
   } else {
-    monthlyEmi =
-      (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) /
-      (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    monthlyEmi = loanAmount * monthlyRate / -Math.expm1(-totalMonths * Math.log1p(monthlyRate));
   }
 
   const totalPayment = monthlyEmi * totalMonths;
@@ -30,10 +30,11 @@ export function calculateLoanEmi(inputs: Record<string, any>): CalculatorOutput 
   let balance = loanAmount;
   const schedule: Array<{ period: number; payment: number; principal: number; interest: number; balance: number }> = [];
 
-  for (let year = 1; year <= tenureYears; year++) {
+  for (let year = 1; year <= Math.ceil(totalMonths / 12); year++) {
     let yearPrincipal = 0;
     let yearInterest = 0;
-    for (let m = 1; m <= 12; m++) {
+    const monthsInYear = Math.min(12, totalMonths - (year - 1) * 12);
+    for (let m = 1; m <= monthsInYear; m++) {
       const interestForMonth = balance * monthlyRate;
       const principalForMonth = monthlyEmi - interestForMonth;
       yearPrincipal += principalForMonth;
@@ -42,7 +43,7 @@ export function calculateLoanEmi(inputs: Record<string, any>): CalculatorOutput 
     }
     schedule.push({
       period: year,
-      payment: Math.round(monthlyEmi * 12),
+      payment: Math.round(monthlyEmi * monthsInYear),
       principal: Math.round(yearPrincipal),
       interest: Math.round(yearInterest),
       balance: Math.round(balance),

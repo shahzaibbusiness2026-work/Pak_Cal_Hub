@@ -21,9 +21,9 @@ export const RATTI_PER_TOLA = 96;
 export const GRAMS_PER_TROY_OUNCE = 31.1035;
 
 // DB-verified default market rates (PKR) — see dataProvider DEFAULT_MARKET_RATES.
-// Manually verified 2026-10-04 (APSGJA rates reported 2 Oct 2026).
-export const DEFAULT_GOLD_24K_PER_TOLA = 440636;
-export const DEFAULT_SILVER_PER_TOLA = 6528;
+// APGJSA rates reported by UrduPoint on 5 Nov 2026; bundled reference only.
+export const DEFAULT_GOLD_24K_PER_TOLA = 435636;
+export const DEFAULT_SILVER_PER_TOLA = 5763;
 export const DEFAULT_MAKING_CHARGES_PER_GRAM = 2500;
 
 /** Sync getters so other modules can reuse the single source without importing raw constants. */

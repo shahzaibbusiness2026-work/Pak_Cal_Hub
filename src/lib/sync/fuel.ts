@@ -17,11 +17,11 @@ import { fetchLiveFuel, LiveFuelResult } from './live/fuelLive';
  *
  * CNG has no live source and remains a manually verified constant.
  */
-export const FUEL_VERIFIED_ON = '2026-10-04';
+export const FUEL_VERIFIED_ON = '2026-11-05';
 
 export const LATEST_FEED_FUEL = [
-  { key: 'petrol', label: 'Petrol (Super RON-92)', value: 392.76, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (3 Oct 2026) — manually verified', sourceUrl: 'https://ogra.org.pk' },
-  { key: 'diesel', label: 'High Speed Diesel (HSD)', value: 399.64, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (3 Oct 2026) — manually verified', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'petrol', label: 'Petrol (Super RON-92)', value: 362.00, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (5 Nov 2026) — manually verified', sourceUrl: 'https://ogra.org.pk' },
+  { key: 'diesel', label: 'High Speed Diesel (HSD)', value: 387.81, unit: 'PKR / Litre', source: 'Petroleum Division & OGRA Notification (5 Nov 2026) — manually verified', sourceUrl: 'https://ogra.org.pk' },
   { key: 'cng', label: 'CNG (Region I/II)', value: 215.00, unit: 'PKR / kg', source: 'All Pakistan CNG Association (APCNGA) — manually verified', sourceUrl: 'https://apcnga.org.pk' },
 ];
 

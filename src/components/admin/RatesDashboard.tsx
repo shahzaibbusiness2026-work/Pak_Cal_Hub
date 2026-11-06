@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Database,
   ShieldCheck,
@@ -116,7 +116,7 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
   const [syncInProgress, setSyncInProgress] = useState<string | null>(null);
 
   // Load Status and Rates
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [healthRes, ratesRes, autoRes] = await Promise.all([
@@ -151,11 +151,11 @@ export default function RatesDashboard({ defaultTab = 'rates' }: { defaultTab?: 
     } finally {
       setLoading(false);
     }
-  };
+  }, [secretKey]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleConnectSupabase = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -10,7 +10,7 @@ export function getPensionRules(government: GovernmentType = 'federal'): Pension
 }
 
 export function getCommutationFactor(age: number): number {
-  const boundedAge = Math.min(Math.max(Math.round(age), 45), 65);
+  const boundedAge = Math.min(Math.max(Math.round(age), 45), 66);
   const entry = COMMUTATION_TABLE.find((item) => item.age === boundedAge);
-  return entry ? entry.factor : 8.48; // fallback to age 60 standard factor
+  return entry ? entry.factor : 12.3719; // Official age-next-birthday 60 reference.
 }

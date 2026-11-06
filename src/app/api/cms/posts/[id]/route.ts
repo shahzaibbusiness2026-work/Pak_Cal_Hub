@@ -4,7 +4,8 @@ import { requireAdmin, adminErrorResponse } from '../../../../../lib/cms/auth';
 import { SupabaseNotConfigured } from '../../../../../lib/supabase/admin';
 
 // GET /api/cms/posts/[id] — admin sees any status; public sees published only
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params: pendingParams }: { params: Promise<{ id: string }> }) {
+  const params = await pendingParams;
   const check = await requireAdmin();
   const post = await getPostById(params.id);
   if (!post) return NextResponse.json({ error: 'not-found' }, { status: 404 });
@@ -19,7 +20,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 // PATCH /api/cms/posts/[id] (admin)
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params: pendingParams }: { params: Promise<{ id: string }> }) {
+  const params = await pendingParams;
   const check = await requireAdmin();
   if (!check.ok) {
     const { status, body } = adminErrorResponse(check.reason);
@@ -39,7 +41,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 // DELETE /api/cms/posts/[id] (admin)
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params: pendingParams }: { params: Promise<{ id: string }> }) {
+  const params = await pendingParams;
   const check = await requireAdmin();
   if (!check.ok) {
     const { status, body } = adminErrorResponse(check.reason);

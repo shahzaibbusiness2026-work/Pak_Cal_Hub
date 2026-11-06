@@ -14,10 +14,10 @@ import CalculatorCard from '../../../components/ui/CalculatorCard';
 import { ChevronRight, Home, ShieldCheck, Sparkles, BookOpen, HelpCircle, Calendar, FileText, CheckCircle2 } from 'lucide-react';
 
 interface CalculatorPageProps {
-  params: {
+  params: Promise<{
     category: string;
     slug: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -27,7 +27,8 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: CalculatorPageProps): Promise<Metadata> {
+export async function generateMetadata({ params: pendingParams }: CalculatorPageProps): Promise<Metadata> {
+  const params = await pendingParams;
   const calculator = getCalculatorBySlug(params.slug);
   if (!calculator) return { title: 'Calculator Not Found' };
 
@@ -51,11 +52,12 @@ export async function generateMetadata({ params }: CalculatorPageProps): Promise
   };
 }
 
-export default async function CalculatorPage({ params }: CalculatorPageProps) {
+export default async function CalculatorPage({ params: pendingParams }: CalculatorPageProps) {
+  const params = await pendingParams;
   const baseCalculator = getCalculatorBySlug(params.slug);
   const category = getCategoryById(params.category);
 
-  if (!baseCalculator || !category) notFound();
+  if (!baseCalculator || !category || baseCalculator.category !== category.id) notFound();
 
   // Admin-managed overrides (hide + public label changes) — degrades to the
   // static catalogue when site settings are unavailable.

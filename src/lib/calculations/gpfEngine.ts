@@ -18,10 +18,10 @@ export function calculateGPF(inputs: GpfEngineInputs): CalculatorOutput {
   const budgetYear: BudgetYear = (inputs.year as BudgetYear) || '2026-27';
   const gpfConfig = getGpfConfig(budgetYear);
   const openingBalance = Math.max(safeNumber(inputs.openingBalance, 500000), 0);
-  const monthlySubscription = Math.max(safeNumber(inputs.monthlySubscription, 8000), 100);
+  const monthlySubscription = Math.max(safeNumber(inputs.monthlySubscription, 8000), 0);
   const years = Math.min(Math.max(safeNumber(inputs.years, 5), 1), 35);
   const customRate = safeNumber(inputs.interestRate, -1);
-  const rate = customRate > 0 ? customRate : gpfConfig.profitRate;
+  const rate = customRate >= 0 ? customRate : gpfConfig.profitRate;
 
   let balance = openingBalance;
   let totalDeposited = openingBalance;
@@ -80,7 +80,7 @@ export function calculateGPF(inputs: GpfEngineInputs): CalculatorOutput {
     notes: [
       // Finance Division No.8(1)GS-I/2018 dated 31-07-2025: FY2024-25 GP Fund mark-up = 12.46%
       // (FY2023-24: 13.97%, FY2022-23: 14.22%).
-      `Official Finance Division Notification rate: ${rate.toFixed(2)}% per annum.`,
+      `Projection rate: ${rate.toFixed(2)}% per annum${customRate >= 0 ? ' (entered assumption)' : budgetYear === '2026-27' ? ' (previous-year benchmark, not a notified FY2026-27 rate)' : ' (selected-year reference)'}.`,
       `Interest credited annually on monthly progressive balances (6.5-month average on yearly subscriptions).`,
       ...(budgetYear === '2026-27'
         ? ['FY2026-27 rate is provisional - verify against the Finance Division notification.']

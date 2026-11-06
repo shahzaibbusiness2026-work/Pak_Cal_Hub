@@ -108,7 +108,7 @@ export function calculateInflation(inputs: Record<string, any>): CalculatorOutpu
       { label: `Residual Purchasing Value of ${formatPKR(currentAmount)}`, amount: formatPKR(futurePurchasingPower), isTotal: true },
     ],
     notes: [
-      'Default inflation rate: 9.0% based on PBS/SBP Headline CPI for July 2026 (significantly lower than the 2023 peak of ~38%).',
+      'The default 9.0% inflation is a planning assumption, not a current PBS observation or forecast. Enter the inflation scenario you want to model.',
       'Enter a custom rate to model different inflation scenarios. Historical Pakistan average: ~8–12% per year.',
     ],
   };

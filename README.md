@@ -163,3 +163,21 @@ Test coverage includes:
 
 ## 📄 License
 This project is licensed under the MIT License.
+
+
+## Review and verification
+
+The GitHub project was imported and reviewed on 6 November 2026. See [the review report](docs/calculator-review-2026-11-06.md) for corrected formulas, live-rate behavior, sources and limitations. Use Node.js 24 (matching CI).
+
+```bash
+npm ci
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm run test:live
+# For production HTTP checks, run npm start -- --port 3100 in a second terminal:
+npm run test:routes
+```
+
+Market APIs report per-rate source dates and live/fallback status. Gold prices from the live feed are indicative spot/FX conversions; retail Sarafa quotes can differ.

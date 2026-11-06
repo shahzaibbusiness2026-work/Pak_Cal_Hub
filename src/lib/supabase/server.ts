@@ -29,9 +29,9 @@ export function getSupabasePublic(): SupabaseClient<any> {
  * Carries the user's session via cookies (anon key; RLS applies).
  * @throws {SupabaseNotConfigured} when env vars are missing.
  */
-export function getSupabaseServer(): SupabaseClient<any> {
+export async function getSupabaseServer(): Promise<SupabaseClient<any>> {
   const { url, anonKey } = envOrThrow();
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   return createServerClient(url, anonKey, {
     cookies: {
       getAll() {
@@ -54,7 +54,7 @@ export function getSupabaseServer(): SupabaseClient<any> {
 /** Returns the currently signed-in user, or null (never throws on missing config). */
 export async function getSupabaseUser() {
   try {
-    const supabase = getSupabaseServer();
+    const supabase = await getSupabaseServer();
     const {
       data: { user },
     } = await supabase.auth.getUser();

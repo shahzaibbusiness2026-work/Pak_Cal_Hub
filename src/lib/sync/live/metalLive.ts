@@ -21,7 +21,7 @@
  * tool-sources.ts). Verified working 2026-10-04.
  */
 
-import { fetchJson, LiveFetchError, FetchJsonOptions } from './http';
+import { fetchJson, LiveFetchError, FetchJsonOptions, validateSourceTime } from './http';
 
 const XAU_URL = 'https://api.gold-api.com/price/XAU';
 const XAG_URL = 'https://api.gold-api.com/price/XAG';
@@ -97,7 +97,8 @@ function checkJump(label: string, derived: number, stored: number | undefined): 
 export async function fetchLiveMetals(
   currentGoldTola?: number,
   currentSilverTola?: number,
-  fetchImpl: FetchImpl = fetchJson
+  fetchImpl: FetchImpl = fetchJson,
+  now = new Date()
 ): Promise<LiveMetalResult> {
   const [xau, xag, fx] = await Promise.all([
     fetchImpl(XAU_URL) as Promise<SpotResponse>,
@@ -146,6 +147,9 @@ export async function fetchLiveMetals(
 
   checkJump('Gold', goldTola, currentGoldTola);
   checkJump('Silver', silverTola, currentSilverTola);
+  const goldTime = validateSourceTime(xau?.updatedAt, 'Gold spot', 7, now);
+  const silverTime = validateSourceTime(xag?.updatedAt, 'Silver spot', 7, now);
+  const fxTime = validateSourceTime(fx?.time_last_update_utc, 'Bullion FX', 3, now);
 
   return {
     goldTola: Math.round(goldTola),
@@ -153,8 +157,8 @@ export async function fetchLiveMetals(
     usdPkr,
     xauUsd,
     xagUsd,
-    fxUpdatedAt: fx?.time_last_update_utc || '',
-    spotUpdatedAt: xau?.updatedAt || '',
+    fxUpdatedAt: fxTime,
+    spotUpdatedAt: [goldTime, silverTime].sort()[0],
     source:
       'Live derived rate: international XAU/XAG spot × USD/PKR — indicative only; official APGJSA sarafa rates may differ slightly',
   };

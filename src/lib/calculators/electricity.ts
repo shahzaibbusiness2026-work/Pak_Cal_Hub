@@ -43,7 +43,7 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
 
   // Unprotected consumers above 200 units lose slab benefit: the entire consumption
   // is billed at the single marginal slab rate (NEPRA domestic tariff design).
-  const useFlatMarginalRate = category === 'unprotected' && units > 200;
+  const useFlatMarginalRate = category !== 'protected';
 
   let energyCost = 0;
   let marginalRate = 0;
@@ -54,7 +54,7 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
     marginalRate = slab.rate;
     energyCost = units * marginalRate;
     slabBreakdownDetails.push({
-      slab: `Unprotected above 200 units: single slab rate (no slab benefit)`,
+      slab: `${category}: applicable bracket rate (no slab benefit)`,
       unitsInSlab: units,
       rate: marginalRate,
       cost: energyCost,
@@ -87,7 +87,7 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
 
   // Surcharges and adjustments — user-supplied, because FPA/QTA vary monthly/quarterly per NEPRA.
   // QTA may be negative (downward quarterly adjustment) — do NOT clamp at zero.
-  const fpaRate = Math.max(0, safeNumber(inputs.fpaRate, 0));
+  const fpaRate = safeNumber(inputs.fpaRate, 0);
   // fpaUnits <= 0 means "same as current-month units" (the common case when FPA is current).
   const fpaUnitsRaw = Math.floor(safeNumber(inputs.fpaUnits, 0));
   const fpaUnits = fpaUnitsRaw > 0 ? fpaUnitsRaw : units;
@@ -95,9 +95,10 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
   const qtaRate = safeNumber(inputs.qtaRate, 0);
   const meterRent = Math.max(0, safeNumber(inputs.meterRent, ELECTRICITY_CONSTANTS.meterRentDefault));
   const tvFeeInput = Math.max(0, safeNumber(inputs.tvFee, 0));
-  const fcSurcharge = units * ELECTRICITY_CONSTANTS.fcSurchargePerUnit;
-  const fpaEnergy = fpaUnits * fpaRate;
-  const qtaCharges = units * qtaRate;
+  const fcRate = isLifeline ? 0 : isProtected ? 0.43 : ELECTRICITY_CONSTANTS.fcSurchargePerUnit;
+  const fcSurcharge = units * fcRate;
+  const fpaEnergy = isLifeline ? 0 : fpaUnits * fpaRate;
+  const qtaCharges = isLifeline ? 0 : units * qtaRate;
 
   // Taxes
   let electricityDuty = 0;
@@ -138,13 +139,13 @@ export function calculateElectricityBill(inputs: Record<string, any>): Calculato
     ...(fixedCharges > 0
       ? [{ label: `Fixed Charges (${sanctionedLoadKw} kW sanctioned load)`, amount: formatPKR(fixedCharges) }]
       : []),
-    { label: 'Financing Cost (FC) Surcharge @ Rs. 3.23/unit', amount: formatPKR(fcSurcharge) },
+    { label: `Financing Cost (FC) Surcharge @ Rs. ${fcRate.toFixed(2)}/unit`, amount: formatPKR(fcSurcharge) },
     ...(qtaCharges !== 0 ? [{ label: `Quarterly Tariff Adjustment (QTA @ Rs. ${qtaRate.toFixed(2)}/unit)`, amount: formatPKR(qtaCharges) }] : []),
-    ...(fpaEnergy > 0 || fpaOther > 0
+    ...(fpaEnergy !== 0 || fpaOther > 0
       ? [
           { label: `Fuel Price Adjustment — energy (${fpaUnits} units @ Rs. ${fpaRate.toFixed(2)}/unit)`, amount: formatPKR(fpaEnergy) },
-          ...(edOnFpa > 0 ? [{ label: 'Electricity Duty on FPA (1.5%)', amount: formatPKR(edOnFpa) }] : []),
-          ...(gstOnFpa > 0 ? [{ label: 'GST on FPA (18%)', amount: formatPKR(gstOnFpa) }] : []),
+          ...(edOnFpa !== 0 ? [{ label: 'Electricity Duty on FPA (1.5%)', amount: formatPKR(edOnFpa) }] : []),
+          ...(gstOnFpa !== 0 ? [{ label: 'GST on FPA (18%)', amount: formatPKR(gstOnFpa) }] : []),
           ...(fpaOther > 0 ? [{ label: 'Other FPA charges (e.g. income tax on FPA, as per bill)', amount: formatPKR(fpaOther) }] : []),
         ]
       : []),
@@ -240,9 +241,9 @@ export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOut
 
   // Savings modeling:
   // Retail grid tariff ~Rs. 48/unit
-  // Net Billing buyback rate Rs. 10.20/unit (NEPRA Prosumer Regulations 2026)
+  // Net Billing buyback rate Rs. 8.13/unit (NEPRA Prosumer Regulations 2026)
   const retailTariff = 48;
-  const exportBuybackRate = safeNumber(inputs.customBuybackRate, 10.20);
+  const exportBuybackRate = safeNumber(inputs.customBuybackRate, 8.13);
   // Share of generation consumed directly during daytime (rest is exported at the buyback rate)
   const selfConsumptionShare = Math.min(Math.max(safeNumber(inputs.selfConsumptionPct, 55), 0), 100) / 100;
 
@@ -252,7 +253,7 @@ export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOut
     monthlySavings = expectedMonthlyGeneration * retailTariff;
   } else {
     // 2026 Net Billing: daytime direct self-consumption saves the retail tariff (Rs 48),
-    // exported surplus is sold at Rs 10.20/unit
+    // exported surplus is sold at Rs 8.13/unit
     const selfConsumedUnits = expectedMonthlyGeneration * selfConsumptionShare;
     const exportedUnits = expectedMonthlyGeneration * (1 - selfConsumptionShare);
     monthlySavings = (selfConsumedUnits * retailTariff) + (exportedUnits * exportBuybackRate);
@@ -275,7 +276,7 @@ export function calculateSolarSystem(inputs: Record<string, any>): CalculatorOut
     secondaryResults: [
       { id: 'totalCost', label: 'Estimated Total Setup Cost', value: formatPKR(totalSystemCost), type: 'currency' },
       { id: 'monthlySavings', label: 'Monthly Electricity Savings', value: formatPKR(monthlySavings), type: 'currency', color: 'success' },
-      { id: 'payback', label: 'ROI Payback Period', value: `${paybackYears.toFixed(1)} Years`, type: 'text' },
+      { id: 'payback', label: 'ROI Payback Period', value: annualSavings > 0 ? `${paybackYears.toFixed(1)} Years` : 'Not achievable', type: 'text' },
       { id: 'regime', label: 'Metering Framework', value: billingRegime === 'net-billing' ? '2026 Net Billing' : '1:1 Net Metering', type: 'badge' },
     ],
     breakdown: [

@@ -21,7 +21,7 @@ export function calculateLoan(inputs: LoanInputs): CalculatorOutput {
   if (inputs.kiborRate !== undefined && inputs.bankSpread !== undefined) {
     annualRate = inputs.kiborRate + inputs.bankSpread;
   }
-  annualRate = Math.max(0.1, annualRate);
+  annualRate = Math.max(0, annualRate);
 
   const tenureYears =
     inputs.tenureMonths && inputs.tenureMonths > 0

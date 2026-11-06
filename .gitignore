@@ -32,4 +32,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+*-results.log
+*-tests.log
+npm-audit.json
+review-tests.log
+/test-artifacts/
 next-env.d.ts

@@ -22,6 +22,15 @@ export class LiveFetchError extends Error {
   }
 }
 
+export function validateSourceTime(value: unknown, label: string, maxAgeDays = 7, now = new Date()): string {
+  const stamp = typeof value === 'string' ? Date.parse(value) : NaN;
+  const age = now.getTime() - stamp;
+  if (!Number.isFinite(stamp) || age > maxAgeDays * 86400000 || age < -300000) {
+    throw new LiveFetchError('validation', `${label}: missing, stale or future source timestamp`);
+  }
+  return new Date(stamp).toISOString();
+}
+
 export interface FetchJsonOptions {
   /** Per-attempt timeout in ms. Default 12000. */
   timeoutMs?: number;
@@ -38,11 +47,22 @@ const DEFAULT_UA =
  * Fetch JSON with a hard timeout and one retry. Throws LiveFetchError with a
  * descriptive message — callers decide whether to fall back to stored values.
  */
-export async function fetchJson<T>(
+const inFlight = new Map<string, Promise<unknown>>();
+
+export function fetchJson<T>(url: string, options: FetchJsonOptions = {}): Promise<T> {
+  const key = JSON.stringify([url, options]);
+  const existing = inFlight.get(key);
+  if (existing) return existing as Promise<T>;
+  const request = fetchJsonUncached<T>(url, options).finally(() => inFlight.delete(key));
+  inFlight.set(key, request);
+  return request;
+}
+
+async function fetchJsonUncached<T>(
   url: string,
   options: FetchJsonOptions = {}
 ): Promise<T> {
-  const timeoutMs = options.timeoutMs ?? 12000;
+  const timeoutMs = options.timeoutMs ?? 4000;
   const retries = options.retries ?? 1;
   const userAgent = options.userAgent ?? DEFAULT_UA;
 
@@ -58,10 +78,14 @@ export async function fetchJson<T>(
           Accept: 'application/json',
           'User-Agent': userAgent,
         },
+        cache: 'no-store',
       });
-      clearTimeout(timer);
 
       if (!res.ok) {
+        if ((res.status >= 500 || res.status === 429) && attempt < retries) {
+          lastError = new LiveFetchError('http-status', `GET ${url} -> HTTP ${res.status}`);
+          continue;
+        }
         // 4xx = our fault or gone — retrying won't help.
         if (res.status >= 400 && res.status < 500) {
           throw new LiveFetchError(
@@ -82,7 +106,6 @@ export async function fetchJson<T>(
         );
       }
     } catch (err) {
-      clearTimeout(timer);
       if (err instanceof LiveFetchError) {
         // Retry only transient classes; 4xx/invalid-json fail fast.
         if (err.kind === 'http-status' || err.kind === 'invalid-json') throw err;
@@ -96,6 +119,9 @@ export async function fetchJson<T>(
             : new LiveFetchError('network', `GET ${url} -> unknown network error`);
       }
       // fall through to retry
+    } finally {
+      // Keep the deadline active while reading the response body as well.
+      clearTimeout(timer);
     }
   }
 

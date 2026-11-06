@@ -29,6 +29,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   }, [calculator]);
 
   const [inputs, setInputs] = useState<Record<string, any>>(initialValues);
+  const editedFields = useRef(new Set<string>());
   const resultsRef = useRef<HTMLDivElement>(null);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,13 +38,13 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   // this stays empty and the built-in defaults are used silently — no error
   // UI, no fake data. Client-only effect: safe for SSR/static generation.
   const [liveOverrides, setLiveOverrides] = useState<Record<string, number>>({});
-  const [liveAsOf, setLiveAsOf] = useState<string | null>(null);
+  const [rateDates, setRateDates] = useState<Record<string, string>>({});
   const [liveFxRates, setLiveFxRates] = useState<Record<string, number> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 8000);
+    const timer = setTimeout(() => controller.abort(), 12000);
 
     // /api/rates/live payload key -> calculator input ids (one payload rate can
     // feed several tools' inputs, e.g. live gold for the gold tool and Zakat)
@@ -54,7 +55,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       usdPkr: ['usdPkrRate'],
     };
 
-    fetch('/api/rates/live', { signal: controller.signal })
+    fetch('/api/rates/live', { signal: controller.signal, cache: 'no-store' })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -63,11 +64,16 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         if (cancelled || !calculator) return;
         const validIds = new Set(calculator.inputs.map((f) => f.id));
         const overrides: Record<string, number> = {};
+        const dates: Record<string, string> = {};
         for (const [payloadKey, inputIds] of Object.entries(RATE_INPUT_MAP)) {
           const v = data?.[payloadKey];
           if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
             for (const inputId of inputIds) {
-              if (validIds.has(inputId)) overrides[inputId] = v;
+              if (validIds.has(inputId)) {
+                overrides[inputId] = v;
+                const sourceDate = data.asOfByRate?.[payloadKey];
+                if (typeof sourceDate === 'string' && Number.isFinite(Date.parse(sourceDate))) dates[inputId] = sourceDate;
+              }
             }
           }
         }
@@ -77,8 +83,8 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         }
         if (Object.keys(overrides).length > 0) {
           setLiveOverrides(overrides);
-          setInputs((prev) => ({ ...prev, ...overrides }));
-          if (typeof data?.asOf === 'string') setLiveAsOf(data.asOf);
+          setRateDates(dates);
+          setInputs((prev) => ({ ...prev, ...Object.fromEntries(Object.entries(overrides).filter(([id]) => !editedFields.current.has(id))) }));
         }
       })
       .catch(() => {
@@ -94,6 +100,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   }, [calculator]);
 
   const handleFieldChange = (id: string, value: any) => {
+    editedFields.current.add(id);
     setInputs((prev) => ({ ...prev, [id]: value }));
 
     // Mobile/tablet: scroll results into view after a short debounce (only on narrow screens)
@@ -106,6 +113,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   };
 
   const handleReset = () => {
+    editedFields.current.clear();
     // Reset to defaults, then re-apply any live rates so "Reset" never
     // silently downgrades the user to a stale built-in default.
     setInputs({ ...initialValues, ...liveOverrides });
@@ -186,10 +194,10 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
                     {isLive && (
                       <p className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
                         <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-                        Live rate
-                        {liveAsOf && (
+                        Saved / indicative reference
+                        {rateDates[field.id] && (
                           <span className="font-normal text-slate-500 dark:text-slate-400">
-                            · updated {new Date(liveAsOf).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            · source date {new Date(rateDates[field.id]).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
                           </span>
                         )}
                       </p>

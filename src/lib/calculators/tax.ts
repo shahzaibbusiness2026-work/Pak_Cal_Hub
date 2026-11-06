@@ -29,7 +29,7 @@ export function calculateFreelancerTax(inputs: Record<string, any>): CalculatorO
     taxYear: inputs.taxYear || '2026-27',
     incomeType: 'freelancer',
     incomePeriod: inputs.period || 'annual',
-    income: inputs.annualIncome || inputs.foreignIncome || inputs.income,
+    income: inputs.annualIncome ?? inputs.foreignIncome ?? inputs.income,
     isPsebRegistered: isPseb,
     remittanceChannel: inputs.remittanceChannel,
   });
@@ -58,16 +58,17 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
 
   const advanceTax = propertyValue * advanceTaxRate;
   // VERIFY: provincial stamp duty and local TMA/transfer fees vary by province and transaction year — these are estimates.
-  const stampDutyRate = 0.01; // 1%
+  const stampDutyRate = Math.max(0, safeNumber(inputs.stampDutyRate, 0)) / 100;
   const stampDuty = propertyValue * stampDutyRate;
-  const tmaFee = propertyValue * 0.01; // 1% Local TMA/Corporation fee (estimate — verify locally)
+  const localTransferRate = Math.max(0, safeNumber(inputs.localTransferRate, 0)) / 100;
+  const tmaFee = propertyValue * localTransferRate;
 
   const totalGovtCharges = advanceTax + stampDuty + tmaFee;
 
   return {
     primaryResult: {
       id: 'totalTax',
-      label: 'Estimated Government Taxes & Fees (advance tax + estimated local fees)',
+      label: 'FBR Advance Tax & Entered Local Fees',
       value: formatPKR(totalGovtCharges),
       type: 'currency',
       highlight: true,
@@ -76,20 +77,20 @@ export function calculatePropertyTax(inputs: Record<string, any>): CalculatorOut
     },
     secondaryResults: [
       { id: 'advanceTax', label: `FBR Advance Tax (${(advanceTaxRate * 100).toFixed(2)}%)`, value: formatPKR(advanceTax), type: 'currency' },
-      { id: 'stampDuty', label: 'Provincial Stamp Duty (1%)', value: formatPKR(stampDuty), type: 'currency' },
-      { id: 'tmaFee', label: 'TMA / Transfer Duty (1%)', value: formatPKR(tmaFee), type: 'currency' },
+      { id: 'stampDuty', label: 'Entered Provincial Stamp Duty', value: formatPKR(stampDuty), type: 'currency' },
+      { id: 'tmaFee', label: 'Entered Local Transfer Fee', value: formatPKR(tmaFee), type: 'currency' },
       { id: 'filerStatus', label: 'Taxpayer Status', value: isFiler ? 'Active Filer' : 'Non-Filer', type: 'badge' },
     ],
     breakdown: [
       { label: 'Property Valuation (FBR/DC Rate)', amount: formatPKR(propertyValue) },
       { label: `FBR Advance Tax (${isBuying ? 'Section 236K Purchase' : 'Section 236C Sale'})`, detail: `${(advanceTaxRate * 100).toFixed(2)}% for ${isFiler ? 'Filer' : 'Non-Filer'}`, amount: formatPKR(advanceTax) },
-      { label: 'Provincial Stamp Duty (e-Stamping 1%)', amount: formatPKR(stampDuty) },
-      { label: 'Local Government / TMA Transfer Fee (1%)', amount: formatPKR(tmaFee) },
+      { label: `Entered Provincial Stamp Duty (${stampDutyRate * 100}%)`, amount: formatPKR(stampDuty) },
+      { label: `Entered Local Transfer Fee (${localTransferRate * 100}%)`, amount: formatPKR(tmaFee) },
       { label: 'Estimated Total Transfer Charges (excludes seller capital-gains tax under Section 37)', amount: formatPKR(totalGovtCharges), isTotal: true },
     ],
     notes: [
       `Advance tax rates read from the ${dataset.assessmentYear} dataset: Section 236K (Buyer) ${(pt.buyerFilerRate * 100).toFixed(2)}% filer / ${(pt.buyerNonFilerRate * 100).toFixed(2)}% non-filer; Section 236C (Seller) ${(pt.sellerFilerRate * 100).toFixed(2)}% filer / ${(pt.sellerNonFilerRate * 100).toFixed(2)}% non-filer.`,
-      'Stamp duty (1%) and TMA / transfer fee (1%) are estimates — verify against your provincial Excise & Taxation / LDA / development-authority schedule before paying.',
+      'Local fees default to zero. Enter the applicable provincial stamp duty and local transfer percentages; these are not universal national rates.',
       'This tool covers advance withholding tax (236C/236K) plus estimated local charges only. A seller\'s capital-gains tax under Section 37 is separate and is not included; late-filer rates are not yet published in the repo\'s verified TY2027 source, so this tool offers filer and non-filer only.',
     ],
   };

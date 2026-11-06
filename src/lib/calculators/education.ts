@@ -61,8 +61,8 @@ export function calculateMdcatAggregate(inputs: Record<string, any>): Calculator
   const matricTotal = safeNumber(inputs.matricTotal, 1100);
   const fscObtained = safeNumber(inputs.fscObtained, 1010);
   const fscTotal = safeNumber(inputs.fscTotal, 1100);
-  const mdcatObtained = safeNumber(inputs.mdcatObtained || inputs.testObtained, 175);
-  const mdcatTotal = safeNumber(inputs.mdcatTotal || inputs.testTotal, 200);
+  const mdcatObtained = safeNumber(inputs.mdcatObtained ?? inputs.testObtained, 160);
+  const mdcatTotal = safeNumber(inputs.mdcatTotal ?? inputs.testTotal, 180);
 
   const warnings: string[] = [];
   const matricPct = clampComponentPct(

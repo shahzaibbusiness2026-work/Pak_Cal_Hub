@@ -93,9 +93,9 @@ async function runLiveRatesTests() {
 
   // ── 7. metalLive: good data passes, values match the formula ───────────────
   const metalMock = async (url: string) => {
-    if (url.includes('XAU')) return { price: 4141.8, currency: 'USD', updatedAt: '2026-10-03T21:29:33Z' };
-    if (url.includes('XAG')) return { price: 60.524, currency: 'USD', updatedAt: '2026-10-03T21:29:33Z' };
-    return { rates: { PKR: 276.82 }, time_last_update_utc: 'Sat, 03 Oct 2026 00:02:32 +0000' };
+    if (url.includes('XAU')) return { price: 4141.8, currency: 'USD', updatedAt: new Date().toISOString() };
+    if (url.includes('XAG')) return { price: 60.524, currency: 'USD', updatedAt: new Date().toISOString() };
+    return { rates: { PKR: 276.82 }, time_last_update_utc: new Date().toUTCString() };
   };
   const metals = await fetchLiveMetals(440636, 6528, metalMock);
   assert(metals.goldTola === Math.round(tolaFromSpot(4141.8, 276.82)), 'metalLive gold matches formula (rounded)');
@@ -133,7 +133,7 @@ async function runLiveRatesTests() {
   // ── 11. /api/rates/live fallback shape ─────────────────────────────────────
   const fallback = buildLiveRatesResponse([]);
   assert(
-    fallback.petrol === 392.76 && fallback.diesel === 399.64 && fallback.gold24kTola === 440636 && fallback.silverTola === 6528 && fallback.usdPkr === 277.1,
+    fallback.petrol === 362 && fallback.diesel === 387.81 && fallback.gold24kTola === 435636 && fallback.silverTola === 5763 && fallback.usdPkr === 276.704,
     'live endpoint fallback serves hardcoded constants'
   );
   assert(fallback.live === false, 'live endpoint fallback reports live=false');
@@ -155,7 +155,7 @@ async function runLiveRatesTests() {
   const fxMock = async () => ({
     result: 'success',
     rates: { PKR: 278.4, USD: 1, GBP: 0.7435, EUR: 0.8612, AED: 3.6725, SAR: 3.75, CAD: 1.3931, AUD: 1.5239, CNY: 7.1188, QAR: 3.64, KWD: 0.3081, JPY: 153.21, TRY: 41.52 },
-    time_last_update_utc: 'Fri, 09 Oct 2026 00:02:31 +0000',
+    time_last_update_utc: new Date().toUTCString(),
   });
   const fx = await fetchLiveFx(fxMock);
   assert(fx.usdPkr === 278.4 && fx.fx.USD === 278.4 && fx.fx.PKR === 1, 'fxLive anchors USD/PKR from open.er-api');

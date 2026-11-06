@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { getMarketRates, updateMarketRate, getRateFreshnessReport } from '../../../../lib/db/dataProvider';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const rates = await getMarketRates();
@@ -17,11 +19,14 @@ export async function POST(req: NextRequest) {
     const { key, value, label, unit, category, secretKey, adminUser } = body;
 
     const expectedSecret = process.env.ADMIN_SECRET_KEY;
-    if (secretKey !== expectedSecret) {
+    if (!expectedSecret) {
+      return NextResponse.json({ success: false, error: 'ADMIN_SECRET_KEY is not configured.' }, { status: 503 });
+    }
+    if (!secretKey || secretKey !== expectedSecret) {
       return NextResponse.json({ success: false, error: 'Unauthorized: Invalid Admin Secret Key' }, { status: 401 });
     }
 
-    if (!key || typeof value !== 'number') {
+    if (typeof key !== 'string' || !key.trim() || typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
       return NextResponse.json({ success: false, error: 'Bad Request: "key" and numeric "value" are required.' }, { status: 400 });
     }
 

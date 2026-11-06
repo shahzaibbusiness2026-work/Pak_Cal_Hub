@@ -40,6 +40,7 @@ export interface InputFieldConfig {
   options?: FieldOption[];
   unit?: string;
   required?: boolean;
+  showWhen?: Array<{ fieldId: string; equals?: any; notEquals?: any }>;
 }
 
 export interface ResultItem {

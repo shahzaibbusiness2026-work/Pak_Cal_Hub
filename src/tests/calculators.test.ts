@@ -65,11 +65,11 @@ function runTests() {
   // 2. COMMUTATION PURCHASE TABLE TESTS
   // ==========================================
   console.log('\n--- 2. Testing Commutation Factors ---');
-  assert(getCommutationFactor(45) === 14.31, 'Commutation factor for Age 45 is 14.31');
-  assert(getCommutationFactor(50) === 12.35, 'Commutation factor for Age 50 is 12.35');
-  assert(getCommutationFactor(55) === 10.40, 'Commutation factor for Age 55 is 10.40');
-  assert(getCommutationFactor(60) === 8.48, 'Commutation factor for Age 60 is 8.48');
-  assert(getCommutationFactor(65) === 7.22, 'Commutation factor for Age 65 is 7.22');
+  assert(getCommutationFactor(45) === 21.7592, 'Commutation factor for Age 45 is 21.7592');
+  assert(getCommutationFactor(50) === 18.3129, 'Commutation factor for Age 50 is 18.3129');
+  assert(getCommutationFactor(55) === 15.1478, 'Commutation factor for Age 55 is 15.1478');
+  assert(getCommutationFactor(60) === 12.3719, 'Commutation factor for Age 60 is 12.3719');
+  assert(getCommutationFactor(65) === 9.9639, 'Commutation factor for Age 65 is 9.9639');
 
   // ==========================================
   // 3. SALARY ENGINE MULTI-GOVT & MULTI-YEAR
@@ -123,8 +123,8 @@ function runTests() {
   // ==========================================
   console.log('\n--- 4. Testing Pension Calculations ---');
   // Case A: Pre-2024 Defined Benefit Scheme (Basic 100k, 30 yrs, Age 60, 35% comm)
-  // CSR commutation table is keyed on age at NEXT birthday, so age 60 uses the age-61 factor 8.16:
-  // 24,500 x 12 x 8.16 = Rs. 23,99,040
+  // CSR commutation table is keyed on age at NEXT birthday, so age 60 uses the age-61 factor 11.8632:
+  // 24,500 x 12 x 11.8632 = Rs. 34,87,781
   const penPre2024 = calculatePension({
     government: 'federal',
     schemeType: 'pre2024',
@@ -135,7 +135,7 @@ function runTests() {
     bps: 17,
   });
   const lumpSum = penPre2024.secondaryResults?.find((r) => r.id === 'lumpSum');
-  assert(Boolean(String(lumpSum?.value).includes('23,99,040')), `Commutation lump sum correctly calculated (age-next-birthday factor 8.16): ${lumpSum?.value}`);
+  assert(Boolean(String(lumpSum?.value).includes('34,87,781')), `Commutation lump sum correctly calculated (age-next-birthday factor 11.8632): ${lumpSum?.value}`);
 
   // Case B: Minimum Pension Floor (Rs. 12,000 on GROSS pension, OM No.F.15(1)-Reg.6/2023)
   // Basic 20k, 10 yrs: gross = 4,667 -> floor top-up 7,333 (non-commutable); commutation on pre-floor gross
@@ -314,7 +314,7 @@ function runTests() {
   assert(String(medRow5?.amount).includes('1,500'), `Medical BPS-5 = Rs. 1,500 flat: ${medRow5?.amount}`);
   // Deductions: verified statutory schedules (OM 18-08-2005 / SRO 21(1)/96 / FEBF Act 3rd Schedule)
   const gpfRow = sal17.breakdown?.find((r) => r.label.includes('GP Fund Subscription'));
-  assert(String(gpfRow?.amount).includes('1,000'), `GP Fund BPS-17 slab = Rs. 1,000/month: ${gpfRow?.amount}`);
+  assert(String(gpfRow?.amount).includes('7,619'), `Federal FY2026-27 GPF BPS-17 = Rs. 7,619/month: ${gpfRow?.amount}`);
   const bfRow = sal17.breakdown?.find((r) => r.label.includes('Benevolent Fund'));
   assert(String(bfRow?.amount).includes('155'), `Benevolent Fund capped at Rs. 155/month: ${bfRow?.amount}`);
   const giRow = sal17.breakdown?.find((r) => r.label.includes('Group Insurance'));
@@ -357,7 +357,7 @@ function runTests() {
 
   // Token tax: Punjab 1300cc, Rs. 4M invoice → 0.3% token (12,000) + Sec 231B 1.5% (60,000)
   const tt = calculateTokenTax({ province: 'punjab', engineCapacityCc: 1300, invoiceValue: 4000000, isFiler: true });
-  assert(String(tt.primaryResult.value).includes('72,000'), 'Punjab 1300cc token + 231B WHT totals Rs. 72,000');
+  assert(String(tt.primaryResult.value).includes('12,000'), 'Punjab annual token is Rs. 12,000; registration WHT is separate');
   assert(
     String(tt.secondaryResults?.find((r) => r.id === 'fbrAdvanceTax')?.label).includes('1.50%'),
     'Section 231B rate is 1.50% of value for the 1001–1300cc band'
@@ -366,10 +366,10 @@ function runTests() {
   // Property tax: TY2027 buyer filer, Rs. 10M → 236K 1.5% = 150,000; total 350,000
   const pt = calculatePropertyTax({ propertyValue: 10000000, transactionType: 'buy', isFiler: true, taxYear: '2026-27' });
   assert(
-    String(pt.secondaryResults?.find((r) => r.id === 'advanceTax')?.value).includes('1,50,000'),
-    'Property 236K buyer-filer advance tax is Rs. 150,000'
+    String(pt.secondaryResults?.find((r) => r.id === 'advanceTax')?.value).includes('1,25,000'),
+    'Property 236K buyer-filer advance tax is Rs. 125,000'
   );
-  assert(String(pt.primaryResult.value).includes('3,50,000'), 'Property total transfer charges are Rs. 350,000');
+  assert(String(pt.primaryResult.value).includes('1,25,000'), 'Property estimate excludes unentered local fees');
 
   // Inheritance no-children: wife 1/4, mother 1/3, father takes the residuary
   const inh = calculateInheritance({
@@ -383,14 +383,14 @@ function runTests() {
     hasMother: true,
   });
   const fatherRow = inh.breakdown?.find((r) => r.label.includes('Father'));
-  assert(String(fatherRow?.label).includes('Residuary'), 'No-children: father takes residuary (not a fixed 1/3)');
-  assert(String(fatherRow?.amount).includes('41,66,667'), 'No-children: father residuary share is Rs. 41,66,667');
+  assert(String(fatherRow?.detail).includes('Residuary'), 'No-children: father takes residuary (not a fixed 1/3)');
+  assert(String(fatherRow?.amount).includes('50,00,000'), 'No-children: father residuary share is Rs. 50,00,000');
   const motherRow = inh.breakdown?.find((r) => r.label.includes('Mother'));
-  assert(String(motherRow?.label).includes('(1/3)'), 'No-children: mother label reflects the 1/3 fraction actually used');
+  assert(String(motherRow?.label).includes('(25.00%)'), 'No-children: mother receives one-third of the remainder (25% of estate)');
 
   // Currency: 100 USD open market → 277.10 × 1.0075 × 100 = Rs. 27,918
   const cur = calculateCurrency({ amount: 100, fromCurrency: 'USD', toCurrency: 'PKR', rateType: 'openMarket' });
-  assert(String(cur.primaryResult.value).includes('27,918'), 'Currency open-market conversion applies the 0.75% retail spread');
+  assert(String(cur.primaryResult.value).includes('27,670'), 'Currency quote remains a reference without a fabricated spread');
 
   // Fuel: 380 km @ 14.5 km/L @ Rs. 342.60/L → Rs. 8,978
   const fuel = calculateVehicleFuelCost({ distanceKm: 380, fuelAverageKmPerLiter: 14.5, fuelPricePerLiter: 342.60 });

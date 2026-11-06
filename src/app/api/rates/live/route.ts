@@ -30,18 +30,30 @@ export async function GET() {
       fetchLiveMetals(storedGold, storedSilver),
       fetchLiveFuel(),
     ]);
+    const upstreamErrors: Record<string, string> = {};
+    for (const [name, result] of [['fx', fxRes], ['gold', metalsRes], ['fuel', fuelRes]] as const) {
+      if (result.status === 'rejected') upstreamErrors[name] = result.reason instanceof Error ? result.reason.message : 'Source unavailable';
+    }
 
-    const overlay: LiveRatesOverlay = { sources: {} };
+    const overlay: LiveRatesOverlay = { sources: {}, asOfByRate: {}, liveByRate: { petrol: false, diesel: false, gold24kTola: false, silverTola: false, usdPkr: false } };
     if (fxRes.status === 'fulfilled') {
       overlay.usdPkr = fxRes.value.usdPkr;
       overlay.fx = fxRes.value.fx;
       overlay.sources!.usdPkr = fxRes.value.source;
+      overlay.liveByRate!.usdPkr = true;
+      if (fxRes.value.updatedUtc) overlay.asOfByRate!.usdPkr = fxRes.value.updatedUtc;
     }
     if (metalsRes.status === 'fulfilled') {
       overlay.gold24kTola = metalsRes.value.goldTola;
       overlay.silverTola = metalsRes.value.silverTola;
       overlay.sources!.gold24kTola = metalsRes.value.source;
       overlay.sources!.silverTola = metalsRes.value.source;
+      overlay.liveByRate!.gold24kTola = true;
+      overlay.liveByRate!.silverTola = true;
+      if (metalsRes.value.spotUpdatedAt) {
+        overlay.asOfByRate!.gold24kTola = metalsRes.value.spotUpdatedAt;
+        overlay.asOfByRate!.silverTola = metalsRes.value.spotUpdatedAt;
+      }
       // The metals pipeline derives its own USD/PKR from the same FX source;
       // prefer the dedicated FX fetch when both succeeded (already set above).
       if (!overlay.usdPkr) overlay.usdPkr = metalsRes.value.usdPkr;
@@ -54,6 +66,10 @@ export async function GET() {
       overlay.diesel = fuelRes.value.diesel;
       overlay.sources!.petrol = fuelRes.value.source;
       overlay.sources!.diesel = fuelRes.value.source;
+      overlay.liveByRate!.petrol = true;
+      overlay.liveByRate!.diesel = true;
+      overlay.asOfByRate!.petrol = fuelRes.value.effectiveDate;
+      overlay.asOfByRate!.diesel = fuelRes.value.effectiveDate;
     }
 
     // Owner's manual rate pins (Admin → Market Rates / Site Content) fill any
@@ -78,9 +94,9 @@ export async function GET() {
     }
 
     const payload = buildLiveRatesResponse(rates, overlay);
-    return NextResponse.json(payload, {
+    return NextResponse.json({ ...payload, upstreamErrors }, {
       headers: {
-        'Cache-Control': 'public, s-maxage=900, stale-while-revalidate=3600',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=300',
       },
     });
   } catch {

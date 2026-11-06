@@ -15,7 +15,7 @@ import { fetchLiveFx } from './live/fxLive';
 export const FX_VERIFIED_ON = '2026-10-04';
 
 export const LATEST_FEED_CURRENCY = [
-  { key: 'usd_pkr', label: 'US Dollar (USD / PKR)', value: 277.10, unit: 'PKR / USD', source: 'State Bank of Pakistan M2M Revaluation Rate (1 Oct 2026) — manually verified', sourceUrl: 'https://www.sbp.org.pk' },
+  { key: 'usd_pkr', label: 'US Dollar (USD / PKR)', value: 276.7040, unit: 'PKR / USD', source: 'State Bank of Pakistan M2M Revaluation Rate (1 Oct 2026) — manually verified', sourceUrl: 'https://www.sbp.org.pk' },
   { key: 'aed_pkr', label: 'UAE Dirham (AED / PKR)', value: 76.40, unit: 'PKR / AED', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
   { key: 'sar_pkr', label: 'Saudi Riyal (SAR / PKR)', value: 74.80, unit: 'PKR / SAR', source: 'State Bank of Pakistan Interbank Closing — manually verified' },
   { key: 'gbp_pkr', label: 'British Pound (GBP / PKR)', value: 357.00, unit: 'PKR / GBP', source: 'State Bank of Pakistan Interbank Closing — manually verified' },

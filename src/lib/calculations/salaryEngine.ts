@@ -1,3 +1,4 @@
+import gpfRates from '../../data/allowances/gpf-rates.json';
 import { GovernmentType, BudgetYear } from '../../types/government';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
 import { getSalaryDataset } from '../../data/salary';
@@ -150,7 +151,10 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   // GP Fund: fixed monthly slab by BPS (OM F.1(5)-Reg.7/87(Vol.1)-485/05, 18-08-2005), NOT a % of pay.
   // Benevolent Fund: 2% of basic, capped at Rs. 155/month (FEBF & GI Act, 3rd Schedule, 01-12-2003).
   // Group Insurance: pay-band slab, max Rs. 182/month (FEBF & GI Rules, 3rd Schedule, 01-01-1996).
-  const gpFundDeduction = getGpFundSlab(bps);
+  const revisedFederalGpf = govType === 'federal' && budgetYear === '2026-27';
+  const gpFundDeduction = revisedFederalGpf
+    ? Number(gpfRates.rates['2026-27'].monthlySubscriptionByBps[String(bps) as keyof typeof gpfRates.rates['2026-27']['monthlySubscriptionByBps']])
+    : getGpFundSlab(bps);
   const benevolentFund = getBenevolentFund(basicPay);
   const groupInsurance = Math.round(getGroupInsurance(basicPay));
   const houseRentDeduction = isNoHra ? Math.round(basicPay * 0.05) : 0; // 5% HRD for Estate Office residence
@@ -202,7 +206,7 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
   }
 
   breakdown.push(
-    { label: `GP Fund Subscription — BPS-${bps} Slab (Rs. ${gpFundDeduction.toLocaleString()}/month, OM 18-08-2005)`, amount: formatPKR(gpFundDeduction), isDeduction: true },
+    { label: `GP Fund Subscription — BPS-${bps} Slab (Rs. ${gpFundDeduction.toLocaleString()}/month, ${revisedFederalGpf ? 'OM 13-08-2026' : 'historical/reference schedule'})`, amount: formatPKR(gpFundDeduction), isDeduction: true },
     { label: 'Benevolent Fund (2% of Basic, Max Rs. 155/month)', amount: formatPKR(benevolentFund), isDeduction: true },
     { label: `Group Insurance (Pay-Slab: Rs. ${groupInsurance}/month)`, amount: formatPKR(groupInsurance), isDeduction: true }
   );
@@ -253,7 +257,7 @@ export function calculateSalary(inputs: SalaryEngineInputs): CalculatorOutput {
     notes: [
       `Official Source: ${dataset.notificationNumber} (${dataset.effectiveDate}).`,
       `Governed by ${dataset.governmentName} Budget (${dataset.year}).`,
-      `GP Fund: Rs. ${gpFundDeduction.toLocaleString()}/month slab (Finance Division OM F.1(5)-Reg.7/87(Vol.1)-485/05, 18-08-2005).`,
+      `GP Fund: Rs. ${gpFundDeduction.toLocaleString()}/month slab (${revisedFederalGpf ? 'Finance Division OM 13-08-2026' : 'historical/reference subscription; confirm the applicable provincial schedule'}).`,
       ...dataset.notes,
     ],
   };

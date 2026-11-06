@@ -11,9 +11,9 @@ import { ChevronRight, Home, Sparkles, ShieldCheck } from 'lucide-react';
 import { canonicalUrl, SITE_NAME } from '../../lib/site';
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
 export async function generateStaticParams() {
@@ -22,7 +22,8 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params: pendingParams }: CategoryPageProps): Promise<Metadata> {
+  const params = await pendingParams;
   const category = getCategoryById(params.category);
   if (!category) return { title: 'Category Not Found' };
 
@@ -45,7 +46,8 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params: pendingParams }: CategoryPageProps) {
+  const params = await pendingParams;
   const category = getCategoryById(params.category);
   const settingsRaw2 = await getSiteSettings();
   const toolOverrides = parseToolOverrides(settingsRaw2);

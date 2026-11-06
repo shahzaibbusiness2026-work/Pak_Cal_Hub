@@ -11,8 +11,8 @@ export interface FuelInputs {
 }
 
 export const DEFAULT_FUEL_PRICES = {
-  petrol: 392.76, // Petroleum Division / OGRA notification of 3 Oct 2026 (see src/lib/sync/fuel.ts)
-  diesel: 399.64,
+  petrol: 362.00, // Petroleum Division / OGRA notification of 5 Nov 2026 (see src/lib/sync/fuel.ts)
+  diesel: 387.81,
   cng: 215.00,
 };
 
@@ -26,7 +26,7 @@ export function calculateFuelCost(inputs: FuelInputs): CalculatorOutput {
   const pricePerUnit =
     inputs.fuelPricePerUnit && inputs.fuelPricePerUnit > 0
       ? inputs.fuelPricePerUnit
-      : DEFAULT_FUEL_PRICES[fuelType] || 392.76;
+      : DEFAULT_FUEL_PRICES[fuelType] || 362.00;
 
   return calculateUiFuelCost({
     distanceKm: inputs.distanceKm,

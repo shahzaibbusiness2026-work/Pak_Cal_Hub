@@ -18,14 +18,14 @@ import { fetchLiveMetals, LiveMetalResult } from './live/metalLive';
  * is left untouched, the failure is recorded in SyncLog, and previously
  * stored (or manually verified constant) values keep serving.
  */
-export const GOLD_VERIFIED_ON = '2026-10-04';
+export const GOLD_VERIFIED_ON = '2026-11-05';
 
 export const LATEST_FEED_GOLD = [
-  { key: 'gold_24k_tola', label: 'Gold 24K (per Tola)', value: 440636, unit: 'PKR / Tola (11.66g)', source: 'All Pakistan Sarafa Gems and Jewellers Association — manually verified' },
-  { key: 'gold_22k_tola', label: 'Gold 22K (per Tola)', value: 403916, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
-  { key: 'gold_21k_tola', label: 'Gold 21K (per Tola)', value: 385557, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
-  { key: 'gold_18k_tola', label: 'Gold 18K (per Tola)', value: 330477, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
-  { key: 'silver_tola', label: 'Silver (per Tola)', value: 6528, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — manually verified' },
+  { key: 'gold_24k_tola', label: 'Gold 24K (per Tola)', value: 435636, unit: 'PKR / Tola (11.66g)', source: 'All Pakistan Sarafa Gems and Jewellers Association — manually verified' },
+  { key: 'gold_22k_tola', label: 'Gold 22K (per Tola)', value: 399333, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
+  { key: 'gold_21k_tola', label: 'Gold 21K (per Tola)', value: 381182, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
+  { key: 'gold_18k_tola', label: 'Gold 18K (per Tola)', value: 326727, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — derived from 24K' },
+  { key: 'silver_tola', label: 'Silver (per Tola)', value: 5763, unit: 'PKR / Tola', source: 'Sarafa Market Benchmark — manually verified' },
 ];
 
 interface PublishItem {

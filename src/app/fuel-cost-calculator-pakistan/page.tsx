@@ -11,10 +11,10 @@ import { BookOpen, ChevronRight, Home, Fuel } from 'lucide-react';
 export const metadata: Metadata = {
   title: 'Pakistan Fuel Cost Calculator 2026 | Petrol & Diesel Trip Cost',
   description:
-    'Calculate car and bike trip fuel expense, distance cost per kilometer, and daily/monthly commute budgets in Pakistan based on official Petroleum Division and OGRA petrol (Rs. 392.76) and diesel (Rs. 399.64) prices.',
+    'Calculate car and bike trip fuel expense, distance cost per kilometer, and daily/monthly commute budgets in Pakistan based on official Petroleum Division and OGRA petrol (Rs. 362.00) and diesel (Rs. 387.81) prices.',
   keywords: [
     'Fuel Cost Calculator Pakistan',
-    'Petrol Price Calculator Rs 392.76',
+    'Petrol Price Calculator Rs 362.00',
     'Diesel Rate 371.61 Pakistan',
     'Lahore to Islamabad Fuel Cost',
     'Car Fuel Average Calculator',
@@ -28,17 +28,17 @@ const FUEL_FAQS = [
   {
     question: 'What is the current official Petrol and Diesel price in Pakistan?',
     answer:
-      'As notified by the Petroleum Division and Oil and Gas Regulatory Authority (OGRA) for 3 October 2026, the official price for Petrol (Motor Spirit) is Rs. 392.76 per litre, and High-Speed Diesel (HSD) is Rs. 399.64 per litre.',
+      'As notified by the Petroleum Division and Oil and Gas Regulatory Authority (OGRA) for 5 November 2026, the official price for Petrol (Motor Spirit) is Rs. 362.00 per litre, and High-Speed Diesel (HSD) is Rs. 387.81 per litre.',
   },
   {
     question: 'How do I calculate fuel cost for a road trip in Pakistan?',
     answer:
-      'Divide the total trip distance (in km) by your vehicle’s fuel average (km/litre) to find the fuel quantity needed. Then multiply the required litres by the current fuel price per litre (e.g. Rs. 392.76 / litre).',
+      'Divide the total trip distance (in km) by your vehicle’s fuel average (km/litre) to find the fuel quantity needed. Then multiply the required litres by the current fuel price per litre (e.g. Rs. 362.00 / litre).',
   },
   {
     question: 'How much fuel does a 1000cc car consume between Lahore and Islamabad?',
     answer:
-      'For a 380 km motorway drive (M-2) with a fuel average of 15 km/litre, a 1000cc car consumes approximately 25.33 litres of petrol, costing approximately Rs. 9,951 each way at Rs. 392.76/litre.',
+      'For a 380 km motorway drive (M-2) with a fuel average of 15 km/litre, a 1000cc car consumes approximately 25.33 litres of petrol, costing approximately Rs. 9,951 each way at Rs. 362.00/litre.',
   },
 ];
 
@@ -81,7 +81,7 @@ export default function FuelCostCalculatorPakistanPage() {
               Petroleum Division Notification
             </span>
             <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-mono">
-              Petrol: Rs. 392.76 • Diesel: Rs. 399.64
+              Petrol: Rs. 362.00 • Diesel: Rs. 387.81
             </span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
@@ -104,7 +104,7 @@ export default function FuelCostCalculatorPakistanPage() {
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-emerald-700 dark:text-emerald-400" />
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-                  Intercity Road Trip Distances &amp; Fuel Estimates (At Rs. 392.76/Litre)
+                  Intercity Road Trip Distances &amp; Fuel Estimates (At Rs. 362.00/Litre)
                 </h2>
               </div>
               <div className="overflow-x-auto">

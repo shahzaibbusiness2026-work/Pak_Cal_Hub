@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const { password, secretKey } = body;
 
     const expectedSecret = process.env.ADMIN_SECRET_KEY;
-    if (secretKey && secretKey !== expectedSecret) {
+    if (!expectedSecret || !secretKey || secretKey !== expectedSecret) {
       return NextResponse.json({ success: false, error: 'Unauthorized: Invalid Admin Secret Key' }, { status: 401 });
     }
 

@@ -91,7 +91,7 @@ export function calculateFreelancerRate(inputs: Record<string, any>): Calculator
   const billableHoursPerWeek = safeNumber(inputs.billableHoursPerWeek, 25);
   const weeksPerYear = safeNumber(inputs.weeksPerYear, 48); // accounting for 4 weeks leave
   const businessExpensesMonthly = safeNumber(inputs.businessExpensesMonthly, 30000); // internet, software, electricity
-  const usdPkrRate = safeNumber(inputs.usdPkrRate, 277.10);
+  const usdPkrRate = safeNumber(inputs.usdPkrRate, 276.7040);
 
   const totalMonthlyNeed = targetMonthlyPKR + businessExpensesMonthly;
   const totalAnnualNeed = totalMonthlyNeed * 12;

@@ -24,7 +24,8 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params: pendingParams }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await pendingParams;
   const [post, settings] = await Promise.all([getPostBySlug(params.slug), getSiteSettings()]);
   if (!post) return { title: 'Article not found | Pak Calc Hub' };
   return buildPostMetadata(post, siteUrl(), settings) as Metadata;
@@ -35,7 +36,8 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('en-PK', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+export default async function BlogPostPage({ params: pendingParams }: { params: Promise<{ slug: string }> }) {
+  const params = await pendingParams;
   const post = await getPostBySlug(params.slug);
   if (!post) notFound();
 

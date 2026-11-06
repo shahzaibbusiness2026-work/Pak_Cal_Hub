@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Save,
   Send,
@@ -400,7 +401,7 @@ export default function PostEditor({ initialPost }: { initialPost?: Post | null 
                     </button>
                     <input ref={ogInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e, 'og')} aria-label="Upload OG image" />
                   </div>
-                  {form.ogImage && <img src={form.ogImage} alt="OG preview" className="mt-2 h-24 rounded-lg border object-cover" />}
+                  {form.ogImage && <Image unoptimized width={240} height={96} src={form.ogImage} alt="OG preview" className="mt-2 h-24 rounded-lg border object-cover" />}
                 </div>
                 <div>
                   <label htmlFor="pe-can" className={labelCls}>Canonical URL (optional)</label>
@@ -505,7 +506,7 @@ export default function PostEditor({ initialPost }: { initialPost?: Post | null 
                   </button>
                   <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e, 'cover')} aria-label="Upload cover image file" />
                 </div>
-                {form.coverImage && <img src={form.coverImage} alt="Cover preview" className="mt-2 h-28 w-full rounded-lg border object-cover" />}
+                {form.coverImage && <Image unoptimized width={800} height={112} src={form.coverImage} alt="Cover preview" className="mt-2 h-28 w-full rounded-lg border object-cover" />}
               </div>
             </div>
           </div>

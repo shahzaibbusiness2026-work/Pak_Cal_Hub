@@ -51,12 +51,12 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     id: 'uet-ecat',
     name: 'UET Lahore (ECAT)',
     shortName: 'UET ECAT',
-    matricWeight: 10,
-    fscWeight: 40,
-    testWeight: 50,
-    // verify: UET F.Sc scope (full HSSC 1100 vs Part-I) unconfirmed against current prospectus
-    fscBasis: 'part1',
-    description: 'UET Combined Entry Test: Matric 10% + F.Sc 40% + ECAT 50%',
+    matricWeight: 0,
+    fscWeight: 67,
+    testWeight: 33,
+    // UET Fall 2026 ECAT merit, academic basis depends on qualification.
+    fscBasis: 'full',
+    description: 'UET ECAT merit: HSSC 67% + ECAT 33%; use the academic basis required by your qualification.',
   },
   {
     id: 'fast-nu',
@@ -84,11 +84,11 @@ export const PAK_UNIVERSITY_FORMULAS: UniversityFormula[] = [
     name: 'University of the Punjab (PU)',
     shortName: 'Punjab University',
     // Official PU basic merit = 1/4 Matric + F.Sc out of 275 + 1100 = 1375 -> 20% / 80%
-    matricWeight: 20,
-    fscWeight: 80,
-    testWeight: 0,
+    matricWeight: 15,
+    fscWeight: 60,
+    testWeight: 25,
     fscBasis: 'full', // verified: PU uses total F.Sc marks out of 1,100
-    description: 'PU Standard Basic Merit: 1/4 Matric + Total F.Sc Marks (or 75% HSSC + 25% PU Entry Test if applicable)',
+    description: 'PU illustrative merit: 75% of academic merit (20% SSC + 80% HSSC) plus 25% admission test. Department-specific academic formulas, subject marks and additional tests can differ.',
   },
   {
     id: 'ku',

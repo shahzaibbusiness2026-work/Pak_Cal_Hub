@@ -170,7 +170,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
     {
       label: `Commuted Portion Surrendered (${commPercent}% of Pre-Floor Gross Pension)`,
       amount: formatPKR(commutedMonthlyFraction),
-      detail: `Factor for age ${age} (CSR table: age on next birthday): ${commutationFactor.toFixed(2)}`,
+      detail: `Factor for age next birthday ${age + 1}: ${commutationFactor.toFixed(4)}`,
       isDeduction: true,
     },
     {

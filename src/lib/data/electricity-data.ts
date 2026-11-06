@@ -82,7 +82,7 @@ export function getFixedCharges(
 export const ELECTRICITY_CONSTANTS = {
   electricityDutyPct: 0.015, // 1.5% Electricity Duty — levied on base energy charges
   generalSalesTaxPct: 0.18, // 18% GST
-  tvFee: 35, // Rs. 35 PTV License Fee
+  tvFee: 0, // Historical fee can be entered explicitly when reconstructing older bills.
   fcSurchargePerUnit: 3.23, // Financing Cost (FC) surcharge per unit
   meterRentDefault: 7.5, // Rs. 7.50 single-phase meter rent
   // Historical reference only (NOT used in billing — FPA/QTA are user inputs since they vary monthly/quarterly per NEPRA):

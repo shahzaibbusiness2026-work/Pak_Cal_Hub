@@ -45,10 +45,12 @@ function isSanePrice(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v) && v >= MIN_PRICE && v <= MAX_PRICE;
 }
 
-function daysSince(dateStr: string): number | null {
-  const t = new Date(dateStr + 'T00:00:00Z').getTime();
+function daysSince(dateStr: string, now: Date): number | null {
+  const calendarDate = new Date(dateStr + 'T00:00:00Z');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr) || !Number.isFinite(calendarDate.getTime()) || calendarDate.toISOString().slice(0, 10) !== dateStr) return null;
+  const t = new Date(dateStr + 'T00:00:00+05:00').getTime();
   if (Number.isNaN(t)) return null;
-  return (Date.now() - t) / 86400000;
+  return (now.getTime() - t) / 86400000;
 }
 
 export async function fetchLiveFuel(
@@ -91,7 +93,8 @@ export async function fetchLiveFuel(
   }
 
   const effectiveDate = petrolEntry.effective_date || dieselEntry.effective_date || '';
-  const age = effectiveDate ? daysSince(effectiveDate) : null;
+  if (petrolEntry.effective_date !== dieselEntry.effective_date) throw new LiveFetchError('validation', 'Fuel API: petrol and diesel dates do not match');
+  const age = effectiveDate ? daysSince(effectiveDate, now) : null;
   if (age === null || age < 0 || age > MAX_DATA_AGE_DAYS) {
     throw new LiveFetchError(
       'validation',

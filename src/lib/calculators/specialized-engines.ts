@@ -209,9 +209,9 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
   const chargingMode = inputs.chargingMode || 'home-standard';
   
   let defaultRate = 48; // Standard domestic peak/upper slab
-  if (chargingMode === 'home-offpeak') defaultRate = 23.57; // NEPRA off-peak subsidized residential tariff (SRO 279(I)/2026)
+  if (chargingMode === 'home-offpeak') defaultRate = 34.53; // Residential TOU off-peak reference, before taxes
   else if (chargingMode === 'public-fast') defaultRate = 125; // Retail public fast charging pump rate (PSO/Shell/Go Green)
-  else if (chargingMode === 'wholesale-commercial') defaultRate = 39.70; // NEPRA discounted wholesale EV charger tariff
+  else if (chargingMode === 'wholesale-commercial') defaultRate = 23.57; // EV charging station base tariff; retail operator prices differ
   
   const electricityRate = safeNumber(inputs.homeElectricityRate || inputs.electricityRate, defaultRate);
 
@@ -220,8 +220,8 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
   const monthlyKm = safeNumber(inputs.monthlyKm, 1500);
   const monthlyCost = costPerKm * monthlyKm;
 
-  // Comparison with Petrol car doing 12 km/L at OGRA 3 Oct 2026 RON-92 rate: Rs. 392.76/L
-  const petrolPricePerLiter = 392.76;
+  // Comparison with Petrol car doing 12 km/L at OGRA 5 Nov 2026 RON-92 rate: Rs. 362.00/L
+  const petrolPricePerLiter = safeNumber(inputs.petrolPricePerLiter, 362.00);
   const petrolCostPerKm = petrolPricePerLiter / 12;
   const monthlyPetrolCost = petrolCostPerKm * monthlyKm;
   const monthlySavingsVsPetrol = monthlyPetrolCost - monthlyCost;
@@ -250,7 +250,7 @@ export function calculateEvChargingCost(inputs: Record<string, any>): Calculator
     ],
     notes: [
       'NEPRA off-peak residential rate is ~Rs. 23.57/kWh under SRO 279(I)/2026. Public fast charging pumps retail at ~Rs. 110–140/kWh.',
-      `Comparison assumes a 1.5L petrol car averaging 12 km/L at Rs. ${petrolPricePerLiter}/L (OGRA RON-92 rate, 3 Oct 2026).`,
+      `Comparison assumes a 1.5L petrol car averaging 12 km/L at Rs. ${petrolPricePerLiter}/L (OGRA RON-92 rate, 5 Nov 2026).`,
     ],
   };
 }

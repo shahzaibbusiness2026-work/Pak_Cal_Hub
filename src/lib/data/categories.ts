@@ -1,4 +1,5 @@
 import type { CategoryDefinition, CalculatorDefinition, CalculatorOutput } from '../../types/calculator';
+import { validatedCalculator } from '../calculators/validation';
 import { CATEGORIES_DATA as META_CATEGORIES } from './categories-meta';
 import { DEFAULT_GOLD_24K_PER_TOLA, DEFAULT_SILVER_PER_TOLA } from './market-rates';
 import {
@@ -129,7 +130,8 @@ export const CATEGORIES_DATA: CategoryDefinition[] = META_CATEGORIES.map((cat) =
       if (i.id === 'silverPricePerTola') return { ...i, defaultValue: DEFAULT_SILVER_PER_TOLA };
       return i;
     });
-    return { ...tool, inputs, calculate };
+    const definition = { ...tool, inputs, calculate };
+    return { ...definition, calculate: validatedCalculator(definition) };
   }),
 }));
 

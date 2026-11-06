@@ -6,7 +6,7 @@ import { CalculatorOutput, BreakdownRow } from '../../types/calculator';
 // SBP Interbank Closing). CAD 204.50 matches the feed; AUD / QAR / KWD are indicative
 // interbank fallbacks. Live rates come from SBP / Forex.pk — these are fallbacks only.
 export const BASELINE_FX_RATES: Record<string, { name: string; rateInPKR: number; symbol: string }> = {
-  USD: { name: 'US Dollar',            rateInPKR: 277.10, symbol: '$' },
+  USD: { name: 'US Dollar',            rateInPKR: 276.7040, symbol: '$' },
   GBP: { name: 'British Pound',        rateInPKR: 357.00, symbol: '£' },
   EUR: { name: 'Euro',                 rateInPKR: 302.80, symbol: '€' },
   AED: { name: 'UAE Dirham',           rateInPKR: 76.40,  symbol: 'AED' },
@@ -36,7 +36,7 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
     inputs.liveFxRates && typeof inputs.liveFxRates === 'object' ? inputs.liveFxRates : undefined;
   const usingLive = Boolean(liveFx && (liveFx[fromCurrency] || liveFx[toCurrency]));
   // Open-market retail quotes carry a spread over interbank (indicative ~0.75%)
-  const spreadFactor = rateType === 'openMarket' ? 1.0075 : 1.0;
+  const spreadFactor = 1.0;
 
   const rateInPkr = (cur: string): number => {
     if (cur === 'PKR') return 1;
@@ -60,7 +60,7 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
     resultAmount = amount;
   } else {
     // Cross currency via PKR
-    effectiveRate = rateInPkr(fromCurrency) / rateInPkr(toCurrency);
+    effectiveRate = customRate > 0 ? customRate : rateInPkr(fromCurrency) / rateInPkr(toCurrency);
     resultAmount = amount * effectiveRate;
   }
 
@@ -68,7 +68,7 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
   const formattedResult = isTargetPKR
     ? formatPKR(resultAmount)
     : `${toCurrency} ${formatNumber(resultAmount, 2)}`;
-  const regimeLabel = rateType === 'openMarket' ? 'Open Market (Retail)' : 'SBP Interbank (Closing)';
+  const regimeLabel = customRate > 0 ? 'Entered transaction quote' : usingLive ? 'Indicative mid-market reference' : 'Dated reference snapshot';
 
   return {
     primaryResult: {
@@ -92,9 +92,9 @@ export function calculateCurrency(inputs: Record<string, any>): CalculatorOutput
     ],
     notes: [
       usingLive
-        ? `Live mid-market rates via open.er-api.com (updated daily) — indicative, not the SBP official closing. Open-market selection applies an indicative ~0.75% retail spread. Banks and forex shops quote their own buying/selling rates.`
-        : `${regimeLabel} parity rate. Open-market quotes carry an indicative ~0.75% retail spread over interbank.`,
-      ...(usingLive ? [] : ['Fallback USD rate is the verified SBP M2M rate of Rs 277.10 (1 Oct 2026, verified 4 Oct 2026); other fallbacks are indicative SBP Interbank Closing values. Check SBP for live rates.']),
+        ? 'Daily indicative mid-market rates via open.er-api.com. Banks and exchange shops set their own buying/selling rates; enter their quote for a transaction.'
+        : 'Bundled references are dated estimates. Enter a bank or exchange-house quote for your transaction; no retail spread is assumed.',
+      ...(usingLive ? [] : ['Fallback USD rate is the verified SBP M2M rate of Rs 276.7040 (4 Nov 2026, verified 5 Nov 2026); other fallbacks are indicative SBP Interbank Closing values. Check SBP for live rates.']),
     ],
   };
 }

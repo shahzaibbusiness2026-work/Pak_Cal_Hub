@@ -110,7 +110,7 @@ const ENTRIES: ToolSourceEntry[] = [
     ratesVerifiedOn: V,
     ratesStatus: 'verified',
     rateKeys: ['rbps-2022', 'rbps-2026', 'adhoc-relief-2022-2026', 'hra-frozen-schedule', 'dra-2026', 'gp-fund-slabs', 'benevolent-fund', 'group-insurance'],
-    note: 'RBPS-2026 verified against the Finance Division notification dated 21-07-2026 (chart cross-checked against the official PDF). ARA-2026 7%, DRA-2026 15% (OM 14(2)R-3/2025), conveyance +50%, 15% medical, frozen HRA schedule, GP Fund slabs (OM 18-08-2005), Benevolent Fund Rs. 155 cap and Group Insurance slabs verified. BPS 19-22 HRA derived via verified formula — provisional.',
+    note: 'RBPS-2026 verified against the Finance Division notification dated 21-07-2026 (chart cross-checked against the official PDF). ARA-2026 7%, DRA-2026 15% (OM 14(2)R-3/2025), conveyance +50%, 15% medical, frozen HRA schedule, Federal FY2026-27 GP Fund subscription revised by OM 13-08-2026; historical/provincial subscriptions need the applicable payroll schedule, Benevolent Fund Rs. 155 cap and Group Insurance slabs verified. BPS 19-22 HRA derived via verified formula — provisional.',
   },
   {
     toolId: 'basic-pay-calculator',
@@ -429,8 +429,8 @@ const ENTRIES: ToolSourceEntry[] = [
     ],
     ratesVerifiedOn: '2026-10-01',
     ratesStatus: 'verified',
-    rateKeys: ['usd-pkr-277.10', 'sbp-interbank'],
-    note: 'USD/PKR 277.10 (SBP M2M revaluation rate, 1 Oct 2026). Open-market rates differ from interbank — confirm with your bank or forex dealer.',
+    rateKeys: ['usd-pkr-276.7040', 'sbp-interbank'],
+    note: 'USD/PKR 276.7040 (SBP M2M revaluation rate, 1 Oct 2026). Open-market rates differ from interbank — confirm with your bank or forex dealer.',
   },
   {
     toolId: 'tenant-bill-splitter',
@@ -453,6 +453,73 @@ const ENTRIES: ToolSourceEntry[] = [
     note: 'This page never publishes winning numbers — always verify in the official National Savings result.',
   },
 ];
+
+// Formula-only tools do not have official market rates. Say so explicitly.
+const formulaTools: Record<string, string> = {
+  'salary-slip-generator': 'Sample payroll statement from entered earnings and deductions; not proof of employment.',
+  'property-area-converter': 'Unit conversion using the selected marla standard; society and revenue-record conventions differ.',
+  'gpa-calculator': 'Credit-weighted GPA from entered courses; percentage and letter-grade mappings are illustrative and institution-specific.',
+  'percentage-calculator': 'Percentage arithmetic from entered values; no statutory rates.',
+  'profit-margin-calculator': 'Margin = profit / revenue; markup = profit / cost. No official rates.',
+  'break-even-calculator': 'Fixed costs / unit contribution, rounded up. Break-even is unavailable when contribution is non-positive.',
+  'freelancer-hourly-rate-calculator': 'Planning quote from income target, billable hours, expenses, buffer and commission assumptions.',
+  'compound-interest-calculator': 'Illustrative compound growth from the entered return; returns are not guaranteed.',
+  'inflation-calculator': 'Planning scenario using the entered inflation assumption, not a live PBS inflation forecast.',
+  'age-calculator': 'Calendar date arithmetic; month-end anniversaries clamp to the last day of the month.',
+  'hijri-date-converter': 'Computed calendar conversion; locally observed lunar dates can differ.',
+};
+for (const [toolId, note] of Object.entries(formulaTools)) {
+  ENTRIES.push({ toolId, sources: [], ratesVerifiedOn: '2026-11-05', ratesStatus: 'verified', rateKeys: [], note });
+}
+for (const toolId of ['construction-cost-calculator', 'cement-calculator', 'bricks-calculator', 'steel-rebar-calculator', 'tiles-calculator']) {
+  ENTRIES.push({ toolId, sources: [], ratesVerifiedOn: '2026-11-05', ratesStatus: 'verify', rateKeys: [], note: 'Material quantities, labour and prices are planning assumptions. Obtain local quotations and an engineer-approved bill of quantities.' });
+}
+const additionalSources: Array<[string, ToolSourceLink, string]> = [
+  ['mdcat-aggregate-calculator', { ...A.pmdc, url: 'https://pmdc.pk/Home/FAQs' }, '50% MDCAT + 40% HSSC + 10% SSC; 2026 MDCAT has 180 marks. Passing and admission eligibility are separate.'],
+  ['university-merit-calculator', { ...A.hec }, 'Verify the program-specific prospectus and qualification basis.'],
+  ['loan-emi-calculator', { ...A.sbp }, 'Reducing-balance illustration using the entered bank rate; fees, floating-rate resets and contract terms can differ.'],
+  ['loan-affordability-calculator', { ...A.sbp }, 'Debt-burden estimate; the lender decides eligibility, approved tenor and pricing.'],
+  ['passport-fee-calculator', { name: 'Directorate General of Immigration & Passports', url: 'https://dgip.gov.pk/passport/ordinary-passport.php/1000' }, 'Published MRP and e-passport fee schedules; additional office services and lost-passport charges can apply.'],
+  ['driving-licence-fee-calculator', { name: 'Punjab DLIMS official fee structure', url: 'https://dlims.punjab.gov.pk/fee_structure' }, 'Punjab only. Confirm category, renewal fine and receipt in DLIMS.'],
+  ['pta-mobile-tax-calculator', { name: 'PTA DIRBS / FBR' }, 'The official PSID determines exact device tax; no unverified fixed mobile-tax table is quoted.'],
+  ['nadra-fee-calculator', { name: 'NADRA / Pak-ID' }, 'Get the current fee in the official application flow for the selected document and service.'],
+  ['duplicate-electricity-bill-checker', { name: 'PITC and the selected electricity supplier' }, 'Reference validation and directions to the official provider portal; this tool does not retrieve private bill records.'],
+  ['vehicle-verification-checker', { name: 'Provincial Excise & Taxation / official MTMIS portals' }, 'Verification guidance; the official province portal determines the record.'],
+  ['property-transfer-cost-calculator', { name: 'Punjab Board of Revenue and FBR' }, 'Punjab transfer estimate; valuation, stamp duty, deed type, location and filer status affect charges.'],
+  ['css-age-eligibility-calculator', { name: 'Federal Public Service Commission' }, 'Verify the examination year, cutoff date and documentary relaxation requirements with FPSC.'],
+  ['pakistan-iban-checker', { name: 'SWIFT IBAN Registry / ISO 13616' }, 'Checks Pakistan IBAN format and MOD-97 checksum; does not establish account ownership or existence.'],
+];
+for (const [toolId, source, note] of additionalSources) {
+  ENTRIES.push({ toolId, sources: [source], ratesVerifiedOn: '2026-11-05', ratesStatus: 'verify', rateKeys: [], note });
+}
+
+const reviewedSources: Record<string, Partial<ToolSourceEntry>> = {
+  'fuel-cost-calculator': {
+    ratesVerifiedOn: '2026-11-05',
+    sources: [{ name: 'Pakistan State Oil published fuel prices', url: 'https://www.psopk.com/en/fuels/fuel-prices', effectiveDate: '5 November 2026', description: 'Petrol Rs 362/L; diesel Rs 387.81/L. Live aggregator quotes are indicative.' }],
+  },
+  'pension-calculator': {
+    ratesVerifiedOn: '2026-11-05',
+    sources: [{ ...A.financeDiv, url: 'https://finance.gov.pk/publications/compenduim_of_pension_rules_2018.pdf', description: '2001 commutation table, page 116: age next birthday 60 = 12.3719; 61 = 11.8632.' }],
+    note: 'The age input is completed age at retirement; the factor uses age at next birthday. Other pension entitlements depend on the scheme and applicable notifications.',
+  },
+  'electricity-bill-calculator': {
+    ratesVerifiedOn: '2026-11-05',
+    sources: [{ name: 'IESCO official tariff guide', url: 'https://www.iesco.com.pk/tariff-guide', notificationRef: 'S.R.O. 279(I)/2026', description: 'Residential schedule: only protected consumers receive previous-slab benefit; fixed charges use sanctioned load.' }],
+    note: 'FPA/QTA can be credits or charges. Enter the signed values from the bill. This estimator models non-TOU residential consumption; account-specific taxes and exemptions can differ.',
+  },
+  'solar-system-calculator': {
+    ratesVerifiedOn: '2026-11-05',
+    note: 'CY2026 NAEPP reference is Rs 8.13/kWh (NEPRA purchase-price forecast decision, 7 January 2026). Edit the export credit to match the current determination or executed agreement. Installed costs and solar yield are planning assumptions.',
+  },
+  'university-merit-calculator': {
+    ratesVerifiedOn: '2026-11-05',
+    ratesStatus: 'verify',
+    sources: [{ name: 'UET Fall 2026 prospectus and admissions portal', url: 'https://admission.uet.edu.pk/downloads/', description: 'ECAT-based merit: 33% test plus 67% applicable academic marks.' }, { name: 'Punjab University 2026 admission test announcement', url: 'https://pu.edu.pk/home/section/allpress/17205', description: '25% admission-test weight. Academic merit varies by department.' }],
+    note: 'University/program and qualification rules vary. Verify the current prospectus before using an aggregate to decide eligibility.',
+  },
+};
+for (const entry of ENTRIES) Object.assign(entry, reviewedSources[entry.toolId] || {});
 
 const BY_ID: Record<string, ToolSourceEntry> = Object.fromEntries(
   ENTRIES.map((e) => [e.toolId, e])

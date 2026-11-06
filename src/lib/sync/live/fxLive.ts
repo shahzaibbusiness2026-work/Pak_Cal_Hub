@@ -11,7 +11,7 @@
  * 1 USD = Rs 277.4). Verified working 2026-10-09.
  */
 
-import { fetchJson, LiveFetchError, FetchJsonOptions } from './http';
+import { fetchJson, LiveFetchError, FetchJsonOptions, validateSourceTime } from './http';
 
 const FX_URL = 'https://open.er-api.com/v6/latest/USD';
 
@@ -39,7 +39,8 @@ export interface LiveFxResult {
 }
 
 export async function fetchLiveFx(
-  fetchImpl: (url: string, opts?: FetchJsonOptions) => Promise<FxResponse> = fetchJson
+  fetchImpl: (url: string, opts?: FetchJsonOptions) => Promise<FxResponse> = fetchJson,
+  now = new Date()
 ): Promise<LiveFxResult> {
   const data = await fetchImpl(FX_URL);
   const rates = data?.rates;
@@ -63,7 +64,7 @@ export async function fetchLiveFx(
   return {
     fx,
     usdPkr,
-    updatedUtc: data.time_last_update_utc || '',
+    updatedUtc: validateSourceTime(data.time_last_update_utc, 'FX', 3, now),
     source: 'Live mid-market FX via open.er-api.com (daily update) — indicative, not the SBP official closing rate',
   };
 }

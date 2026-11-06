@@ -108,5 +108,5 @@ export function formatPercent(
 export function safeNumber(val: any, fallback: number = 0): number {
   if (val === undefined || val === null || val === '') return fallback;
   const parsed = typeof val === 'number' ? val : parseFloat(String(val).replace(/,/g, ''));
-  return isNaN(parsed) ? fallback : parsed;
+  return Number.isFinite(parsed) ? parsed : fallback;
 }

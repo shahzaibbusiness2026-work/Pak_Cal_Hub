@@ -1,12 +1,14 @@
 'use client';
+import { useParams } from 'next/navigation';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 import PostEditor from '../../../../components/admin/PostEditor';
 import { Post, cmsFetch, cmsErrorMessage } from '../../../../components/admin/cms';
 
-export default function AdminEditPostPage({ params }: { params: { id: string } }) {
+export default function AdminEditPostPage() {
+  const params = useParams<{ id: string }>();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
