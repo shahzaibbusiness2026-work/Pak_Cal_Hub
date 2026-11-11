@@ -174,11 +174,11 @@ export default function Navbar() {
                     />
                   </button>
 
-                  {/* Dropdown Menu for this Specific Category */}
+                  {/* Dropdown Menu for this Specific Category — card grid, no scroll */}
                   {isOpen && (
-                    <div className={`absolute ${item.dropdownRight ? 'right-0' : 'left-0'} top-full z-50 pt-1.5 w-80`}>
+                    <div className={`absolute ${item.dropdownRight ? 'right-0' : 'left-0'} top-full z-50 pt-1.5 w-[540px] max-w-[calc(100vw-2rem)]`}>
                       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2.5 shadow-xl shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-950 animate-in fade-in slide-in-from-top-1 duration-150">
-                        <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1.5">
+                        <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-2">
                           <div className="flex items-center gap-1.5">
                             <span className="text-emerald-800 dark:text-emerald-400">
                               {<CategoryIcon icon={category.icon} className="h-4 w-4" />}
@@ -195,24 +195,24 @@ export default function Navbar() {
                           </Link>
                         </div>
 
-                        <div className="space-y-1 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="grid grid-cols-2 gap-2">
                           {category.tools.map((tool) => (
                             <Link
                               key={tool.id}
                               href={`/${tool.category}/${tool.slug}`}
-                              className="group flex flex-col rounded-xl px-2.5 py-2 transition-colors hover:bg-emerald-50 dark:hover:bg-slate-900"
+                              className="group flex flex-col rounded-xl border border-slate-200 bg-white p-2.5 transition-colors hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:border-emerald-800 dark:hover:bg-slate-900"
                             >
-                              <div className="flex items-center justify-between">
+                              <div className="flex items-center justify-between gap-1">
                                 <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-900 dark:text-slate-200 dark:group-hover:text-emerald-400">
                                   {tool.title}
                                 </span>
                                 {tool.trending && (
-                                  <span className="rounded bg-amber-50 px-1 py-0.5 text-[9px] font-bold text-amber-700 dark:bg-amber-950/70 dark:text-amber-300">
+                                  <span className="shrink-0 rounded bg-amber-50 px-1 py-0.5 text-[9px] font-bold text-amber-700 dark:bg-amber-950/70 dark:text-amber-300">
                                     Popular
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                              <span className="text-[10px] leading-snug text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">
                                 {tool.description}
                               </span>
                             </Link>
