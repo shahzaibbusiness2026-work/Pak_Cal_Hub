@@ -61,6 +61,16 @@ export async function fetchLiveFx(
     // rates[code] = units of `code` per 1 USD, so PKR per 1 unit of code = USD/PKR ÷ that.
     fx[code] = usdPkr / perUsd;
   }
+  // Keep the wider snapshot internally for worldwide conversion. Consumers
+  // expose a selected conversion, not a redistributed copy of the full feed.
+  for (const [code, perUsd] of Object.entries(rates)) {
+    if (/^[A-Z]{3}$/.test(code) && typeof perUsd === 'number' && Number.isFinite(perUsd) && perUsd > 0) {
+      const converted = usdPkr / perUsd;
+      if (Number.isFinite(converted) && converted > 0) fx[code] = converted;
+    }
+  }
+  fx.PKR = 1;
+  fx.USD = usdPkr;
   return {
     fx,
     usdPkr,

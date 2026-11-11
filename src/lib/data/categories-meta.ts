@@ -1,4 +1,5 @@
 import type { CategoryDefinition, CalculatorDefinition } from '../../types/calculator';
+import { OVERSEAS_CATEGORY } from './remittance-meta';
 
 /** Default gold rate placeholder — replaced by categories.ts with the live market-rates value. */
 export const META_GOLD_24K_PER_TOLA = 0;
@@ -1361,6 +1362,8 @@ export const CATEGORIES_DATA: CategoryMeta[] = [
     ],
   },
 ];
+
+CATEGORIES_DATA.push(OVERSEAS_CATEGORY);
 
 // Helper search index
 export const ALL_CALCULATORS: CalculatorMeta[] = CATEGORIES_DATA.flatMap((c) => c.tools);

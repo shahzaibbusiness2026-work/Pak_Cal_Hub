@@ -34,7 +34,7 @@ import { CategoryIcon } from '../components/ui/categoryIcons';
 import { SITE_URL, SITE_NAME, SITE_FULL_NAME, canonicalUrl } from '../lib/site';
 
 export const metadata: Metadata = {
-  title: `${SITE_FULL_NAME} (${SITE_NAME}) | 53 Free Pakistan Calculators 2026`,
+  title: `${SITE_FULL_NAME} (${SITE_NAME}) | ${ALL_CALCULATORS.length} Free Pakistan Calculators 2026`,
   description:
     'Pakistan\'s free calculator hub: RBPS-2026 Government Salary, FBR Income Tax 2026-27, Electricity Bills, Pension, GP Fund, Zakat, Solar, Gold Rates & more. Accurate, official-source linked, updated October 2026.',
   alternates: { canonical: canonicalUrl('/') },
@@ -42,14 +42,14 @@ export const metadata: Metadata = {
     type: 'website',
     url: SITE_URL,
     siteName: SITE_FULL_NAME,
-    title: `${SITE_FULL_NAME} | 53 Free Pakistan Calculators 2026`,
+    title: `${SITE_FULL_NAME} | ${ALL_CALCULATORS.length} Free Pakistan Calculators 2026`,
     description:
       'Free Pakistan calculators: Government Salary (RBPS-2026), FBR Tax, Electricity Bills, Pension, GP Fund, Zakat, Solar & more.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_FULL_NAME} | 53 Free Pakistan Calculators`,
-    description: 'RBPS-2026 Salary, FBR Tax, Electricity Bills, Pension, Zakat & 53 free Pakistan calculators.',
+    title: `${SITE_FULL_NAME} | ${ALL_CALCULATORS.length} Free Pakistan Calculators`,
+    description: `RBPS-2026 Salary, FBR Tax, Electricity Bills, Pension, Zakat & ${ALL_CALCULATORS.length} free Pakistan calculators.`,
   },
 };
 
@@ -59,7 +59,7 @@ export default async function HomePage() {
   const categoryOverrides = parseCategoryOverrides(settingsRaw);
   const heroTitle = (settingsRaw.hero_title || 'Pakistan Calculator').toString();
   const heroAccent = (settingsRaw.hero_accent || 'Hub').toString();
-  const heroSubtitle = (settingsRaw.hero_subtitle || "Pakistan's authoritative financial, governmental, and daily calculation engine. 100% verified, fast, and completely free.").toString();
+  const heroSubtitle = (settingsRaw.hero_subtitle || "Free calculators for Pakistan and Pakistanis abroad. Explore salary, tax, bills, savings and worldwide remittance estimates.").toString();
   const displayCategories = CATEGORIES_DATA.map((c) => {
     const cov = categoryOverrides.categories[c.id];
     return {
@@ -85,6 +85,7 @@ export default async function HomePage() {
   ];
 
   const NEW_TRENDING_IDS = [
+    'remittance-calculator',
     'percentage-calculator',
     'hijri-date-converter',
     'tenant-bill-splitter',
@@ -122,7 +123,7 @@ export default async function HomePage() {
           {/* Official Trust Badge */}
           <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full border border-emerald-600/20 bg-emerald-100/80 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-emerald-800 backdrop-blur-sm dark:border-emerald-500/30 dark:bg-emerald-950/80 dark:text-emerald-300 max-w-full">
             <Sparkles className="h-3.5 w-3.5 text-emerald-800 dark:text-emerald-400 shrink-0" />
-            <span className="truncate">Updated October 2026: RBPS-2026 Pay Scales, FBR TY2027 &amp; NEPRA Tariffs</span>
+            <span className="truncate">Tools for Pakistan &amp; Overseas Pakistanis</span>
           </div>
 
           {/* Main Hero Heading */}
@@ -137,6 +138,11 @@ export default async function HomePage() {
             {heroSubtitle}
           </p>
 
+          {/* Daily rates sit immediately above the hero search. */}
+          <div className="mt-6 -mx-4 sm:mx-0 text-left" data-testid="hero-daily-rates">
+            <LiveRatesStrip />
+          </div>
+
           {/* Prominent Hero Search Bar */}
           <HeroSearch />
 
@@ -146,7 +152,7 @@ export default async function HomePage() {
             {[
               { label: 'Top Tools', href: '#quick-launch' },
               { label: 'New & Trending', href: '#daily-demand' },
-              { label: 'All 13 Categories', href: '#categories' },
+              { label: `All ${CATEGORIES_DATA.length} Categories`, href: '#categories' },
               { label: 'Guides & Blog', href: '/blog' },
             ].map((tag) => (
               <Link
@@ -159,10 +165,6 @@ export default async function HomePage() {
             ))}
           </div>
 
-          {/* Live rates strip — today's petrol, diesel, gold, silver, USD */}
-          <div className="mt-8 -mx-4 sm:mx-0 text-left">
-            <LiveRatesStrip />
-          </div>
 
           {/* ⚡ High-Visibility Quick Launch Matrix (Top 8 Daily Tools) */}
           <div id="quick-launch" className="mt-8 scroll-mt-24 pt-6 border-t border-slate-200/70 dark:border-slate-800/70 text-left">
@@ -218,7 +220,7 @@ export default async function HomePage() {
                 New &amp; Trending Calculators
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Fresh tools Pakistan is searching for right now — added October 2026
+                New additions and practical tools for Pakistan and Pakistanis abroad
               </p>
             </div>
           </div>
@@ -238,10 +240,10 @@ export default async function HomePage() {
       <section id="categories" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-20">
         <div className="border-b border-slate-200 pb-5 dark:border-slate-800">
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
-            Explore All 13 Categories
+            Explore All {CATEGORIES_DATA.length} Categories
           </h2>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-            53 precision calculation engines across government, tax, property, and finance
+            {ALL_CALCULATORS.length} calculators across government, tax, property, finance and overseas needs
           </p>
         </div>
 

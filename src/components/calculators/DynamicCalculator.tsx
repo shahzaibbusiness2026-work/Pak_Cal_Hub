@@ -4,6 +4,8 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { CalculatorDefinition, CalculatorOutput } from '../../types/calculator';
 import { getCalculatorBySlug } from '../../lib/data/categories';
 import { formatPKR } from '../../lib/utils/formatters';
+import { changeRemittanceField } from '../../lib/data/remittance';
+import type { RemittanceReference } from '../../lib/sync/live/remittanceRates';
 import NumberInput from '../ui/NumberInput';
 import ResultCard from '../ui/ResultCard';
 import BreakdownTable from '../ui/BreakdownTable';
@@ -40,6 +42,30 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
   const [liveOverrides, setLiveOverrides] = useState<Record<string, number>>({});
   const [rateDates, setRateDates] = useState<Record<string, string>>({});
   const [liveFxRates, setLiveFxRates] = useState<Record<string, number> | null>(null);
+  const [remittanceReference, setRemittanceReference] = useState<RemittanceReference | null>(null);
+  const [remittanceRateStatus, setRemittanceRateStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
+
+  useEffect(() => {
+    if (calculator?.id !== 'remittance-calculator') return;
+    const controller = new AbortController();
+    let cancelled = false;
+    const timer = setTimeout(() => controller.abort(), 10000);
+    setRemittanceRateStatus('loading');
+    setRemittanceReference(null);
+    fetch(`/api/remittance-rate?from=${encodeURIComponent(inputs.fromCurrency)}&to=${encodeURIComponent(inputs.toCurrency)}`, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error('Reference unavailable');
+        return response.json();
+      })
+      .then((value: RemittanceReference) => {
+        if (cancelled || value.fromCurrency !== inputs.fromCurrency || value.toCurrency !== inputs.toCurrency || !Number.isFinite(value.rate) || value.rate <= 0) return;
+        setRemittanceReference(value);
+        setRemittanceRateStatus('ready');
+      })
+      .catch(() => { if (!cancelled) setRemittanceRateStatus('unavailable'); })
+      .finally(() => clearTimeout(timer));
+    return () => { cancelled = true; controller.abort(); clearTimeout(timer); };
+  }, [calculator?.id, inputs.fromCurrency, inputs.toCurrency]);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,7 +127,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
 
   const handleFieldChange = (id: string, value: any) => {
     editedFields.current.add(id);
-    setInputs((prev) => ({ ...prev, [id]: value }));
+    setInputs((prev) => calculator?.id === 'remittance-calculator' ? changeRemittanceField(prev, id, value) : { ...prev, [id]: value });
 
     // Mobile/tablet: scroll results into view after a short debounce (only on narrow screens)
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
@@ -125,6 +151,10 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
       return { primaryResult: { id: 'not-found', label: 'Calculator not found', value: '', type: 'text' as const } };
     }
     try {
+      if (calculator.id === 'remittance-calculator') {
+        const reference = remittanceReference?.fromCurrency === inputs.fromCurrency && remittanceReference?.toCurrency === inputs.toCurrency ? remittanceReference : null;
+        return calculator.calculate({ ...inputs, referenceRate: reference?.rate, referenceAsOf: reference?.asOf });
+      }
       return calculator.id === 'pkr-currency-converter' && liveFxRates
         ? calculator.calculate({ ...inputs, liveFxRates })
         : calculator.calculate(inputs);
@@ -134,7 +164,7 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
         primaryResult: { id: 'err', label: 'Calculation Error', value: 'Invalid Inputs', type: 'text' },
       };
     }
-  }, [calculator, inputs, liveFxRates]);
+  }, [calculator, inputs, liveFxRates, remittanceReference]);
 
   if (!calculator) {
     return <div className="p-4 text-center text-slate-500">Calculator not found</div>;
@@ -148,6 +178,16 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
 
   return (
     <div className="space-y-8">
+      {calculator.id === 'remittance-calculator' && (
+        <div className="rounded-xl border border-cyan-200 bg-cyan-50 p-4 text-sm text-cyan-950 dark:border-cyan-900 dark:bg-cyan-950/30 dark:text-cyan-100" role="status">
+          <p>Choose any listed country and currency. Changing a route clears its old quotes and fees.</p>
+          <p className="mt-1 text-xs">
+            {remittanceRateStatus === 'loading' ? 'Checking the daily exchange-rate reference…' : remittanceRateStatus === 'ready' ? `Reference available${remittanceReference?.asOf ? ` — source updated ${new Date(remittanceReference.asOf).toLocaleString('en-GB', { timeZone: 'UTC' })} UTC` : ' — same currency'}.` : 'Daily reference unavailable for this pair. Use a current provider quote; any saved reference is labelled in the result.'}
+            {' '}<a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="underline">Rates by ExchangeRate-API</a>.
+          </p>
+          <p className="mt-1 text-xs">Fees start at zero. Enter your actual provider charges; references do not guarantee availability, pricing or delivery speed.</p>
+        </div>
+      )}
       {calculator.category === 'salary' && (
         <p role="note" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
           Government pay and retirement estimates depend on your jurisdiction, scheme, pay history and sanctioned allowances. Provincial rules and some historical schedules still need verification. Confirm the result with your accounts office before using it for a financial decision.

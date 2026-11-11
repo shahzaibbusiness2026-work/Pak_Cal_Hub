@@ -22,6 +22,7 @@ interface NavDropdownItem {
 }
 
 const PRIMARY_NAV_CATEGORIES: NavDropdownItem[] = [
+  { id: 'overseas', label: 'Overseas', categorySlug: 'overseas' },
   { id: 'salary', label: 'Salary & Govt', categorySlug: 'salary' },
   { id: 'tax', label: 'FBR Tax 2026', categorySlug: 'tax', badge: 'New Slabs' },
   { id: 'electricity', label: 'Electricity & Solar', categorySlug: 'electricity' },

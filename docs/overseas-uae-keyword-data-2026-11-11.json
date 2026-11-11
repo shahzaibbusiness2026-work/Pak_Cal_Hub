@@ -1,0 +1,259 @@
+{
+  "retrievedOn": "2026-11-11",
+  "provider": "Ubersuggest",
+  "market": "United Arab Emirates",
+  "language": "English",
+  "seeds": [
+    {
+      "keyword": "gratuity calculator",
+      "competition": 0,
+      "volume": 40500,
+      "cpc": 0.036725,
+      "cpcDollars": 0.01,
+      "sd": 30,
+      "pd": 1,
+      "updated_at": 1778301683,
+      "searchIntent": null
+    },
+    {
+      "keyword": "visa fine calculator"
+    },
+    {
+      "keyword": "dubai salary calculator",
+      "competition": 0,
+      "volume": 390,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 8,
+      "pd": 1,
+      "updated_at": 1777832785,
+      "searchIntent": [
+        1
+      ]
+    }
+  ],
+  "keywords": [
+    {
+      "keyword": "dubai gratuity calculator",
+      "competition": 0.11,
+      "volume": 60500,
+      "cpc": 0.036725,
+      "cpcDollars": 0.01,
+      "sd": 35,
+      "updated_at": 1778301683,
+      "pd": 11,
+      "searchIntent": null
+    },
+    {
+      "keyword": "uae gratuity calculator",
+      "competition": 0.01,
+      "volume": 60500,
+      "cpc": 4.2417375,
+      "cpcDollars": 1.155,
+      "sd": 32,
+      "updated_at": 1778301683,
+      "pd": 1,
+      "searchIntent": null
+    },
+    {
+      "keyword": "gratuity calculator uae",
+      "competition": 0.01,
+      "volume": 49500,
+      "cpc": 3.415425,
+      "cpcDollars": 0.93,
+      "sd": 18,
+      "updated_at": 1794296482,
+      "pd": 1,
+      "searchIntent": null
+    },
+    {
+      "keyword": "mohre gratuity calculator",
+      "competition": 0,
+      "volume": 3600,
+      "cpc": 0.07345,
+      "cpcDollars": 0.02,
+      "sd": 7,
+      "updated_at": 1776908409,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "online gratuity calculator",
+      "competition": 0,
+      "volume": 1000,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 20,
+      "updated_at": 1794296464,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "uae gratuity calculator 2026",
+      "competition": 0,
+      "volume": 880,
+      "cpc": 9.5485,
+      "cpcDollars": 2.6,
+      "sd": 13,
+      "updated_at": 1782865713,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "gratuity calculator online",
+      "competition": 0,
+      "volume": 880,
+      "cpc": 0.036725,
+      "cpcDollars": 0.01,
+      "sd": 19,
+      "updated_at": 1788794603,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "uae gratuity calculator 2025",
+      "competition": 0.01,
+      "volume": 880,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 20,
+      "updated_at": 1787211969,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "gratuity calculator mohre",
+      "competition": 0,
+      "volume": 880,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 15,
+      "updated_at": 1794093749,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "online gratuity calculator uae",
+      "competition": 0.06,
+      "volume": 720,
+      "cpc": 4.92115,
+      "cpcDollars": 1.34,
+      "sd": 16,
+      "updated_at": 1779166486,
+      "pd": 6,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "gratuity calculator uae 2025",
+      "competition": 0,
+      "volume": 720,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 20,
+      "updated_at": 1785162818,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "gratuity calculator uae online",
+      "competition": 0.01,
+      "volume": 590,
+      "cpc": 7.6755249999999995,
+      "cpcDollars": 2.09,
+      "sd": 11,
+      "updated_at": 1779847918,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "dda gratuity calculator",
+      "competition": 0,
+      "volume": 480,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 10,
+      "updated_at": 1785330721,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "gratuity calculator uae 2024",
+      "competition": 0.08,
+      "volume": 390,
+      "cpc": 0.036725,
+      "cpcDollars": 0.01,
+      "sd": 25,
+      "updated_at": 1762277404,
+      "pd": 8,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "mohre gratuity calculator uae",
+      "competition": 0,
+      "volume": 320,
+      "cpc": 0.036725,
+      "cpcDollars": 0.01,
+      "sd": 24,
+      "updated_at": 1787992487,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "gratuity calculator for india",
+      "competition": 0,
+      "volume": 320,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 36,
+      "updated_at": 1769942468,
+      "pd": 1,
+      "searchIntent": [
+        2,
+        1
+      ]
+    },
+    {
+      "keyword": "jafza gratuity calculator",
+      "competition": 0,
+      "volume": 320,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 12,
+      "updated_at": 1785841000,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    }
+  ],
+  "limitations": [
+    "Estimates for all searchers in this country, not Pakistani nationals only.",
+    "No monthly history was retrieved; volumes do not prove seasonality or future traffic.",
+    "Keyword variants overlap; do not add them as unique users.",
+    "Ahrefs and Semrush cross-checks were requested afterwards but blocked by plan/API-unit access."
+  ]
+}

@@ -14,6 +14,7 @@ import {
   calculateCementRequirement,
   calculateConstructionCost,
   calculateCurrency,
+  calculateRemittance,
   calculateElectricityBill,
   calculateEvChargingCost,
   calculateFamilyPension,
@@ -59,6 +60,7 @@ import {
 } from '../calculators';
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
+  'remittance-calculator': calculateRemittance,
   'bps-salary-calculator': calculateBpsSalary,
   'basic-pay-calculator': calculateBasicPay,
   'pension-calculator': calculatePension,

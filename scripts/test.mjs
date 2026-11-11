@@ -10,6 +10,7 @@ const suites = [
   'tool-sources',
   'review-regressions',
   'government-accuracy',
+  'remittance',
 ];
 for (const suite of suites) {
   const result = spawnSync(process.execPath, ['--import', 'tsx', `src/tests/${suite}.test.ts`], { stdio: 'inherit' });

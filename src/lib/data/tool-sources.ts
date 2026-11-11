@@ -91,6 +91,16 @@ const A = {
 const V = '2026-10-04'; // default verification date for entries verified in the Oct 2026 review pass
 
 const ENTRIES: ToolSourceEntry[] = [
+  {
+    toolId: 'remittance-calculator', ratesVerifiedOn: '2026-11-11', ratesStatus: 'verify',
+    sources: [
+      { name: 'World Bank Remittance Prices Worldwide methodology', url: 'https://remittanceprices.worldbank.org/methodology', description: 'Distinguish transfer fees from the exchange-rate margin when comparing remittance cost.' },
+      { name: 'ExchangeRate-API', url: 'https://www.exchangerate-api.com/docs/free', description: 'Daily indicative currency-conversion references; not transfer-provider quotes or fee schedules.' },
+      { name: 'Unicode CLDR', url: 'https://github.com/unicode-org/cldr-json', description: 'Country/territory names, currency suggestions and currency display precision. Data reviewed 11 November 2026.' },
+    ],
+    rateKeys: [],
+    note: '257 country/territory choices and 153 currencies. Reference coverage depends on the upstream pair; unsupported pairs require a provider quote. Currency choices do not establish corridor availability, legal eligibility or provider pricing. Fees are entered by the user.',
+  },
   // ── 1. Government salary & service ──────────────────────────────────────────
   {
     toolId: 'bps-salary-calculator',

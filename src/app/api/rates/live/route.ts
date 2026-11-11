@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getMarketRates } from '../../../../lib/db/dataProvider';
 import { buildLiveRatesResponse, LiveRatesOverlay } from '../../../../lib/sync/live/liveRatesPayload';
-import { fetchLiveFx } from '../../../../lib/sync/live/fxLive';
+import { fetchLiveFx, FX_CODES } from '../../../../lib/sync/live/fxLive';
 import { fetchLiveMetals } from '../../../../lib/sync/live/metalLive';
 import { fetchLiveFuel } from '../../../../lib/sync/live/fuelLive';
 import { getSiteSettings } from '../../../../lib/cms/settings';
@@ -38,7 +38,9 @@ export async function GET() {
     const overlay: LiveRatesOverlay = { sources: {}, asOfByRate: {}, liveByRate: { petrol: false, diesel: false, gold24kTola: false, silverTola: false, usdPkr: false } };
     if (fxRes.status === 'fulfilled') {
       overlay.usdPkr = fxRes.value.usdPkr;
-      overlay.fx = fxRes.value.fx;
+      // Preserve the existing converter's supported map; the worldwide tool
+      // receives only its requested cross-rate from /api/remittance-rate.
+      overlay.fx = Object.fromEntries(['PKR', ...FX_CODES].map((code) => [code, fxRes.value.fx[code]]));
       overlay.sources!.usdPkr = fxRes.value.source;
       overlay.liveByRate!.usdPkr = true;
       if (fxRes.value.updatedUtc) overlay.asOfByRate!.usdPkr = fxRes.value.updatedUtc;

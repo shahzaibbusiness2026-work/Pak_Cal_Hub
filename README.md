@@ -181,3 +181,11 @@ npm run test:routes
 ```
 
 Market APIs report per-rate source dates and live/fallback status. Gold prices from the live feed are indicative spot/FX conversions; retail Sarafa quotes can differ.
+
+## Worldwide remittance
+
+Visit `/overseas/remittance-calculator` for sending/receiving country and currency choices, included/on-top transfer fees, a dated indicative cross-rate, and two entered provider quotes. Country selection suggests a currency; the user can choose another. Route changes clear old quotes and fees. Provider availability, fees and delivery times are not fetched or guaranteed.
+
+The reference endpoint `/api/remittance-rate?from=GBP&to=PKR` returns one cross-rate and its source date. Its upstream snapshot is cached for an hour and concurrent requests are coalesced. Unsupported or unavailable pairs require a manual provider quote; currencies are never silently replaced with USD. Country/currency data is derived from Unicode CLDR under the included licence.
+
+See [the implementation and research follow-up](docs/worldwide-remittance-and-research-2026-11-11.md) for the other overseas-tool candidates and the Ahrefs/Semrush access limitations. Daily market rates appear directly above the homepage hero search.
