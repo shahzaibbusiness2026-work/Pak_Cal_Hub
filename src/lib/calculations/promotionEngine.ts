@@ -2,6 +2,7 @@ import { GovernmentType, BudgetYear } from '../../types/government';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
 import { getSalaryDataset } from '../../data/salary';
 import { formatPKR, safeNumber } from '../utils/formatters';
+import { invalidInput } from '../calculators/validation';
 
 export interface PromotionEngineInputs {
   government?: GovernmentType;
@@ -18,13 +19,15 @@ export function calculatePromotion(inputs: PromotionEngineInputs): CalculatorOut
   const govType: GovernmentType = (inputs.government as GovernmentType) || 'federal';
   const budgetYear: BudgetYear = (inputs.year as BudgetYear) || '2026-27';
   const currentBps = Math.min(Math.max(safeNumber(inputs.currentBps, 16), 1), 21);
-  const promotedBps = Math.min(Math.max(safeNumber(inputs.promotedBps, currentBps + 1), currentBps + 1), 22);
+  const promotedBps = safeNumber(inputs.promotedBps, currentBps + 1);
+  if (!Number.isInteger(promotedBps) || promotedBps <= currentBps || promotedBps > 22) return invalidInput('The promoted BPS must be a higher grade than the current BPS.');
 
   const dataset = getSalaryDataset(govType, budgetYear);
   const currentScale = dataset.scales[currentBps] || dataset.scales[16];
   const promotedScale = dataset.scales[promotedBps] || dataset.scales[17];
 
   const currentBasic = Math.max(safeNumber(inputs.currentBasic, currentScale.minPay + currentScale.increment * 5), currentScale.minPay);
+  if (currentBasic > currentScale.maxPay) return invalidInput('Current basic pay exceeds this scale maximum. Personal pay and special fixation require an accounts-office calculation.');
 
   // FR-22(a)(i) Formula: Add 1 premature increment in lower scale
   const prematureIncrement = currentScale.increment;
@@ -34,7 +37,7 @@ export function calculatePromotion(inputs: PromotionEngineInputs): CalculatorOut
   let newBasic = promotedScale.minPay;
   let stageInNewScale = 0;
 
-  if (payPlusPremature <= promotedScale.minPay) {
+  if (payPlusPremature < promotedScale.minPay) {
     newBasic = promotedScale.minPay;
     stageInNewScale = 0;
   } else {
@@ -47,8 +50,7 @@ export function calculatePromotion(inputs: PromotionEngineInputs): CalculatorOut
         break;
       }
       if (s === promotedScale.stages) {
-        newBasic = promotedScale.maxPay;
-        stageInNewScale = promotedScale.stages;
+        return invalidInput('No higher stage is available in the promoted scale. Personal pay or special fixation requires accounts-office review.');
       }
     }
   }
@@ -76,7 +78,7 @@ export function calculatePromotion(inputs: PromotionEngineInputs): CalculatorOut
   return {
     primaryResult: {
       id: 'newBasic',
-      label: 'New Fixed Basic Pay in Higher Scale',
+      label: 'Estimated Basic Pay in Higher Scale',
       value: formatPKR(newBasic),
       type: 'currency',
       highlight: true,
@@ -92,6 +94,7 @@ export function calculatePromotion(inputs: PromotionEngineInputs): CalculatorOut
     chartType: 'pie',
     chartData,
     notes: [
+      'Illustrates the one-increment and next-above method only. Fixation options, promotion date, personal pay, time scales and provincial orders require individual confirmation.',
       `Official Rule: Fundamental Rule FR-22(a)(i) governing pay fixation on promotion.`,
       `One premature annual increment is granted in the lower scale prior to fixation in higher scale.`,
       `Governed by ${dataset.governmentName} (${dataset.scaleTitle}).`,

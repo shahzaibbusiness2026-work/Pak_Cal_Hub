@@ -26,6 +26,11 @@ for (const tool of ALL_CALCULATORS) {
   finiteTree(result, tool.id);
   scenarios++;
   for (const field of tool.inputs) {
+    // Hidden conditional fields do not participate in the current form contract.
+    if (field.showWhen?.some((rule) =>
+      ('equals' in rule && inputs[rule.fieldId] !== rule.equals) ||
+      ('notEquals' in rule && inputs[rule.fieldId] === rule.notEquals)
+    )) continue;
     const values = field.options?.map((option) => option.value) ??
       (field.type === 'toggle' ? [true, false] : ['number', 'currency'].includes(field.type) ? [field.min ?? 0, ...(field.max === undefined ? [] : [field.max])] : []);
     for (const value of values) {

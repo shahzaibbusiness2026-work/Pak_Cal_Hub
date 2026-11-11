@@ -21,9 +21,9 @@ export function calculateLeaveEncashment(inputs: LeaveEncashmentInputs): Calcula
   const monthlyEquivalent = totalEncashment / (leaveDays / 30 || 1);
 
   const breakdown: BreakdownRow[] = [
-    { label: 'Last Drawn Running Basic Pay', amount: formatPKR(basicPay) },
-    { label: 'Computed Daily Basic Wage Rate (Basic Pay ÷ 30)', amount: formatPKR(dailyWage) },
-    { label: `Accumulated Privilege Leave Days Surrendered (Max 365 Days)`, amount: `${leaveDays} Days` },
+    { label: 'Entered Approved Monthly Pay Basis', amount: formatPKR(basicPay) },
+    { label: 'Daily Rate (Entered Monthly Pay ÷ 30)', amount: formatPKR(dailyWage) },
+    { label: 'Entered Approved Encashable Days', amount: `${leaveDays} Days` },
     { label: 'Equivalent Leave Duration in Months', amount: `${(leaveDays / 30).toFixed(1)} Months` },
     { label: 'Total Gross Leave Encashment Lump Sum', amount: formatPKR(totalEncashment), isTotal: true },
   ];
@@ -35,7 +35,7 @@ export function calculateLeaveEncashment(inputs: LeaveEncashmentInputs): Calcula
   return {
     primaryResult: {
       id: 'leaveEncashment',
-      label: 'LPR Leave Encashment Lump Sum',
+      label: 'Estimated Leave Encashment',
       value: formatPKR(totalEncashment),
       type: 'currency',
       highlight: true,
@@ -52,8 +52,8 @@ export function calculateLeaveEncashment(inputs: LeaveEncashmentInputs): Calcula
     chartData,
     notes: [
       `Official Rule: Revised Leave Rules 1980 / Provincial Leave Rules.`,
-      `Maximum allowable encashment is strictly capped at 365 days (12 calendar months).`,
-      `Encashment is calculated purely on Basic Pay without allowances.`,
+      'This arithmetic estimate uses entered monthly pay divided by 30 and up to 365 entered days. Eligibility, encashable days and the admissible pay basis differ by jurisdiction and retirement date.',
+      'The government selector does not apply a verified provincial pay-basis rule. Confirm the admissible monthly pay and approved days with your accounts office before relying on this amount.',
     ],
   };
 }

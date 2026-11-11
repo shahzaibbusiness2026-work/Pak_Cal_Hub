@@ -96,7 +96,6 @@ export default function Navbar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const totalTools = CATEGORIES_DATA.reduce((sum, cat) => sum + cat.tools.length, 0);
 
   return (
     <>
@@ -203,80 +202,6 @@ export default function Navbar() {
               );
             })}
 
-            {/* "More Tools" Dropdown for remaining categories */}
-            <div
-              className="relative"
-              onMouseEnter={() => handleMouseEnter('more')}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenDropdownId(openDropdownId === 'more' ? null : 'more')}
-                aria-expanded={openDropdownId === 'more'}
-                aria-haspopup="true"
-                className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all ${
-                  openDropdownId === 'more'
-                    ? 'bg-emerald-50 text-emerald-800 dark:bg-slate-900 dark:text-emerald-400'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-emerald-800 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-emerald-400'
-                }`}
-              >
-                <span>More Tools</span>
-                <ChevronDown
-                  className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                    openDropdownId === 'more' ? 'rotate-180 text-emerald-800 dark:text-emerald-400' : 'text-slate-400'
-                  }`}
-                />
-              </button>
-
-              {/* More Tools landscape category card */}
-              {openDropdownId === 'more' && (
-                <div className="absolute right-0 top-full z-50 w-[min(92vw,780px)] pt-2">
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-950/15 dark:border-slate-800 dark:bg-slate-950 animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="mb-3 flex flex-wrap items-end justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
-                      <div>
-                        <p className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-white">
-                          All tool categories
-                        </p>
-                        <p className="mt-0.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                          {totalTools} calculators across {CATEGORIES_DATA.length} Pakistan-focused categories
-                        </p>
-                      </div>
-                      <Link
-                        href="/#categories"
-                        className="text-[11px] font-bold text-emerald-800 hover:underline dark:text-emerald-400"
-                      >
-                        Browse category overview →
-                      </Link>
-                    </div>
-
-                    <div className="grid max-h-[68vh] grid-cols-2 gap-2 overflow-y-auto pr-1 custom-scrollbar xl:grid-cols-3">
-                      {CATEGORIES_DATA.map((cat) => (
-                        <Link
-                          key={cat.id}
-                          href={`/${cat.slug}`}
-                          className="group flex min-h-[72px] items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 p-3 transition-all hover:border-emerald-200 hover:bg-emerald-50 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-900 dark:hover:bg-slate-900"
-                        >
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-800 shadow-sm ring-1 ring-slate-100 transition-colors group-hover:text-emerald-900 dark:bg-slate-950 dark:text-emerald-400 dark:ring-slate-800">
-                            {<CategoryIcon icon={cat.icon} className="h-4.5 w-4.5" />}
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block truncate text-xs font-extrabold text-slate-900 group-hover:text-emerald-900 dark:text-white dark:group-hover:text-emerald-300">
-                              {cat.name}
-                            </span>
-                            <span className="mt-1 block text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                              {cat.tools.length} tools
-                            </span>
-                            <span className="mt-1 block truncate text-[11px] text-slate-500 dark:text-slate-400">
-                              {cat.tools[0]?.title}
-                            </span>
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
           </nav>
 
           {/* Right Action Icons: Dark Mode Toggle + Mobile Menu */}

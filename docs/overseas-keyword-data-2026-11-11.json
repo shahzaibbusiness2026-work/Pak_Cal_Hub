@@ -1,0 +1,280 @@
+{
+  "researchedOn": "2026-11-11",
+  "source": "Ubersuggest keyword_suggestions",
+  "market": "United Kingdom",
+  "language": "English",
+  "locationId": 2826,
+  "seeds": [
+    {
+      "keyword": "pta tax calculator",
+      "competition": 0,
+      "volume": 260,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 11,
+      "pd": 1,
+      "updated_at": 1790231066,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "nicop renewal",
+      "competition": 0,
+      "volume": 320,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 10,
+      "pd": 1,
+      "updated_at": 1790140247,
+      "searchIntent": [
+        1,
+        2
+      ]
+    },
+    {
+      "keyword": "send money to pakistan",
+      "competition": 0.6,
+      "volume": 2400,
+      "cpc": 3.8436524999999997,
+      "cpcDollars": 5.13,
+      "sd": 19,
+      "pd": 60,
+      "updated_at": 1794187769,
+      "searchIntent": [
+        4
+      ]
+    }
+  ],
+  "keywords": [
+    {
+      "keyword": "send money to pakistan from uk",
+      "competition": 0.66,
+      "volume": 720,
+      "cpc": 5.3271675,
+      "cpcDollars": 7.11,
+      "sd": 17,
+      "updated_at": 1788372044,
+      "pd": 66,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "nicop renewal online",
+      "competition": 0,
+      "volume": 390,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 11,
+      "updated_at": 1788485058,
+      "pd": 1,
+      "searchIntent": [
+        2,
+        4,
+        1
+      ]
+    },
+    {
+      "keyword": "how do i send money to pakistan",
+      "competition": 0.69,
+      "volume": 320,
+      "cpc": 3.7050412500000003,
+      "cpcDollars": 4.945,
+      "sd": 26,
+      "updated_at": 1778300737,
+      "pd": 69,
+      "searchIntent": null
+    },
+    {
+      "keyword": "how send money to pakistan",
+      "competition": 0.37,
+      "volume": 260,
+      "cpc": 5.589405,
+      "cpcDollars": 7.46,
+      "sd": 36,
+      "updated_at": 1780473493,
+      "pd": 37,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "nicop renewal uk",
+      "competition": 0,
+      "volume": 260,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 17,
+      "updated_at": 1790241953,
+      "pd": 1,
+      "searchIntent": [
+        1,
+        2
+      ]
+    },
+    {
+      "keyword": "send money to pakistan online",
+      "competition": 0.23,
+      "volume": 170,
+      "cpc": 6.218775,
+      "cpcDollars": 8.3,
+      "sd": 23,
+      "updated_at": 1790491971,
+      "pd": 23,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "how to send money to pakistan from uk",
+      "competition": 0.76,
+      "volume": 170,
+      "cpc": 8.75124,
+      "cpcDollars": 11.68,
+      "sd": 20,
+      "updated_at": 1790548788,
+      "pd": 76,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "best app to send money to pakistan",
+      "competition": 0.77,
+      "volume": 90,
+      "cpc": 7.6498425,
+      "cpcDollars": 10.21,
+      "sd": 14,
+      "updated_at": 1787013546,
+      "pd": 77,
+      "searchIntent": [
+        3
+      ]
+    },
+    {
+      "keyword": "best way to send money to pakistan",
+      "competition": 0.69,
+      "volume": 90,
+      "cpc": 6.7657275,
+      "cpcDollars": 9.03,
+      "sd": 21,
+      "updated_at": 1791320010,
+      "pd": 69,
+      "searchIntent": [
+        3
+      ]
+    },
+    {
+      "keyword": "best rate to send money to pakistan",
+      "competition": 0.67,
+      "volume": 90,
+      "cpc": 3.101895,
+      "cpcDollars": 4.14,
+      "sd": 16,
+      "updated_at": 1791314760,
+      "pd": 67,
+      "searchIntent": [
+        3
+      ]
+    },
+    {
+      "keyword": "send money to pakistan bank account",
+      "competition": 0.47,
+      "volume": 90,
+      "cpc": 5.4020925,
+      "cpcDollars": 7.21,
+      "sd": 21,
+      "updated_at": 1791138782,
+      "pd": 47,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "pakistan nicop renewal",
+      "competition": 0,
+      "volume": 70,
+      "cpc": 0,
+      "cpcDollars": 0,
+      "sd": 16,
+      "updated_at": 1789081721,
+      "pd": 1,
+      "searchIntent": [
+        1
+      ]
+    },
+    {
+      "keyword": "cheap way to send money to pakistan",
+      "competition": 0.51,
+      "volume": 70,
+      "cpc": 3.2592375,
+      "cpcDollars": 4.35,
+      "sd": 23,
+      "updated_at": 1770817758,
+      "pd": 51,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "tap tap send money to pakistan",
+      "competition": 0.64,
+      "volume": 70,
+      "cpc": 1.723275,
+      "cpcDollars": 2.3,
+      "sd": 23,
+      "updated_at": 1787168428,
+      "pd": 64,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "send money to pakistan for free",
+      "competition": 0.81,
+      "volume": 70,
+      "cpc": 6.563429999999999,
+      "cpcDollars": 8.76,
+      "sd": 22,
+      "updated_at": 1791884284,
+      "pd": 81,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "send money to pakistan from uk best rate",
+      "competition": 0.69,
+      "volume": 70,
+      "cpc": 1.6033950000000001,
+      "cpcDollars": 2.14,
+      "sd": 24,
+      "updated_at": 1791881967,
+      "pd": 69,
+      "searchIntent": [
+        4
+      ]
+    },
+    {
+      "keyword": "send money to pakistan best rate",
+      "competition": 0.72,
+      "volume": 70,
+      "cpc": 2.562435,
+      "cpcDollars": 3.42,
+      "sd": 21,
+      "updated_at": 1791886510,
+      "pd": 72,
+      "searchIntent": [
+        4
+      ]
+    }
+  ],
+  "limitations": [
+    "Estimates, not Search Console observations or guaranteed traffic.",
+    "UK market only; not worldwide or Pakistan totals.",
+    "No monthly history was retrieved, so evergreen is an inference from recurring needs.",
+    "Do not sum overlapping keywords as unique users.",
+    "CPC omitted from recommendations because the response contained differently scaled cpc and cpcDollars fields."
+  ]
+}

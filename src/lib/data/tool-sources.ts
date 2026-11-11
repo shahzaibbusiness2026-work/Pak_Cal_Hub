@@ -108,9 +108,9 @@ const ENTRIES: ToolSourceEntry[] = [
       { ...A.fdBalochistan, description: 'Balochistan hardship allowance', notificationStatus: 'verify' },
     ],
     ratesVerifiedOn: V,
-    ratesStatus: 'verified',
+    ratesStatus: 'verify',
     rateKeys: ['rbps-2022', 'rbps-2026', 'adhoc-relief-2022-2026', 'hra-frozen-schedule', 'dra-2026', 'gp-fund-slabs', 'benevolent-fund', 'group-insurance'],
-    note: 'RBPS-2026 verified against the Finance Division notification dated 21-07-2026 (chart cross-checked against the official PDF). ARA-2026 7%, DRA-2026 15% (OM 14(2)R-3/2025), conveyance +50%, 15% medical, frozen HRA schedule, Federal FY2026-27 GP Fund subscription revised by OM 13-08-2026; historical/provincial subscriptions need the applicable payroll schedule, Benevolent Fund Rs. 155 cap and Group Insurance slabs verified. BPS 19-22 HRA derived via verified formula — provisional.',
+    note: 'Payroll estimate. Federal RBPS-2026 basic pay and selected notifications have been checked; frozen allowances require individual payroll amounts. Income tax is annualised or entered. Provincial/historical deductions and special allowances remain provisional. See the 11 November government accuracy review.',
   },
   {
     toolId: 'basic-pay-calculator',
@@ -184,7 +184,7 @@ const ENTRIES: ToolSourceEntry[] = [
       },
     ],
     ratesVerifiedOn: V,
-    ratesStatus: 'verified',
+    ratesStatus: 'verify',
     rateKeys: ['rbps-2022', 'fr-22a-i'],
   },
   {
@@ -519,6 +519,10 @@ const reviewedSources: Record<string, Partial<ToolSourceEntry>> = {
     note: 'University/program and qualification rules vary. Verify the current prospectus before using an aggregate to decide eligibility.',
   },
 };
+Object.assign(reviewedSources['pension-calculator'], {
+  ratesStatus: 'verify', ratesVerifiedOn: '2026-11-11',
+  note: 'The form now forwards 24-month average emoluments and retirement date. Retiring-year increment, sanctioned medical, prior increases and the federal 2026 baseline increase are explicit inputs. Provincial rules, transitional exceptions and voluntary retirement remain unverified.',
+});
 for (const entry of ENTRIES) Object.assign(entry, reviewedSources[entry.toolId] || {});
 
 const BY_ID: Record<string, ToolSourceEntry> = Object.fromEntries(

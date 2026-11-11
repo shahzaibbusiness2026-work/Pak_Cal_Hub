@@ -20,7 +20,7 @@ export default function ResultCard({ primary, secondaries }: ResultCardProps) {
           </span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] font-bold text-emerald-300 backdrop-blur-sm">
             <Sparkles className="h-3 w-3 text-emerald-400" />
-            Verified Calculation
+            Based on your inputs
           </span>
         </div>
 

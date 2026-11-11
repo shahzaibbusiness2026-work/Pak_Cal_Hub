@@ -1,5 +1,6 @@
 import { formatPKR, formatPercent, safeNumber, formatNumber } from '../utils/formatters';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
+import { invalidInput } from './validation';
 import { SALARIED_TAX_SLABS, NON_SALARIED_TAX_SLABS } from '../data/tax-slabs-data';
 import { PROTECTED_SLABS, UNPROTECTED_SLABS, ELECTRICITY_CONSTANTS } from '../data/electricity-data';
 import { BASELINE_FX_RATES } from './currency';
@@ -22,11 +23,15 @@ export function calculateLeaveEncashment(inputs: Record<string, any>): Calculato
 }
 
 export function calculateFamilyPension(inputs: Record<string, any>): CalculatorOutput {
+  if (inputs.pensionBasis === 'retired' && !(Number(inputs.pensionDrawn) > 0)) return invalidInput('Enter the pension actually being drawn, excluding medical allowance.');
   return calcFamilyPensionEngine({
     government: inputs.jurisdiction || inputs.government,
     lastBasicPay: inputs.pensionerBasicPay || inputs.lastBasicPay,
     serviceYears: inputs.serviceYears,
     deceasedBps: inputs.deceasedBps || inputs.bps,
+    pensionBasis: inputs.pensionBasis,
+    pensionDrawn: inputs.pensionDrawn,
+    sanctionedMedical: inputs.sanctionedMedical,
   });
 }
 

@@ -300,9 +300,9 @@ function runTests() {
   const sal17 = calculateSalary({ government: 'federal', year: '2026-27', bps: 17, stage: 3, cityType: 'big' });
   const basicRow = sal17.breakdown?.find((r) => r.label.includes('Basic Pay (Revised'));
   assert(String(basicRow?.amount).includes('66,470'), `RBPS-2026 BPS-17 stage 3 basic = 54,140 + 3x4,110 = Rs. 66,470: ${basicRow?.amount}`);
-  // Medical: 15% of running basic for BPS 16-22 (verified rule)
+  // Federal new-entrant medical reference is frozen on the BPS-2008 base, not current basic.
   const medRow = sal17.breakdown?.find((r) => r.label === 'Medical Allowance');
-  assert(String(medRow?.amount).includes('9,971'), `Medical = 15% of 66,470 = Rs. 9,971: ${medRow?.amount}`);
+  assert(String(medRow?.amount).includes('1,847'), `Frozen new-entrant medical = 9,850 x 15% x 1.25 = Rs. 1,847: ${medRow?.amount}`);
   // Conveyance: BPS 16-22 = Rs. 7,500 after 50% increase w.e.f. 01-07-2026
   const convRow = sal17.breakdown?.find((r) => r.label === 'Conveyance Allowance');
   assert(String(convRow?.amount).includes('7,500'), `Conveyance BPS-17 = Rs. 7,500: ${convRow?.amount}`);
@@ -342,12 +342,12 @@ function runTests() {
   const promoGain = promoResult.secondaryResults?.find((r) => r.id === 'payGain');
   assert(String(promoGain?.value).includes('6,470'), `Promotional monthly gain is Rs. 6,470: ${promoGain?.value}`);
 
-  // Federal DRA-2026: round(45,070 x 15%) = 6,761 on frozen BPS-2022 initial (basic pay as on
-  // 30-06-2022), BPS 1-22, w.e.f. 01-07-2026 — OM No. 14(2)R-3/2025 dated 21-07-2026.
-  const salDra = calculateSalary({ government: 'federal', year: '2026-27', bps: 17, stage: 0, cityType: 'big' });
+  // Federal DRA-2026: an eligible employee must supply the actual historical base or sanctioned total.
+  // A BPS minimum is not a substitute for that employee-specific amount.
+  const salDra = calculateSalary({ government: 'federal', year: '2026-27', bps: 17, stage: 0, cityType: 'big', includeDRA: true, draBase2022: 45070 });
   const dra2026Row = salDra.breakdown?.find((r) => r.label.includes('Disparity Reduction Allowance 2026'));
-  assert(String(dra2026Row?.amount).includes('6,761'), `DRA-2026 is 15% of frozen BPS-2022 initial (Rs. 6,761): ${dra2026Row?.amount}`);
-  const salBps20 = calculateSalary({ government: 'federal', year: '2026-27', bps: 20, stage: 0, cityType: 'big' });
+  assert(String(dra2026Row?.amount).includes('6,761'), `DRA-2026 uses 15% of the employee-entered historical base (Rs. 6,761): ${dra2026Row?.amount}`);
+  const salBps20 = calculateSalary({ government: 'federal', year: '2026-27', bps: 20, stage: 0, cityType: 'big', includeDRA: true, draBase2022: 100000 });
   assert(salBps20.breakdown?.filter((r) => r.label.includes('Disparity Reduction Allowance 2026')).length === 1, 'DRA-2026 applies to BPS-20 (scope is BPS 1-22)');
 
   // ==========================================

@@ -18,7 +18,7 @@
       "vpsNominalGrowthRate": 0.12
     },
     "notes": [
-      "Federal Defined Benefit Pension (Pre-1 July 2024): Gross pension = (Last Basic Pay * Service Years * 7) / 300 (up to 70% max).",
+      "Federal defined-benefit reference: pensionable emoluments x qualifying service x 7 / 300, capped at 30 years. Retirements from 1 January 2025 generally use the last 24 months average (OM 9(3)R-6/2024-401), subject to transitional exceptions.",
       "Commutation capped at 35% of gross pension.",
       "Minimum pension Rs. 12,000/month and minimum family pension Rs. 9,000/month w.e.f. 01-07-2023 per Finance Division OM No.F.15(1)-Reg.6/2023 dated 05-07-2023; the floor applies to gross pension and the top-up is non-commutable.",
       "Provincial minimum floors follow the federal pattern - verify against the provincial finance department notification.",
@@ -45,8 +45,7 @@
       "vpsNominalGrowthRate": 0.12
     },
     "notes": [
-      "Punjab Cabinet Notification (July 2026): Restored lifetime family pension for surviving widows and unmarried/divorced daughters.",
-      "Commutation capped at 35% with restoration after completion of commutation purchase period."
+      "Provincial pension reforms, scheme entry dates, minimum floors, commutation limits and beneficiary duration have not been fully verified. These figures are illustrative references, not a provincial pension sanction. Confirm the applicable rules with the provincial accounts office."
     ]
   },
   "sindh": {
@@ -68,7 +67,7 @@
       "vpsNominalGrowthRate": 0.12
     },
     "notes": [
-      "Sindh Civil Servants Pension Rules maintain classic Defined Benefit structure with lifetime family pension admissibility."
+      "Provincial pension reforms, scheme entry dates, minimum floors, commutation limits and beneficiary duration have not been fully verified. These figures are illustrative references, not a provincial pension sanction. Confirm the applicable rules with the provincial accounts office."
     ]
   },
   "kpk": {
@@ -90,7 +89,7 @@
       "vpsNominalGrowthRate": 0.12
     },
     "notes": [
-      "KPK Pension Reforms: Voluntary retirement eligibility is 25 qualifying service years with early retirement age restrictions."
+      "Provincial pension reforms, scheme entry dates, minimum floors, commutation limits and beneficiary duration have not been fully verified. These figures are illustrative references, not a provincial pension sanction. Confirm the applicable rules with the provincial accounts office."
     ]
   },
   "balochistan": {
@@ -112,7 +111,7 @@
       "vpsNominalGrowthRate": 0.12
     },
     "notes": [
-      "Balochistan Civil Service Pension regulations."
+      "Provincial pension reforms, scheme entry dates, minimum floors, commutation limits and beneficiary duration have not been fully verified. These figures are illustrative references, not a provincial pension sanction. Confirm the applicable rules with the provincial accounts office."
     ]
   }
 }

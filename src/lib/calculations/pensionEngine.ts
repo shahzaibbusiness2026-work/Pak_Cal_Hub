@@ -2,6 +2,7 @@ import { GovernmentType, BudgetYear } from '../../types/government';
 import { CalculatorOutput, BreakdownRow, ChartDataPoint } from '../../types/calculator';
 import { getPensionRules, getCommutationFactor } from '../../data/pension';
 import { formatPKR, safeNumber } from '../utils/formatters';
+import { invalidInput } from '../calculators/validation';
 
 export interface PensionEngineInputs {
   government?: GovernmentType;
@@ -12,25 +13,28 @@ export interface PensionEngineInputs {
   age?: number | string;
   commutationPercent?: number | string;
   bps?: number | string;
-  /** Average emoluments of the last 24 months (federal pension reform, retirements on/after 1 Sept 2024). */
+  /** Average emoluments of the last 24 months (federal pension reform, retirements on/after 1 January 2025). */
   avgLast24MoPay?: number | string;
   /** Retirement year/month drive auto-selection of the post-reform (24-month average) path. */
   retirementYear?: number | string;
   retirementMonth?: number | string;
+  notionalIncrement?: number | string;
+  sanctionedMedical?: number | string;
+  sanctionedIncreases?: number | string;
+  baselinePension?: number | string;
+  apply2026Increase?: boolean;
 }
 
 /**
  * Federal pension reform: retirements on/after 1 January 2025 are computed on the
  * average emoluments of the last 24 months instead of last-drawn basic pay
- * (Finance Division clarification OM F.No.9(3)R-6/2024-403).
+ * (Finance Division clarification OM F.No.9(3)R-6/2024-401).
  * Pre-2025 retirements keep last-drawn basic pay as the emoluments base.
  */
 function isPostReformRetirement(inputs: PensionEngineInputs): boolean {
   const year = Math.floor(safeNumber(inputs.retirementYear, 0));
   if (year > 2025) return true;
-  if (year === 2025) {
-    return Math.floor(safeNumber(inputs.retirementMonth, 0)) >= 1;
-  }
+  if (year === 2025) return true;
   return false;
 }
 
@@ -47,6 +51,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
   const bps = Math.min(Math.max(safeNumber(inputs.bps, 17), 1), 22);
 
   const rules = getPensionRules(govType);
+  if (schemeType === 'post2024' && govType !== 'federal') return invalidInput('Provincial contribution schemes have different entry dates and rates. Use the applicable provincial notification; this projection supports the federal scheme only.');
 
   // 1. Post-2024 FGDC Defined Contribution Scheme (VPS Fund)
   if (schemeType === 'post2024' && rules.post2024Scheme.enabled) {
@@ -106,10 +111,11 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
   // 2. Defined Benefit Pension Scheme (Official Statutory Formula)
   // Emoluments base: the federal pension reform uses the AVERAGE emoluments of the last
   // 24 months for retirements on/after 1 January 2025 (Finance Division clarification
-  // OM F.No.9(3)R-6/2024-403); pre-2025 retirements keep last-drawn basic pay.
+  // OM F.No.9(3)R-6/2024-401); pre-2025 retirements keep last-drawn basic pay.
   const avgLast24MoPay = Math.max(safeNumber(inputs.avgLast24MoPay, 0), 0);
-  const useReformAverage = schemeType === 'postReform' || isPostReformRetirement(inputs);
-  const emolumentsBase = useReformAverage && avgLast24MoPay > 0 ? avgLast24MoPay : basicPay;
+  const useReformAverage = schemeType === 'postReform' || (govType === 'federal' && isPostReformRetirement(inputs));
+  if (useReformAverage && avgLast24MoPay <= 0) return invalidInput('Enter the average pensionable emoluments of the last 24 months. Last basic pay cannot silently replace this average.');
+  const emolumentsBase = (useReformAverage ? avgLast24MoPay : basicPay) + Math.max(0, safeNumber(inputs.notionalIncrement, 0));
 
   const qualifyingYears = Math.min(serviceYears, 30);
   const grossPensionUncapped = (emolumentsBase * qualifyingYears * 7) / 300;
@@ -135,16 +141,21 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
   // Medical Allowance for Pensioners: 25% for BPS 1-15, 20% for BPS 16-22
   // (Finance Division 2010 notification). No statutory minimum floor applies.
   const medicalAllowanceRate = bps <= 15 ? 0.25 : 0.20;
-  const medicalAllowance = Math.round(netMonthlyPension * medicalAllowanceRate);
+  const enteredMedical = safeNumber(inputs.sanctionedMedical, -1);
+  const medicalAllowance = enteredMedical >= 0 ? enteredMedical : Math.round(netMonthlyPension * medicalAllowanceRate);
+  const sanctionedIncreases = Math.max(0, safeNumber(inputs.sanctionedIncreases, 0));
+  const baseline = Math.max(0, safeNumber(inputs.baselinePension, 0));
+  if (inputs.apply2026Increase && (govType !== 'federal' || baseline <= 0)) return invalidInput('The federal 2026 increase requires the sanctioned baseline pension, excluding medical allowance. Confirm the baseline with your accounts office.');
+  const increase2026 = inputs.apply2026Increase ? Math.round(baseline * 0.07) : 0;
 
-  const totalMonthlyPensionPayable = netMonthlyPension + medicalAllowance;
+  const totalMonthlyPensionPayable = netMonthlyPension + medicalAllowance + sanctionedIncreases + increase2026;
 
   const restorationAge = age + Math.round(commutationFactor);
 
   const breakdown: BreakdownRow[] = [
     {
       label: useReformAverage
-        ? 'Average Emoluments of Last 24 Months (Federal Pension Reform, retirements on/after 1 Jan 2025 — OM F.No.9(3)R-6/2024-403)'
+        ? 'Average Emoluments of Last 24 Months (Federal Pension Reform, retirements on/after 1 Jan 2025 — OM F.No.9(3)R-6/2024-401)'
         : 'Last Drawn Running Basic Pay',
       amount: formatPKR(emolumentsBase),
     },
@@ -183,19 +194,21 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
       amount: formatPKR(netMonthlyPension),
     },
     {
-      label: `Pensioners Medical Allowance (${(medicalAllowanceRate * 100).toFixed(0)}% of net pension)`,
+      label: enteredMedical >= 0 ? 'Sanctioned medical allowance (entered)' : `Illustrative medical allowance (${(medicalAllowanceRate * 100).toFixed(0)}%; confirm frozen entitlement)`,
       amount: formatPKR(medicalAllowance),
     },
     {
-      label: 'Total Net Monthly Pension Disbursed into Bank',
+      label: 'Estimated Monthly Pension Including Entered Additions',
       amount: formatPKR(totalMonthlyPensionPayable),
       isTotal: true,
     },
     {
-      label: `Full Pension Restoration Age (after ${Math.round(commutationFactor)} years)`,
-      amount: `Age ${restorationAge} (Gross: ${formatPKR(grossPension + medicalAllowance)}/mo)`,
+      label: 'Approximate Restoration Age (confirm the sanctioned date)',
+      amount: `Around age ${restorationAge}; actual restoration depends on the applicable order`,
     }
   );
+  breakdown.push({ label: 'Other sanctioned monthly pension increases (entered)', amount: formatPKR(sanctionedIncreases) });
+  if (inputs.apply2026Increase) breakdown.push({ label: 'Federal 2026 increase: 7% of entered baseline', amount: formatPKR(increase2026) });
 
   const chartData: ChartDataPoint[] = [
     { name: 'Commutation Lump Sum (Immediate)', value: Math.round(lumpSumGratuity), color: '#16a34a' },
@@ -205,7 +218,7 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
   return {
     primaryResult: {
       id: 'netMonthlyPension',
-      label: 'Total Monthly Pension (In-Hand)',
+      label: 'Estimated Monthly Pension',
       value: formatPKR(totalMonthlyPensionPayable),
       type: 'currency',
       highlight: true,
@@ -216,18 +229,21 @@ export function calculatePension(inputs: PensionEngineInputs): CalculatorOutput 
       { id: 'lumpSum', label: 'Commutation Lump Sum (Tax-Free)', value: formatPKR(lumpSumGratuity), type: 'currency' },
       { id: 'grossPension', label: 'Gross Monthly Pension (70% Max)', value: formatPKR(grossPension), type: 'currency' },
       { id: 'medical', label: 'Pensioner Medical Allowance', value: formatPKR(medicalAllowance), type: 'currency' },
-      { id: 'restoration', label: 'Restoration Age', value: `Age ${restorationAge}`, type: 'text' },
+      { id: 'restoration', label: 'Approximate Restoration Age', value: `Around age ${restorationAge}`, type: 'text' },
     ],
     breakdown,
     chartType: 'pie',
     chartData,
     notes: [
+      'Estimate only: voluntary-retirement penalties, provincial reforms, eligibility and historical increases are not automatically determined. Enter sanctioned medical allowance and increases; zero means they are excluded. Do not include the 2026 increase twice.',
+      'Federal 7% increase from 1 July 2026 applies to the sanctioned baseline, not simply 7% of last basic pay. The baseline must be confirmed under the applicable orders (OM 29-07-2026).',
+      'The usual/notional retiring-year increment, where admissible, is added after the 24-month average (FD clarification 04-03-2025). Transitional LPR exceptions require accounts-office confirmation.',
       `Official Source: CSR (Civil Service Regulations) Art. 468-A & Finance Division Commutation Purchase Table.`,
       `Commutation factor ${commutationFactor.toFixed(2)} years (CSR table: age on next birthday).`,
       `Minimum pension floor of Rs. ${rules.minimumPension.toLocaleString()}/month applies to gross pension (Finance Division OM No.F.15(1)-Reg.6/2023); the floor top-up is non-commutable.`,
       ...(useReformAverage
         ? [
-            'Retirement on/after 1 Jan 2025: pension is computed on average emoluments of the last 24 months per the federal pension reform (OM F.No.9(3)R-6/2024-403). Pre-2025 retirements use last-drawn basic pay.',
+            'Retirement on/after 1 Jan 2025: pension is computed on average emoluments of the last 24 months per the federal pension reform (OM F.No.9(3)R-6/2024-401). Pre-2025 retirements use last-drawn basic pay.',
           ]
         : []),
       ...rules.notes,

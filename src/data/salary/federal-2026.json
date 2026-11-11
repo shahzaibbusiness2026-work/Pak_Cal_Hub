@@ -291,16 +291,11 @@
     }
   ],
   "notes": [
-    "Ad-hoc Relief Allowance 2026 (7%) applies to running basic pay.",
-    "Disparity Reduction Allowance 2021 (25%) + 2022 (15%) continues on the frozen initial of BPS-2017 for BPS 1-19 only.",
-    "Conveyance Allowance is flat per OM No. 3(1)R-5/2010-P-001 (BPS 1-4: 2,678, BPS 5-10: 2,898, BPS 11-15: 4,284, BPS 16-19: 7,056).",
-    "BPS 20-22 are monetized transport eligible; official conveyance allowance is Rs. 0.",
-    "Medical allowance values for 2026-27 (Rs. 3,500 / Rs. 4,000) are unverified - verify against the official notification.",
-    "RBPS-2026 verified against Finance Division notification dated 21-07-2026 (effective 01-07-2026); 15% ARA-2022 + 10% ARA-2025 merged into basic pay.",
-    "Ad-hoc Relief Allowance 2026 (7%) applies to running basic pay of BPS-2026, w.e.f. 01-07-2026.",
-    "Disparity Reduction Allowance 2026 (15%) computed on basic pay as on 30-06-2022 (frozen BPS-2022 initial), BPS 1-22, per OM No. 14(2)R-3/2025 dated 21-07-2026.",
-    "Conveyance Allowance revised +50% w.e.f. 01-07-2026: BPS 1-4 Rs. 2,678; 5-10 Rs. 2,898; 11-15 Rs. 4,284; 16-22 Rs. 7,500.",
-    "Medical Allowance: Rs. 1,500/month flat for BPS 1-15; 15% of running basic pay for BPS 16-22 (Finance Division, frozen).",
-    "House Rent Allowance frozen per Federal Notification F.No.2(2)/R-5/2010 dated 02-07-2018 (45%/30% of BPS-2008 minimum +50%, w.e.f. 01-07-2018); frozen at 30-06-2026 levels. BPS 19-22 values derived via the verified formula \u2014 provisional pending a directly quotable chart."
+    "RBPS-2026 and ARA-2026 7%: Finance Division OM 21-07-2026, effective 01-07-2026.",
+    "ARA-2023 and ARA-2024 continue at frozen amounts per clarification 04-08-2026. Defaults are new-entrant references, not individual payroll entitlements.",
+    "DRA-2026 15% applies only to eligible employees already receiving DRA and uses their basic pay as on 30-06-2022. Enter the sanctioned total for all DRA components.",
+    "Conveyance reference: BPS 1-4 Rs 2,678; 5-10 Rs 2,898; 11-15 Rs 4,284; 16-22 Rs 7,500. Confirm eligibility where official transport or monetisation applies.",
+    "Medical allowance is frozen, not 15% of current running basic pay. Enter your pay-slip amount; the automatic federal amount uses the new-entrant BPS-2008 reference and minimum.",
+    "HRA is a frozen reference. Confirm station, accommodation and personal entitlement; BPS 19-22 HRA values remain provisional."
   ]
 }

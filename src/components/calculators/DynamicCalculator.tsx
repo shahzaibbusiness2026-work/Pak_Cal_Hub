@@ -148,6 +148,11 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
 
   return (
     <div className="space-y-8">
+      {calculator.category === 'salary' && (
+        <p role="note" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">
+          Government pay and retirement estimates depend on your jurisdiction, scheme, pay history and sanctioned allowances. Provincial rules and some historical schedules still need verification. Confirm the result with your accounts office before using it for a financial decision.
+        </p>
+      )}
       {/* Interactive Calculator Workspace Grid */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
         {/* Left Column: Input Form (5 cols on Desktop) */}
@@ -175,6 +180,10 @@ export default function DynamicCalculator({ slug }: DynamicCalculatorProps) {
 
           <div className="mt-5 space-y-4">
             {calculator.inputs.map((field) => {
+              if (field.showWhen?.some((rule) =>
+                ('equals' in rule && inputs[rule.fieldId] !== rule.equals) ||
+                ('notEquals' in rule && inputs[rule.fieldId] === rule.notEquals)
+              )) return null;
               if (field.type === 'number' || field.type === 'currency') {
                 const isLive = liveOverrides[field.id] !== undefined;
                 return (

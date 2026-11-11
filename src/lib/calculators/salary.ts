@@ -53,6 +53,14 @@ export function calculatePension(inputs: Record<string, any>): CalculatorOutput 
     age: inputs.ageAtRetirement || inputs.age,
     commutationPercent: inputs.commutationPercent,
     bps: inputs.bps,
+    avgLast24MoPay: inputs.avgLast24MoPay,
+    retirementYear: inputs.retirementYear,
+    retirementMonth: inputs.retirementMonth,
+    notionalIncrement: inputs.notionalIncrement,
+    sanctionedMedical: inputs.sanctionedMedical,
+    sanctionedIncreases: inputs.sanctionedIncreases,
+    baselinePension: inputs.baselinePension,
+    apply2026Increase: inputs.apply2026Increase,
   });
 }
 
@@ -61,7 +69,7 @@ export function calculatePension(inputs: Record<string, any>): CalculatorOutput 
  */
 export function calculateIncrementArrears(inputs: Record<string, any>): CalculatorOutput {
   const currentBasic = safeNumber(inputs.currentBasic, 54140);
-  const annualIncrement = safeNumber(inputs.annualIncrement, 4100);
+  const annualIncrement = safeNumber(inputs.annualIncrement, 4110);
   const arrearsMonths = safeNumber(inputs.arrearsMonths, 6);
 
   const newBasicPay = currentBasic + annualIncrement;
