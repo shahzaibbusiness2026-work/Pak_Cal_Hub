@@ -257,6 +257,20 @@ input[type='range'] { accent-color: #166534; }
   animation: livePulse 1.6s ease-in-out infinite;
 }
 
+/* ── Navbar: blinking Overseas button (new-tools highlight) ─────────────
+   Soft background + ring pulse; the label itself never fades, so the text
+   stays readable while the button blinks for attention. */
+@keyframes navBlink {
+  0%, 100% { background-color: transparent; box-shadow: 0 0 0 0 rgb(16 185 129 / 0); }
+  50% { background-color: #a7f3d0; box-shadow: 0 0 0 4px rgb(16 185 129 / 0.4); }
+}
+@keyframes navBlinkDark {
+  0%, 100% { background-color: transparent; box-shadow: 0 0 0 0 rgb(52 211 153 / 0); }
+  50% { background-color: #064e3b; box-shadow: 0 0 0 4px rgb(52 211 153 / 0.45); }
+}
+.nav-blink { animation: navBlink 1.4s ease-in-out infinite; }
+.dark .nav-blink { animation-name: navBlinkDark; }
+
 
 /* ── Print / Save-as-PDF ───────────────────────────────────────────
    A printed calculator shows ONLY the brand line and the result —

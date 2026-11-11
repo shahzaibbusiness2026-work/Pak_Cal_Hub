@@ -19,16 +19,22 @@ interface NavDropdownItem {
   label: string;
   categorySlug: string;
   badge?: string;
+  /** Render the badge underneath the label instead of beside it. */
+  badgeBelow?: boolean;
+  /** Blink the button for attention (new-tools highlight). */
+  blink?: boolean;
+  /** Anchor the dropdown to the button's right edge (last nav item). */
+  dropdownRight?: boolean;
 }
 
 const PRIMARY_NAV_CATEGORIES: NavDropdownItem[] = [
-  { id: 'overseas', label: 'Overseas', categorySlug: 'overseas' },
   { id: 'salary', label: 'Salary & Govt', categorySlug: 'salary' },
-  { id: 'tax', label: 'FBR Tax 2026', categorySlug: 'tax', badge: 'New Slabs' },
+  { id: 'tax', label: 'FBR Tax 2026', categorySlug: 'tax' },
   { id: 'electricity', label: 'Electricity & Solar', categorySlug: 'electricity' },
   { id: 'property', label: 'Property & Land', categorySlug: 'property' },
   { id: 'education', label: 'Education & Merit', categorySlug: 'education' },
-  { id: 'islamic', label: 'Islamic & Zakat', categorySlug: 'islamic', badge: 'Nisab' },
+  { id: 'islamic', label: 'Islamic & Zakat', categorySlug: 'islamic' },
+  { id: 'overseas', label: 'Overseas', categorySlug: 'overseas', blink: true, dropdownRight: true },
 ];
 
 export default function Navbar() {
@@ -134,16 +140,32 @@ export default function Navbar() {
                     aria-expanded={isOpen}
                     aria-haspopup="true"
                     className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all ${
+                      item.blink ? 'nav-blink ' : ''
+                    }${
                       isOpen
                         ? 'bg-emerald-50 text-emerald-800 dark:bg-slate-900 dark:text-emerald-400'
                         : 'text-slate-700 hover:bg-slate-100 hover:text-emerald-800 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-emerald-400'
                     }`}
                   >
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="rounded bg-emerald-100 px-1 py-0.2 text-[9px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                        {item.badge}
+                    {item.blink && <span className="live-dot" aria-hidden="true" />}
+                    {item.badgeBelow ? (
+                      <span className="flex flex-col items-center leading-tight">
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span className="mt-0.5 rounded bg-emerald-100 px-1 py-px text-[9px] font-bold leading-normal text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            {item.badge}
+                          </span>
+                        )}
                       </span>
+                    ) : (
+                      <>
+                        <span>{item.label}</span>
+                        {item.badge && (
+                          <span className="rounded bg-emerald-100 px-1 py-0.2 text-[9px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                            {item.badge}
+                          </span>
+                        )}
+                      </>
                     )}
                     <ChevronDown
                       className={`h-3.5 w-3.5 transition-transform duration-200 ${
@@ -154,7 +176,7 @@ export default function Navbar() {
 
                   {/* Dropdown Menu for this Specific Category */}
                   {isOpen && (
-                    <div className="absolute left-0 top-full z-50 pt-1.5 w-80">
+                    <div className={`absolute ${item.dropdownRight ? 'right-0' : 'left-0'} top-full z-50 pt-1.5 w-80`}>
                       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2.5 shadow-xl shadow-slate-950/10 dark:border-slate-800 dark:bg-slate-950 animate-in fade-in slide-in-from-top-1 duration-150">
                         <div className="flex items-center justify-between px-2 py-1.5 border-b border-slate-100 dark:border-slate-800 mb-1.5">
                           <div className="flex items-center gap-1.5">
@@ -239,12 +261,13 @@ export default function Navbar() {
                       type="button"
                       onClick={() => setExpandedMobileCat(isExpanded ? null : cat.id)}
                       aria-expanded={isExpanded}
-                      className="flex w-full items-center justify-between p-3 text-left text-xs font-bold text-slate-900 dark:text-white bg-slate-50/70 dark:bg-slate-900/60 min-h-[44px] touch-manipulation"
+                      className={`flex w-full items-center justify-between p-3 text-left text-xs font-bold text-slate-900 dark:text-white bg-slate-50/70 dark:bg-slate-900/60 min-h-[44px] touch-manipulation ${cat.id === 'overseas' ? 'nav-blink' : ''}`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-emerald-800 dark:text-emerald-400">
                           {<CategoryIcon icon={cat.icon} className="h-4 w-4" />}
                         </span>
+                        {cat.id === 'overseas' && <span className="live-dot" aria-hidden="true" />}
                         <span>{cat.name}</span>
                       </div>
                       <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
