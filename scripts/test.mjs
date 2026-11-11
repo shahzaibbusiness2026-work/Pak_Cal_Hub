@@ -11,6 +11,7 @@ const suites = [
   'review-regressions',
   'government-accuracy',
   'remittance',
+  'overseas',
 ];
 for (const suite of suites) {
   const result = spawnSync(process.execPath, ['--import', 'tsx', `src/tests/${suite}.test.ts`], { stdio: 'inherit' });

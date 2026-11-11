@@ -101,6 +101,51 @@ const ENTRIES: ToolSourceEntry[] = [
     rateKeys: [],
     note: '257 country/territory choices and 153 currencies. Reference coverage depends on the upstream pair; unsupported pairs require a provider quote. Currency choices do not establish corridor availability, legal eligibility or provider pricing. Fees are entered by the user.',
   },
+  // ── Overseas Pakistanis toolkit (added 11 Nov 2026) ───────────────────────
+  {
+    toolId: 'pta-visitor-tax-calculator', ratesVerifiedOn: '2026-11-11', ratesStatus: 'verify',
+    sources: [
+      { ...A.fbr, description: 'Mobile device duties and taxes collected through PTA DIRBS; SRO 1064(I)/2026 regulatory-duty brackets.' },
+      { name: 'PTA DIRBS', url: 'https://dirbs.pta.gov.pk/drs', description: 'Official registration portal — the DIRBS PSID shows the final tax for an IMEI.' },
+    ],
+    rateKeys: ['pta-fy2026-27-brackets'],
+    note: 'FY2026-27 bracket table, in force 1 July 2026 (SRO 1064(I)/2026), cross-checked 11 Nov 2026 against two independent published tables whose worked examples reproduce exactly. DIRBS always has the final figure.',
+  },
+  {
+    toolId: 'nicop-fee-calculator', ratesVerifiedOn: '2026-11-11', ratesStatus: 'verify',
+    sources: [
+      { name: 'NADRA', url: 'https://www.nadra.gov.pk/feeStructure', description: 'Official Smart NICOP fee schedule by zone (Zone A: USA & Europe; Zone B: Middle East & Africa).' },
+      { name: 'NADRA', url: 'https://www.nadra.gov.pk/identityDocument/nicop', description: 'NICOP renewal requirements and PakID application route.' },
+    ],
+    rateKeys: ['nicop-zone-a', 'nicop-zone-b'],
+    note: 'Zone A $39/$57/$75 and Zone B $20/$30/$40 (Normal/Urgent/Executive) as reported across multiple 2026 sources. Processing days (31/23/9) are widely reported but NADRA’s own fee page has printed different day counts — confirm in PakID.',
+  },
+  {
+    toolId: 'roshan-digital-account-guide', ratesVerifiedOn: '2026-11-11', ratesStatus: 'verify',
+    sources: [
+      { ...A.sbp, description: 'Roshan Digital Account eligibility, agent banks and Naya Pakistan Certificate rates.' },
+      { ...A.financeDiv, description: 'Naya Pakistan Certificate rates — SRO 870(I)/2026, certificates issued from 1 June 2026.' },
+    ],
+    rateKeys: ['npc-rates-2026-06-01'],
+    note: 'NPC rates from 1 June 2026: USD 6.75–7.75%, PKR 11.75–12.75%, GBP 6.75–8.00% per year by tenor; 10% final tax on profit. Islamic NPC rates are expected, not guaranteed. RDA scale: 975,000+ accounts, US$14.16bn received by Sep 2026 (SBP provisional).',
+  },
+  {
+    toolId: 'umrah-cost-estimator', ratesVerifiedOn: '2026-11-11', ratesStatus: 'verify',
+    sources: [
+      { name: 'Nusuk', url: 'https://www.nusuk.sa', description: 'Official Saudi Umrah platform — visa, bookings and licensed-operator verification.' },
+      { name: 'Saudi Ministry of Hajj and Umrah', url: 'https://www.haj.gov.sa', description: 'Umrah visa rules, SAR 300 visa fee, 30-day stay cap.' },
+    ],
+    rateKeys: ['umrah-2026-package-ranges'],
+    note: 'All costs are ranges from published 2026 package data, not fixed prices: economy 7–10 night packages PKR 220,000–300,000; visa SAR 300 plus insurance about SAR 100–180; Ramadan roughly 30–50% more.',
+  },
+  {
+    toolId: 'overseas-property-cost-estimator', ratesVerifiedOn: '2026-11-11', ratesStatus: 'verify',
+    sources: [
+      { ...A.fbr, description: 'Advance tax s.236K (buyer) and s.236C (seller) filer rates, TY2027; overseas property FAQs on NICOP/POC and non-resident conditions.' },
+    ],
+    rateKeys: ['property-236k-236c-ty2027'],
+    note: 'Buyer s.236K 1.25% and seller s.236C 2.75% (filer, TY2027). Stamp duty, registration and capital value tax are editable inputs — Punjab stamp duty was reported at 1% under a 2026 ordinance; other provinces differ. CGT uses the rate you enter; 0% is shown only as a claimed exemption to verify.',
+  },
   // ── 1. Government salary & service ──────────────────────────────────────────
   {
     toolId: 'bps-salary-calculator',

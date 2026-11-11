@@ -50,6 +50,11 @@ import {
   calculatePropertyTransferCost,
   calculatePtaMobileTax,
   calculateNadraFeeGuide,
+  calculatePtaVisitorTax,
+  calculateNicopFee,
+  calculateRdaGuide,
+  calculateUmrahCost,
+  calculateOverseasPropertyCost,
   calculateSalarySlip,
   calculateCssAgeEligibility,
   calculatePakistanIban,
@@ -61,6 +66,11 @@ import {
 
 const CALCULATE_FNS: Record<string, (inputs: Record<string, any>) => CalculatorOutput> = {
   'remittance-calculator': calculateRemittance,
+  'pta-visitor-tax-calculator': calculatePtaVisitorTax,
+  'nicop-fee-calculator': calculateNicopFee,
+  'roshan-digital-account-guide': calculateRdaGuide,
+  'umrah-cost-estimator': calculateUmrahCost,
+  'overseas-property-cost-estimator': calculateOverseasPropertyCost,
   'bps-salary-calculator': calculateBpsSalary,
   'basic-pay-calculator': calculateBasicPay,
   'pension-calculator': calculatePension,

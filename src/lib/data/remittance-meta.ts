@@ -1,10 +1,11 @@
 import type { CategoryDefinition, CalculatorDefinition } from '../../types/calculator';
 import { REMITTANCE_COUNTRY_OPTIONS, REMITTANCE_CURRENCY_OPTIONS } from './remittance';
+import { OVERSEAS_TOOLS } from './overseas-meta';
 
 export const OVERSEAS_CATEGORY: Omit<CategoryDefinition, 'tools'> & { tools: Omit<CalculatorDefinition, 'calculate'>[] } = {
   id: 'overseas', slug: 'overseas', name: 'Overseas Pakistanis',
-  shortDesc: 'Worldwide remittance estimates, currency choices and transfer-fee comparisons',
-  description: 'Practical tools for Pakistanis abroad. Compare money transfers using your chosen countries, currencies and provider quotes.',
+  shortDesc: 'Remittance, PTA phone tax, NICOP fees, Roshan Digital Account, Umrah costs & overseas property taxes',
+  description: 'Practical tools for Pakistanis abroad. Compare money transfers, work out PTA phone tax and NICOP fees, check Roshan Digital Account returns, estimate Umrah costs, and estimate overseas property taxes.',
   icon: 'DollarSign', colorTheme: 'cyan',
   tools: [{
     id: 'remittance-calculator', slug: 'remittance-calculator', category: 'overseas',
@@ -39,5 +40,5 @@ export const OVERSEAS_CATEGORY: Omit<CategoryDefinition, 'tools'> & { tools: Omi
       { id: 'secondFeePercent', label: 'Quote B: Sender Fee (%)', type: 'number', defaultValue: 0, min: 0, max: 100, step: 0.01, showWhen: [{ fieldId: 'rateMode', equals: 'quote' }, { fieldId: 'compareQuote', equals: true }] },
       { id: 'secondRecipientFee', label: 'Quote B: Recipient Fee (Receiving Currency)', type: 'number', defaultValue: 0, min: 0, step: 0.01, showWhen: [{ fieldId: 'rateMode', equals: 'quote' }, { fieldId: 'compareQuote', equals: true }] },
     ],
-  }],
+  }, ...OVERSEAS_TOOLS],
 };
